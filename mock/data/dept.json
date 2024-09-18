@@ -1,0 +1,7 @@
+[
+  { "id": 8, "name": "总部" },
+  { "id": 9, "name": "IT部", "parentId": 8 },
+  { "id": 10, "name": "人资部", "parentId": 8 },
+  { "id": 11, "name": "Oversea" },
+  { "id": 12, "name": "Marketing", "parentId": 11, "desc": "Awesome Team" }
+]

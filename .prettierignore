@@ -1,0 +1,5 @@
+dist
+node_modules
+stats.html
+types/auto-imports.d.ts
+types/components.d.ts

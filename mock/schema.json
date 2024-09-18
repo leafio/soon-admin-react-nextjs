@@ -1,0 +1,233 @@
+[
+  {
+    "label": "",
+    "name": "captcha",
+    "storageType": "table",
+    "fields": [
+      {
+        "name": "id",
+        "dataType": "string",
+        "defaultValue": "faker.string.uuid()",
+        "nullable": false,
+        "mock": "faker.string.uuid()",
+        "primary": true,
+        "id": "4fbf5921-8abf-47a7-8b3f-ea1ad94fb400"
+      },
+      {
+        "name": "code",
+        "dataType": "string",
+        "nullable": false,
+        "mock": "faker.number.int({min:1000,max:9999})",
+        "id": "d53bbf25-ac8a-4700-9025-f01625f7f680",
+        "defaultValue": "mockjs.Random.integer(1000, 9999)"
+      },
+      {
+        "name": "createAt",
+        "dataType": "string",
+        "nullable": true,
+        "defaultValue": "new Date().toISOString()",
+        "mock": "faker.date.anytime()",
+        "id": "2b4a390b-a73c-4a50-8665-4ca6a17963bf"
+      },
+      {
+        "name": "updateAt",
+        "dataType": "string",
+        "nullable": true,
+        "defaultValue": "new Date().toISOString()",
+        "mock": "faker.date.anytime()",
+        "id": "e40b1b3b-75b8-4889-b6bf-79c24fbfddb3"
+      }
+    ],
+    "dataType": "string",
+    "id": "87e371fe-1752-4709-8c2a-95f19d7a5ce3"
+  },
+  {
+    "id": "cea94ae2-213e-4bfb-ad4d-66dbad91c23d",
+    "name": "user",
+    "label": "",
+    "storageType": "table",
+    "fields": [
+      {
+        "id": "f263ca64-4ec0-4e8e-85cc-8b8b82933db2",
+        "name": "id",
+        "nullable": false,
+        "dataType": "int",
+        "desc": "",
+        "mock": "auto.intId()\n",
+        "required": false,
+        "primary": true,
+        "defaultValue": "auto.intId()"
+      },
+      { "id": "1bf04853-d132-4abb-bf99-616074af507c", "name": "username", "nullable": false, "dataType": "string", "desc": "", "mock": "", "required": false },
+      { "id": "f25ba691-3269-49a7-872b-e53593f45005", "name": "password", "nullable": false, "dataType": "string", "desc": "", "mock": "", "required": false },
+      { "id": "24517cd0-cafe-4b44-ad88-d616310c1112", "name": "email", "nullable": false, "dataType": "string", "desc": "", "mock": "", "required": false },
+      { "id": "3afe07b3-1df1-4c66-a6d6-99dba6743faf", "name": "phone", "nullable": false, "dataType": "string", "desc": "", "mock": "", "required": false },
+      { "id": "a9946b39-c0ec-460a-9152-32ed0a9b791d", "name": "name", "nullable": false, "dataType": "string", "desc": "", "mock": "", "required": false },
+      { "id": "0593bda9-b950-439f-9a94-a6c925377e05", "name": "nickname", "nullable": false, "dataType": "string", "desc": "", "mock": "", "required": false },
+      { "id": "69e7c724-6eb5-4a7d-a268-b1893db4b893", "name": "roleId", "nullable": false, "dataType": "string", "desc": "", "mock": "", "required": false },
+      { "id": "60ffb74a-a2b8-4fba-b3c5-cf1bfc31650e", "name": "deptId", "nullable": false, "dataType": "int", "desc": "", "mock": "", "required": false },
+      { "id": "1e7083c2-0321-4518-84ee-c641c1bcad4e", "name": "status", "nullable": false, "dataType": "int", "desc": "", "mock": "", "required": false },
+      { "id": "a782f82d-f5c0-40a8-b00d-cc768ffff5bc", "name": "gender", "nullable": false, "dataType": "int", "desc": "", "mock": "", "required": false },
+      { "id": "63a47ff7-dab3-48ac-9e54-a19402ab5d3f", "name": "desc", "nullable": false, "dataType": "string", "desc": "", "mock": "", "required": false },
+      {
+        "name": "createTime",
+        "dataType": "string",
+        "nullable": true,
+        "defaultValue": "new Date().toISOString()",
+        "mock": "faker.date.anytime()",
+        "id": "cb74e563-0c36-4dd5-b3c3-649301db5c06"
+      },
+      {
+        "name": "updateTime",
+        "dataType": "string",
+        "nullable": true,
+        "defaultValue": "new Date().toISOString()",
+        "mock": "faker.date.anytime()",
+        "id": "dfb9c959-3e78-4de9-abfd-4f7fa34d9f35"
+      }
+    ],
+    "dataType": "string"
+  },
+  {
+    "id": "bb7ae299-3e88-4e7c-ac81-04818164648a",
+    "name": "role",
+    "label": "",
+    "storageType": "table",
+    "fields": [
+      {
+        "id": "db086b91-4cc2-48d3-bc9f-ef80fc4c83a4",
+        "name": "id",
+        "nullable": false,
+        "dataType": "string",
+        "desc": "",
+        "mock": "auto.intId()",
+        "required": false,
+        "primary": true,
+        "defaultValue": "auto.intId()"
+      },
+      { "id": "e5ce5529-7249-4715-ad5f-d4ba0f41bff4", "name": "name", "nullable": false, "dataType": "string", "desc": "", "mock": "", "required": true },
+      { "id": "a288d131-87d8-4922-8f9b-37524be347a9", "name": "status", "nullable": false, "dataType": "int", "desc": "", "mock": "", "required": false },
+      { "id": "813dbd2a-09e2-47a7-9385-622201b99f09", "name": "desc", "nullable": false, "dataType": "string", "desc": "", "mock": "", "required": false },
+      {
+        "id": "f5cd9ee1-dd3a-4ce7-9bbb-ffc95c96d9af",
+        "name": "permissions",
+        "nullable": false,
+        "dataType": "number",
+        "isArray": true,
+        "desc": "",
+        "mock": "",
+        "required": false
+      },
+      { "name": "createTime", "dataType": "string", "nullable": true, "defaultValue": "new Date().toISOString()", "mock": "faker.date.anytime()" },
+      { "name": "updateTime", "dataType": "string", "nullable": true, "defaultValue": "new Date().toISOString()", "mock": "faker.date.anytime()" }
+    ],
+    "dataType": "string"
+  },
+  {
+    "id": "3bc5fe49-9276-4b75-92ff-d826e6a05350",
+    "name": "dept",
+    "label": "",
+    "storageType": "table",
+    "fields": [
+      {
+        "id": "b1664554-e0ea-4813-863a-0af19b799416",
+        "name": "id",
+        "nullable": false,
+        "dataType": "number",
+        "desc": "",
+        "mock": "auto.intId()",
+        "required": false,
+        "primary": true,
+        "fields": [],
+        "isArray": false,
+        "defaultValue": "auto.intId()"
+      },
+      { "id": "ad3ec711-fa25-4499-94f2-cf4be6dc199a", "name": "name", "nullable": false, "dataType": "string", "desc": "", "mock": "", "required": false },
+      { "id": "eaa8f80a-acdc-4260-ba0c-71d4c995c55a", "name": "desc", "nullable": false, "dataType": "string", "desc": "", "mock": "", "required": false },
+      { "id": "4b2bd144-5c22-4b32-bf3c-4955fbb6c1a5", "name": "sort", "nullable": false, "dataType": "string", "desc": "", "mock": "", "required": false },
+      {
+        "id": "423d3bde-3844-473a-87a8-8dbeedfa788e",
+        "name": "parentId",
+        "nullable": false,
+        "dataType": "number",
+        "desc": "",
+        "mock": "",
+        "required": false,
+        "fields": [],
+        "isArray": false
+      },
+      {
+        "id": "cbeebe43-153f-4e3e-9d02-819e97934337",
+        "name": "createTime",
+        "nullable": false,
+        "dataType": "string",
+        "desc": "",
+        "mock": "faker.date.anytime()",
+        "required": false
+      },
+      {
+        "id": "ff70bab9-1ef6-4997-8756-9223e36ed882",
+        "name": "updateTime",
+        "nullable": false,
+        "dataType": "string",
+        "desc": "",
+        "mock": "faker.date.anytime()",
+        "required": false
+      }
+    ],
+    "dataType": "string"
+  },
+  {
+    "id": "d52a12cb-d84c-4c67-8f80-36d7b947056d",
+    "name": "menu",
+    "label": "",
+    "storageType": "table",
+    "fields": [
+      {
+        "id": "b600ded0-9b0a-48c3-a1fa-5a73251162c0",
+        "name": "id",
+        "nullable": false,
+        "dataType": "int",
+        "desc": "",
+        "mock": "auto.intId()",
+        "required": false,
+        "primary": true,
+        "defaultValue": "auto.intId()"
+      },
+      { "id": "a5c7b0bf-5ce3-400b-bf94-4de64e7695cb", "name": "parentId", "nullable": true, "dataType": "int", "desc": "", "mock": "", "required": false },
+      { "id": "7b5eceab-9d82-4463-8d58-2672d66d65c4", "name": "name", "nullable": false, "dataType": "string", "desc": "", "mock": "", "required": false },
+      { "id": "c6138950-ed91-467b-b1db-d3794d5bbbb1", "name": "desc", "nullable": false, "dataType": "string", "desc": "", "mock": "", "required": false },
+      {
+        "id": "7eb95736-6e42-4a1b-a15b-82204f02b536",
+        "name": "sort",
+        "nullable": false,
+        "dataType": "int",
+        "desc": "",
+        "mock": "",
+        "required": false,
+        "fields": [],
+        "isArray": false
+      },
+      { "id": "d074ebb5-082e-4fad-a9e6-ee1686d46e98", "name": "menuType", "nullable": false, "dataType": "string", "desc": "", "mock": "", "required": false },
+      { "id": "c8f3b272-f783-4782-98cf-597a2ed1c7e6", "name": "path", "nullable": false, "dataType": "string", "desc": "", "mock": "", "required": false },
+      { "id": "5f859e20-ea55-4c73-b47f-9d4dd5b859c8", "name": "component", "nullable": false, "dataType": "string", "desc": "", "mock": "", "required": false },
+      { "id": "780d87a1-1061-4847-8b48-99d835f2ec89", "name": "redirect", "nullable": false, "dataType": "string", "desc": "", "mock": "", "required": false },
+      {
+        "id": "7796df03-b8b1-4f12-92c3-b060b5162e65",
+        "name": "meta",
+        "nullable": false,
+        "dataType": "object",
+        "desc": "",
+        "mock": "",
+        "fields": [
+          { "id": "e6a1f190-4cd6-4d82-a5d2-9b05f43f29c3", "name": "title", "nullable": false, "dataType": "string", "desc": "", "mock": "", "required": false }
+        ],
+        "required": false
+      },
+      { "id": "c5aae1aa-7dd0-48d8-ab5b-43d9e2b5f830", "name": "auth", "nullable": false, "dataType": "string", "desc": "", "mock": "", "required": false },
+      { "name": "createTime", "dataType": "string", "nullable": true, "defaultValue": "new Date().toISOString()", "mock": "faker.date.anytime()" },
+      { "name": "updateTime", "dataType": "string", "nullable": true, "defaultValue": "new Date().toISOString()", "mock": "faker.date.anytime()" }
+    ],
+    "dataType": "string"
+  }
+]

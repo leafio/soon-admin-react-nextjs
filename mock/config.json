@@ -1,0 +1,38 @@
+{
+  "name": "default",
+  "baseUrl": "/api",
+  "mock": {
+    "int": "faker.number.int({min:0,max:10**9})",
+    "number": "faker.number.float({min: 0, max:10**9, precision: 0.001})",
+    "boolean": "faker.datatype.boolean(0.7)",
+    "string": "faker.string.alpha({ length: { min: 3, max: 10 } })",
+    "object": "{}",
+    "array": "[]",
+    "any": "faker.string.alpha({ length: { min: 3, max: 10 } })"
+  },
+  "schema": {
+    "fieldRequired": false,
+    "primaryKeys": ["id", "uid", "gid", "uuid"],
+    "fields": [
+      { "name": "id", "dataType": "string", "defaultValue": "faker.string.uuid()", "nullable": false, "mock": "faker.string.uuid()" },
+      { "name": "name", "dataType": "string", "nullable": false, "mock": "faker.word.sample()" },
+      { "name": "createTime", "dataType": "string", "nullable": true, "defaultValue": "new Date().toISOString()", "mock": "faker.date.anytime()" },
+      { "name": "updateTime", "dataType": "string", "nullable": true, "defaultValue": "new Date().toISOString()", "mock": "faker.date.anytime()" }
+    ],
+    "storageType": "table",
+    "dataType": "object"
+  },
+  "api": {
+    "authCode": "(code) => (req, res, next) => {\n  const token = req.headers.authorization\n  if (token) {\n    jwt.verify(token, 'JWT_SECRET', async (err, user) => {\n      if (err)  return res.sendStatus(403)    \n      const { username } = user\n      if (code) {\n        \n      }\n      req.username = username\n      next()\n    })\n  } else {\n    res.sendStatus(401)\n  }\n}",
+    "responseCode": "(data)=>res.json({code: 0,msg: \"\",data,})",
+    "errorCode": " (err)=>res.json({ code:500,err:err})",
+    "groups": ["dept", "menu", "menu", "role", "role", "user"],
+    "groupTree": [
+      { "name": "dept", "children": [] },
+      { "name": "menu", "children": [] },
+      { "name": "role", "children": [] },
+      { "name": "user", "children": [] }
+    ]
+  },
+  "proxy": { "enabled": false, "target": "" }
+}
