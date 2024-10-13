@@ -1,6 +1,5 @@
 "use client"
 import "nprogress/nprogress.css"
-import "./globals.scss"
 import "@/css/index.scss"
 
 import zhCN from "antd/locale/zh_CN"
@@ -8,7 +7,7 @@ import enUS from "antd/locale/en_US"
 // for date-picker i18n
 import "dayjs/locale/zh-cn"
 
-import { getLang, GrigProvider, useGrigContext } from "@/i18n/index"
+import { useLang } from "@/i18n/index"
 import { useResponsive, useTitle } from "ahooks"
 import { appStore } from "@/store/app"
 import { usePathname } from "next/navigation"
@@ -23,16 +22,16 @@ import Layout from "@/layout"
 import { runStrFun } from "@/utils"
 import { Menu } from "@/api"
 import { AntdRegistry } from "@ant-design/nextjs-registry"
-import { ConfigProvider } from "antd"
+import { ConfigProvider,theme as antTheme } from "antd"
 import { useSnapshot } from "valtio"
 import { everyRoute } from "@/router"
 
 const BrowserTitle = ({ menu }: { menu?: Menu }) => {
-  useGrigContext()
+  useLang()
   const appTitle = "Soon Admin"
   const metaTitle = runStrFun(menu?.meta?.title)
   useTitle(metaTitle ? `${metaTitle} | ${appTitle}` : appTitle)
-  return <></>
+  return null
 }
 
 export default function RootLayout({
@@ -45,47 +44,46 @@ export default function RootLayout({
   const pathname = usePathname()
   const router = useRouter()
   const { menus } = useSnapshot(userStore)
-  const pathMenus = useMemo<Menu[]>(() => getPathMenu(pathname, (menus as any) ?? []) ?? [], [menus])
+  const pathMenus = getPathMenu(pathname, (menus as any) ?? [])
   const isLayout = useMemo(() => pathMenus.some((m) => m.meta.layout), [pathMenus])
   const current = useMemo(() => pathMenus.slice(-1)[0], [pathMenus])
 
   const [loadPath, setLoadPath] = useState("")
 
-  const nextChild = useMemo(() => (loadPath === pathname ? <>{children}</> : <></>), [loadPath, pathname, children])
-  // console.log("next-child", loadPath, pathname, nextChild)
+  const nextChild = useMemo(() => (loadPath === pathname ? children : null), [loadPath, children])
+  // //console.log("next-child", loadPath, pathname, nextChild)
   useEffect(() => {
-    ;(async () => {
+    ; (async () => {
       NProgress.start()
       startLoading()
       let result = await everyRoute(pathname, router)
       NProgress.done()
       endLoading()
-      console.log("user", menus, userStore)
+      //console.log("user", menus, userStore)
       if (result) setLoadPath(pathname)
     })()
   }, [pathname])
+  const [lang] = useLang()
+  const { theme } = useSnapshot(appStore)
+
   return (
-    <html lang="en">
+    <html lang="en" >
       <link rel="icon" type="image/svg+xml" href="/logo.svg" />
-      <body>
-        <GrigProvider>
-          <BrowserTitle menu={current} />
-          {/* {
-            current?.meta.layout ? <Layout>{children}</Layout> : children
-          } */}
-          <AntdRegistry>
-            <ConfigProvider
-              locale={getLang() == "zh" ? zhCN : enUS}
-              theme={{
-                token: {
-                  colorPrimary: "#8c57ff",
-                },
-              }}
-            >
-              {isLayout ? <Layout>{nextChild}</Layout> : <> {nextChild}</>}
-            </ConfigProvider>
-          </AntdRegistry>
-        </GrigProvider>
+      <body >
+        <BrowserTitle menu={current} />
+        <AntdRegistry>
+          <ConfigProvider
+            locale={lang == "zh" ? zhCN : enUS}
+            theme={{
+              algorithm: antTheme.defaultAlgorithm,
+              token: {
+                colorPrimary: "#8c57ff",
+              },
+            }}
+          >
+            {isLayout ? <Layout>{nextChild}</Layout> : nextChild}
+          </ConfigProvider>
+        </AntdRegistry>
       </body>
     </html>
   )

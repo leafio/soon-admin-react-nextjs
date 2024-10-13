@@ -1,14 +1,10 @@
 :root {
   .query-form {
     @apply flex flex-wrap bg-white pt-1.5 pl-2 mb-2;
-
-    .el-form-item {
-      @apply mb-1.5;
-    }
   }
 
   .query-form-item {
-    @apply w-full md:w-2/4 lg:w-1/3 xl:w-1/4 box-border pl-2 pr-2;
+    @apply w-full md:w-2/4 lg:w-1/3 xl:w-1/4 box-border pl-2 pr-2 mb-0;
   }
 
   .query-form-item-2 {

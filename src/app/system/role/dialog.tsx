@@ -2,11 +2,11 @@ import { Button, Cascader, Form, FormInstance, Input, message, Modal, Switch } f
 
 import { Role, add_role, update_role, tree_menu, Menu } from "@/api"
 import { useDialog } from "@/hooks/dialog"
-import { useMessages } from "@/i18n"
+import { useLocales } from "@/i18n"
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react"
 import { makeVModel } from "react-vmodel"
-import { zh_system_role } from "@/i18n/zh/system/role"
-import { en_system_role } from "@/i18n/en/system/role"
+import  zh_system_role  from "@/i18n/zh/system/role"
+import  en_system_role  from "@/i18n/en/system/role"
 
 export type FormDialogRef = {
   open: (type?: "add" | "edit" | "detail", data?: Partial<Role> | undefined, link?: boolean) => void
@@ -16,7 +16,7 @@ const FormDialog = forwardRef(({ onSuccess }: { onSuccess?: () => void }, ref) =
   type Item = Role
   const formRef = useRef<FormInstance>(null)
 
-  const t = useMessages({ zh: zh_system_role, en: en_system_role })
+  const t = useLocales({ zh: zh_system_role, en: en_system_role })
   const titles = () => ({
     add: t("add"),
     edit: t("edit"),
@@ -97,7 +97,7 @@ const FormDialog = forwardRef(({ onSuccess }: { onSuccess?: () => void }, ref) =
         labelCol={{ span: 6 }}
         onFinish={submit}
         onFinishFailed={(err) => {
-          console.log("err", err)
+          //console.log("err", err)
         }}
       >
         <Form.Item label={t("label.name")} name="name" className="dialog-form-item" rules={rules().name}>

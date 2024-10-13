@@ -2,9 +2,9 @@ import { Button, Cascader, Form, FormInstance, Input, message, Modal, Select, Sw
 
 import { list_role, add_user, update_user, Role, tree_dept, Dept, User } from "@/api"
 import { useDialog } from "@/hooks/dialog"
-import { useMessages } from "@/i18n"
-import { zh_system_user } from "@/i18n/zh/system/user"
-import { en_system_user } from "@/i18n/en/system/user"
+import { useLocales } from "@/i18n"
+import  { Zh_System_User } from "@/i18n/zh/system/user"
+import  { En_System_User }  from "@/i18n/en/system/user"
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react"
 import { makeVModel } from "react-vmodel"
 
@@ -16,7 +16,7 @@ const FormDialog = forwardRef(({ onSuccess }: { onSuccess?: () => void }, ref) =
   type Item = User
   const formRef = useRef<FormInstance>(null)
 
-  const t = useMessages({ zh: zh_system_user, en: en_system_user })
+  const t = useLocales<Zh_System_User|En_System_User>({ zh: ()=>import('@/i18n/zh/system/user'), en: ()=>import('@/i18n/en/system/user') })
   const titles = () => ({
     add: t("add"),
     edit: t("edit"),
@@ -106,7 +106,7 @@ const FormDialog = forwardRef(({ onSuccess }: { onSuccess?: () => void }, ref) =
         labelCol={{ span: 6 }}
         onFinish={submit}
         onFinishFailed={(err) => {
-          console.log("err", err)
+          //console.log("err", err)
         }}
       >
         <Form.Item label={t("label.username")} name="username" className="dialog-form-item" rules={rules().username}>

@@ -1,7 +1,7 @@
 "user client"
 
 import { logout } from "@/api"
-import { tMessages, useMessages } from "@/i18n"
+import { useLocales } from "@/i18n"
 import { userStore } from "@/store/user"
 
 import { MenuProps, Dropdown, Space, message } from "antd"
@@ -10,7 +10,7 @@ import { ChevronDown } from "react-bootstrap-icons"
 
 export default function User() {
   const router = useRouter()
-  const t = useMessages({
+  const t = useLocales({
     zh: {
       logout: "退出登录",
       loggedOut: "已退出!",

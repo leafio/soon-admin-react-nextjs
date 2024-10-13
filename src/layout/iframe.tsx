@@ -13,11 +13,11 @@ export default function Iframe({ link }: { link?: string }) {
 
   const current = (getPathMenu(pathname, (userSnap.menus as any) ?? []) ?? []).slice(-1)[0]
   const list = getPathMenu(pathname, (userSnap.menus as any) ?? [])
-  console.log("cur", current, list, list[0], list)
+  //console.log("cur", current, list, list[0], list)
   // useEffect(() => {
   //     if (!link) {
   //         const current = getPathMenu(pathname, userSnap.menus as any ?? [])[-1]
-  //         console.log('current', pathname,userSnap.menus)
+  //         //console.log('current', pathname,userSnap.menus)
   //         setSrc(current?.meta?.link)
   //     }
   // }, [pathname, userSnap])

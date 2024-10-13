@@ -1,5 +1,5 @@
-export const zh_menu = {
-  dashboard: "概览",
+const zh_menu = {
+  home: "概览",
   link: "链接",
   iframe: "iframe打开",
   external: "新标签打开",
@@ -10,3 +10,4 @@ export const zh_menu = {
   menu: "菜单管理",
   role: "角色管理",
 }
+export default zh_menu

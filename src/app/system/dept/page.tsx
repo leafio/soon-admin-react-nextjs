@@ -1,19 +1,20 @@
 "use client"
 import { tree_dept, del_dept, Dept } from "@/api"
 import { dateFormat } from "@/utils/tools"
-import { useMessages } from "@/i18n"
+import { useLocales } from "@/i18n"
 import { Button, message, Modal, Table, Tree } from "antd"
 import { appStore } from "@/store/app"
 import { useSnapshot } from "valtio"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { useCols } from "@/hooks/cols"
 import { usePageList } from "@/hooks/list"
 import BtnAdd from "@/components/soon-tool-bar/btn-add"
 import BtnRefresh from "@/components/soon-tool-bar/btn-refresh"
 import FormDialog, { FormDialogRef } from "./dialog"
 import type { TableColumnsType } from "antd"
-import { zh_system_dept } from "@/i18n/zh/system/dept"
-import { en_system_dept } from "@/i18n/en/system/dept"
+import { En_System_Dept } from "@/i18n/en/system/dept"
+import { Zh_System_Dept } from "@/i18n/zh/system/dept"
+
 
 export default function PageDept() {
   type Item = Dept
@@ -21,16 +22,12 @@ export default function PageDept() {
   const isMobile = appSnap.responsive === "mobile"
   const [showSearch, setShowSearch] = useState(true)
   // const auth = useAuth()
-  const t = useMessages({
-    zh: zh_system_dept,
-    en: en_system_dept,
-  })
+  const t = useLocales<Zh_System_Dept|En_System_Dept>({ zh: ()=>import('@/i18n/zh/system/dept'), en:()=>import('@/i18n/en/system/dept') })
   const {
     list,
     refresh,
     total,
     loading,
-    exportExcel,
     search,
     reset,
     params: queryForm,
@@ -42,7 +39,7 @@ export default function PageDept() {
     autoSearchDelay: 300,
   })
   useEffect(() => {
-    console.log("page-init")
+    //console.log("page-init")
     refresh()
   }, [])
 
@@ -66,13 +63,8 @@ export default function PageDept() {
       )
     },
   } satisfies TableColumnsType<Item>[0]
-
-  const {
-    cols,
-    checkedCols,
-    setCols,
-    reset: restCols,
-  } = useCols<TableColumnsType<Item>[0] & { dataIndex: string; title: string }>(() => [
+  
+  const checkedCols=useMemo(() => [
     {
       dataIndex: "name",
       title: t("label.name"),
@@ -92,7 +84,9 @@ export default function PageDept() {
         return dateFormat(item?.createTime)
       },
     },
-  ])
+  ],[t])
+
+
 
   const handleDelete = (item: Item) => {
     Modal.confirm({

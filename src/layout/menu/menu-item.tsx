@@ -1,6 +1,6 @@
 import { Menu } from "@/api"
 import SoonIcon from "@/components/soon-icon"
-import { useGrigContext } from "@/i18n"
+import { useLang } from "@/i18n"
 import { appStore } from "@/store/app"
 import { runStrFun } from "@/utils"
 import { useRouter } from "next/navigation"
@@ -46,7 +46,7 @@ export default function MenuItem({
   selectedPath: string
   // setSelectedPath: (value: string) => void;
 }) {
-  useGrigContext()
+  useLang()
   const router = useRouter()
 
   const [expanded, setExpanded] = useState(false)
@@ -56,7 +56,7 @@ export default function MenuItem({
       setExpanded(!expanded)
     } else {
       if (appStore.responsive === "mobile") {
-        console.log("app", appStore)
+        //console.log("app", appStore)
         appStore.sideBar.isHide = true
       }
       if (!menu.meta.isIframe && menu.meta?.link) return window.open(menu.meta?.link, "_blank")

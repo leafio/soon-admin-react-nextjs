@@ -1,9 +1,9 @@
 "use client"
 
 import { getCaptcha, login } from "@/api"
-import { useGrigContext, useMessages } from "@/i18n"
-import { en_login } from "@/i18n/en/login"
-import { zh_login } from "@/i18n/zh/login"
+import { useLang, useLocales } from "@/i18n"
+import  en_login  from "@/i18n/en/login"
+import  zh_login  from "@/i18n/zh/login"
 import LangSwitch from "@/layout/lang-switch"
 import { Button, Form, FormInstance, Input } from "antd"
 import { useRouter } from "next/navigation"
@@ -19,7 +19,7 @@ const Container = styled.div`
 `
 
 export default function PageLogin() {
-  const t = useMessages({ zh: zh_login, en: en_login })
+  const t = useLocales({ zh: zh_login, en: en_login })
 
   const [form, setForm] = useState({
     username: "",
@@ -52,7 +52,7 @@ export default function PageLogin() {
     password: [{ required: true, message: t("error.password"), trigger: "blur" }],
     code: [{ required: true, message: t("error.code"), trigger: "blur" }],
   })
-  const { lang } = useGrigContext()
+  const [lang] = useLang()
 
   useEffect(() => {
     if (formRef.current?.isFieldsTouched()) formRef.current?.validateFields()

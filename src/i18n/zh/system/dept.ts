@@ -1,4 +1,4 @@
-export const zh_system_dept = {
+const zh_system_dept = {
   label: {
     name: "名称",
     createTime: "创建时间",
@@ -17,3 +17,5 @@ export const zh_system_dept = {
     modifySuccess: "修改部门成功",
   },
 } as const
+export default zh_system_dept
+export type Zh_System_Dept = typeof zh_system_dept

@@ -1,34 +1,40 @@
-// // styles/element/index.scss
-// /* 只需要重写你需要的即可 */
-// @forward 'element-plus/theme-chalk/src/common/var.scss' with (
-//   $colors: (
-//     'primary': (
-//       'base': #673ab7,
-//     ),
-//   ),
-// );
-
 :root {
   --soon-color-primary: #8c57ff;
   --soon-menu-hover-bg-color: #ece8f7;
   --soon-menu-hover-text-color: var(--soon-color-primary);
+  --soon-color-bg: #181818;
+  --soon-color-bg-light: #1f1f1f;
 }
 
-:root body {
-  --el-color-primary-rgb: 126, 78, 229;
+// .dark {
+//   body {
+//     background: #1f1f1f;
+//     color: white;
+//   }
 
-  --el-color-primary: var(--soon-color-primary);
-  --el-color-primary-light-3: #7d5cb8;
-  --el-color-primary-light-5: #876eb3;
-  --el-color-primary-light-7: rgb(190, 174, 219);
-  --el-color-primary-light-8: rgb(216, 204, 240);
-  --el-color-primary-light-9: var(--soon-menu-hover-bg-color);
-  --el-color-primary-dark-2: #5220a8;
+//   .page-container {
+//     background-color: #1f1f1f;
+//   }
 
-  --el-menu-active-color: var(--soon-color-primary);
-  --el-menu-hover-text-color: var(--soon-color-primary);
-  --el-menu-hover-bg-color: var(--soon-menu-hover-bg-color);
-}
+//   .query-form,
+//   .soon-header,
+//   .soon-aside,
+//   .btn-bar {
+//     background-color: #181818;
+//   }
+
+//   .ant-form,
+//   .ant-form-item,
+//   .ant-form-item .ant-form-item-label>label {
+//     color: currentColor;
+//   }
+
+//   .ant-table-wrapper .ant-table {
+//     background-color: #1f1f1f;
+//     color: currentColor;
+//   }
+
+// }
 
 #nprogress .bar {
   background: var(--soon-color-primary);

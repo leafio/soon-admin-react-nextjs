@@ -1,4 +1,4 @@
-export const en_global = {
+const en_global = {
   search: "Search",
   reset: "Reset",
   add: "Add",
@@ -14,3 +14,4 @@ export const en_global = {
     requestTimeout: "Request timeout",
   },
 } as const
+export default en_global

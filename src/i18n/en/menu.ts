@@ -1,5 +1,5 @@
-export const en_menu = {
-  dashboard: "Dashboard",
+const en_menu = {
+  home: "Dashboard",
   link: "Link",
   iframe: "Open in Iframe",
   external: "Open in Browser Tab",
@@ -10,3 +10,4 @@ export const en_menu = {
   menu: "Menu",
   role: "Role",
 }
+export default en_menu

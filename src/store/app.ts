@@ -11,4 +11,5 @@ export const appStore = proxy({
     isCollapse: false,
     isHide: false,
   },
+  theme: "dark"
 })

@@ -1,35 +1,32 @@
 "use client"
 import { del_dept, Menu, tree_menu } from "@/api"
-import { useMessages } from "@/i18n"
+import { useLocales } from "@/i18n"
 import { Button, message, Modal, Table, Tag, Tree } from "antd"
 import { appStore } from "@/store/app"
 import { useSnapshot } from "valtio"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { useCols } from "@/hooks/cols"
 import { usePageList } from "@/hooks/list"
 import BtnAdd from "@/components/soon-tool-bar/btn-add"
 import BtnRefresh from "@/components/soon-tool-bar/btn-refresh"
 import FormDialog, { FormDialogRef } from "./dialog"
 import type { TableColumnsType } from "antd"
-import { zh_system_menu } from "@/i18n/zh/system/menu"
-import { en_system_menu } from "@/i18n/en/system/menu"
+import { Zh_System_Menu } from "@/i18n/zh/system/menu"
+import { En_System_Menu } from "@/i18n/en/system/menu"
 
 export default function PageMenu() {
   type Item = Menu
+  type Col=TableColumnsType<Item>[0] & { dataIndex: string; title: string }
   const appSnap = useSnapshot(appStore)
   const isMobile = appSnap.responsive === "mobile"
   const [showSearch, setShowSearch] = useState(true)
   // const auth = useAuth()
-  const t = useMessages({
-    zh: zh_system_menu,
-    en: en_system_menu,
-  })
+  const t = useLocales<Zh_System_Menu | En_System_Menu>({ zh: () => import('@/i18n/zh/system/menu'), en: () => import('@/i18n/en/system/menu') })
   const {
     list,
     refresh,
     total,
     loading,
-    exportExcel,
     search,
     reset,
     params: queryForm,
@@ -41,7 +38,7 @@ export default function PageMenu() {
     autoSearchDelay: 300,
   })
   useEffect(() => {
-    console.log("page-init")
+    //console.log("page-init")
     refresh()
   }, [])
 
@@ -64,14 +61,9 @@ export default function PageMenu() {
         </div>
       )
     },
-  } satisfies TableColumnsType<Item>[0]
+  } satisfies Col
 
-  const {
-    cols,
-    checkedCols,
-    setCols,
-    reset: restCols,
-  } = useCols<TableColumnsType<Item>[0] & { dataIndex: string; title: string }>(() => [
+  const checkedCols = useMemo(() => [
     {
       dataIndex: "meta.title",
       title: t("label.menuTitle"),
@@ -102,15 +94,18 @@ export default function PageMenu() {
     {
       dataIndex: "path",
       title: t("label.routePath"),
-      width: "",
     },
 
     {
       dataIndex: "auth",
       title: t("label.auth"),
-      width: "",
+
     },
-  ])
+  ] satisfies Col[]
+
+    , [t])
+
+
 
   const handleDelete = (item: Item) => {
     Modal.confirm({

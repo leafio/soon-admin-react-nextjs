@@ -1,11 +1,11 @@
-import { tMessages } from "@/i18n"
+import { useLocales } from "@/i18n"
 
 import { Button, Tooltip } from "antd"
 import { ListOl } from "react-bootstrap-icons"
 import SoonCols from "../soon-cols"
 import { Col } from "../soon-cols/type"
 
-const t = tMessages()
+
 export default function BtnCols({
   onClick,
   cols,
@@ -17,6 +17,7 @@ export default function BtnCols({
   setCols: (value: Col[]) => void
   onReset: () => void
 }) {
+  const t = useLocales()
   return (
     <SoonCols model={cols} setModel={setCols} onReset={onReset}>
       <Tooltip className="" title={t("add")} placement="top">

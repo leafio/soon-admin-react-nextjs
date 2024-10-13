@@ -1,11 +1,11 @@
-import { getLang, useGrigContext } from "@/i18n"
+import { useLang } from "@/i18n"
 import { Dropdown, MenuProps } from "antd"
 import { useState, useEffect } from "react"
 import { Translate } from "react-bootstrap-icons"
 
 export default function LangSwitch({ className }: { className?: string }) {
-  const { lang, setLang } = useGrigContext()
-  const handelChangeLang = (lang: string) => {
+  const [lang, setLang] = useLang()
+  const handelChangeLang = (lang: "zh" | "en") => {
     setLang(lang)
   }
   const [isInit, setIsInit] = useState(false)
@@ -18,7 +18,7 @@ export default function LangSwitch({ className }: { className?: string }) {
       if (!_lang) {
         localStorage.setItem("lang", lang)
       } else {
-        setLang(_lang)
+        setLang(_lang as "zh" | "en")
       }
       setIsInit(true)
     }
@@ -28,7 +28,7 @@ export default function LangSwitch({ className }: { className?: string }) {
     { value: "en", label: "English" },
   ].map((m) => ({
     key: m.value,
-    label: <div onClick={() => handelChangeLang(m.value)}>{m.label}</div>,
+    label: <div onClick={() => handelChangeLang(m.value as "zh" | "en")}>{m.label}</div>,
     disabled: lang === m.value,
   }))
   return (

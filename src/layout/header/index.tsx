@@ -8,15 +8,15 @@ import LangSwitch from "../lang-switch"
 
 import { appStore } from "@/store/app"
 import { useSnapshot } from "valtio"
-import { useMessages } from "@/i18n"
+import { useLocales } from "@/i18n"
 
 export default function Header() {
   const toggleSideMenu = (e: any) => {
     appStore.sideBar.isHide = !appStore.sideBar.isHide
-    console.log("result", appStore.sideBar.isHide)
+    //console.log("result", appStore.sideBar.isHide)
   }
   const sideBar = useSnapshot(appStore.sideBar)
-  const t = useMessages({
+  const t = useLocales({
     zh: { msg: "我在上海找工作，如果有机会给到我，请联系我，email: leafnote@outlook.com ", star: "给个⭐" },
     en: {
       msg: "I'm looking for job in Shanghai, if you have a offer for me , email me : leafnote@outlook.com ",
@@ -30,7 +30,7 @@ export default function Header() {
     onClick: toggleSideMenu,
   }
   return (
-    <header className="flex justify-between p-2 app-header backdrop-saturate-200 backdrop-blur bg-white bg-opacity-90">
+    <header className="flex justify-between p-2  backdrop-saturate-200 backdrop-blur  bg-opacity-90 soon-header">
       <div className="flex items-center">
         {sideBar.isHide ? <TextIndentLeft {...iconProps} /> : <TextIndentRight {...iconProps} />}
         <SoonBreadcrumb className="ml-4" />

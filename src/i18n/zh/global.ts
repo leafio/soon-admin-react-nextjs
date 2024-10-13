@@ -1,4 +1,4 @@
-export const zh_global = {
+const zh_global = {
   search: "查询",
   reset: "重置",
   add: "新增",
@@ -14,3 +14,4 @@ export const zh_global = {
     requestTimeout: "请求超时",
   },
 } as const
+export default zh_global

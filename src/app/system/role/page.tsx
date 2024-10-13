@@ -1,22 +1,20 @@
 "use client"
 import { Role, list_role, del_role } from "@/api"
-import { useMessages } from "@/i18n"
+import { useLocales } from "@/i18n"
 import { Button, Form, Input, List, message, Modal, Table, Tag } from "antd"
 import { appStore } from "@/store/app"
 import { useSnapshot } from "valtio"
-import { useEffect, useRef, useState } from "react"
-import { useCols } from "@/hooks/cols"
+import { useEffect, useMemo, useRef, useState } from "react"
+import { useCols} from "@/hooks/cols"
 import { usePageList } from "@/hooks/list"
 import BtnAdd from "@/components/soon-tool-bar/btn-add"
-import BtnExport from "@/components/soon-tool-bar/btn-export"
 import BtnSearch from "@/components/soon-tool-bar/btn-search"
 import BtnRefresh from "@/components/soon-tool-bar/btn-refresh"
 import FormDialog, { FormDialogRef } from "./dialog"
 import type { TableColumnsType } from "antd"
 import SoonDetail from "@/components/soon-detail"
-import BtnCols from "@/components/soon-tool-bar/btn-cols"
-import { zh_system_role } from "@/i18n/zh/system/role"
-import { en_system_role } from "@/i18n/en/system/role"
+import { Zh_System_Role } from "@/i18n/zh/system/role"
+import { En_System_Role } from "@/i18n/en/system/role"
 
 export default function PageRole() {
   type Item = Role
@@ -24,16 +22,15 @@ export default function PageRole() {
   const isMobile = appSnap.responsive === "mobile"
   const [showSearch, setShowSearch] = useState(true)
   // const auth = useAuth()
-  const t = useMessages({
-    zh: zh_system_role,
-    en: en_system_role,
+  const t = useLocales<Zh_System_Role | En_System_Role>({ zh: () => import('@/i18n/zh/system/role'), en: () => import('@/i18n/en/system/role') })
+  useEffect(() => {
+    //console.log('role-change', t)
   })
   const {
     list,
     refresh,
     total,
     loading,
-    exportExcel,
     search,
     reset,
     params: queryForm,
@@ -45,7 +42,7 @@ export default function PageRole() {
     autoSearchDelay: 300,
   })
   useEffect(() => {
-    console.log("page-init")
+    //console.log("page-init")
     refresh()
   }, [])
 
@@ -70,27 +67,33 @@ export default function PageRole() {
       )
     },
   } satisfies TableColumnsType<Item>[0]
+  const memoCols = useMemo(
+    () => [
+      {
+        dataIndex: "name",
+        title: t("label.name"),
+        // width: "",
+      },
+
+      {
+        dataIndex: "status",
+        title: t("label.status"),
+        width: "100",
+        render: (_: any, item: Item) =>
+          item?.status == 1 ? <Tag color="success">{t("status.enabled")}</Tag> : <Tag>{t("status.disabled")}</Tag>,
+      },
+    ], [t])
+    useEffect(()=>{
+      //console.log('t-change')
+    },[t])
+
 
   const {
     cols,
     checkedCols,
     setCols,
     reset: restCols,
-  } = useCols<TableColumnsType<Item>[0] & { dataIndex: string; title: string }>(() => [
-    {
-      dataIndex: "name",
-      title: t("label.name"),
-      // width: "",
-    },
-
-    {
-      dataIndex: "status",
-      title: t("label.status"),
-      width: "100",
-      render: (_: any, item: Item) =>
-        item?.status == 1 ? <Tag color="success">{t("status.enabled")}</Tag> : <Tag>{t("status.disabled")}</Tag>,
-    },
-  ])
+  } = useCols<TableColumnsType<Item>[0] & { dataIndex: string; title: string }>(memoCols)
 
   const handleDelete = (item: Item) => {
     Modal.confirm({

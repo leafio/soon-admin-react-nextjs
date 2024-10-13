@@ -1,4 +1,4 @@
-export const zh_system_user = {
+const zh_system_user = {
   label: {
     username: "账号",
     nickname: "昵称",
@@ -39,3 +39,6 @@ export const zh_system_user = {
     modifySuccess: "修改用户成功",
   },
 } as const
+
+export default zh_system_user
+export type Zh_System_User = typeof zh_system_user

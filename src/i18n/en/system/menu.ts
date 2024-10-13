@@ -1,4 +1,4 @@
-export const en_system_menu = {
+const en_system_menu = {
   label: {
     menuTitle: "Menu Title",
     menuType: "Menu Type",
@@ -47,3 +47,6 @@ export const en_system_menu = {
     title: "Tip",
   },
 } as const
+
+export default en_system_menu
+export type En_System_Menu = typeof en_system_menu

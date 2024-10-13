@@ -1,12 +1,12 @@
-'use client'
-import { useGrigContext, useMessages } from "@/i18n"
+"use client"
+import { useLang, useLocales } from "@/i18n"
 import { Card, Tag } from "antd"
 import { Github } from "react-bootstrap-icons"
 
 export default function PageHome() {
-  const { lang } = useGrigContext()
-  const t = useMessages({ zh: { msg: "请赏个star吧" }, en: { msg: "Your star is important for me" } })
-  
+  const [lang] = useLang()
+  const t = useLocales({ zh: { msg: "请赏个star吧" }, en: { msg: "Your star is important for me" } })
+
   const zh = [
     {
       title: "soon-mock",
@@ -21,10 +21,10 @@ export default function PageHome() {
       github: "https://github.com/leafio/soon-fetch",
     },
     {
-      title: "grig",
+      title: "soon-i18n",
       description: "react , vue , svelte , solid 均可使用的i18n库",
       tags: ["不到3K", "ts智能提醒", "适配框架, 数据状态不丢失"],
-      github: "https://github.com/leafio/grig",
+      github: "https://github.com/leafio/soon-i18n",
     },
     {
       title: "react-vmodel",
@@ -59,10 +59,10 @@ export default function PageHome() {
       github: "https://github.com/leafio/soon-fetch",
     },
     {
-      title: "grig",
+      title: "soon-i18n",
       description: "i18n lib for react , vue , svelte , solid ...",
       tags: ["less than 3K", "ts prompt", "state keeping"],
-      github: "https://github.com/leafio/grig",
+      github: "https://github.com/leafio/soon-i18n",
     },
     {
       title: "react-vmodel",
@@ -107,7 +107,6 @@ export default function PageHome() {
                 ))}
               </div>
               <a href={item.github} target="_blank" className="flex items-center mt-2">
-                
                 <Github className="mr-1" /> {item.github}
               </a>
             </Card>

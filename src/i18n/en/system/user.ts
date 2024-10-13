@@ -1,4 +1,4 @@
-export const en_system_user = {
+const en_system_user = {
   label: {
     username: "Username",
     nickname: "Nickname",
@@ -39,3 +39,5 @@ export const en_system_user = {
     title: "Tip",
   },
 } as const
+export default en_system_user
+export type En_System_User = typeof en_system_user

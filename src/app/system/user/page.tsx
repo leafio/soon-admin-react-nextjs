@@ -1,13 +1,13 @@
 "use client"
 import { list_user, download_user_table, del_user, UserInfo } from "@/api"
-import { defaultTime, dateFormat, curMonth } from "@/utils/tools"
-import { tMessages, useMessages } from "@/i18n"
-import { zh_system_user } from "@/i18n/zh/system/user"
-import { en_system_user } from "@/i18n/en/system/user"
-import { Avatar, Button, Form, Input, List, message, Modal, Pagination, Table, Tag } from "antd"
+import { dateFormat } from "@/utils/tools"
+import { useLocales } from "@/i18n"
+import  { Zh_System_User }  from "@/i18n/zh/system/user"
+import  { En_System_User }  from "@/i18n/en/system/user"
+import { Avatar, Button, Form, Input, List, message, Modal, Table, Tag } from "antd"
 import { appStore } from "@/store/app"
 import { useSnapshot } from "valtio"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { useCols } from "@/hooks/cols"
 import { usePageList } from "@/hooks/list"
 import BtnAdd from "@/components/soon-tool-bar/btn-add"
@@ -25,17 +25,12 @@ export default function PageUser() {
   const appSnap = useSnapshot(appStore)
   const isMobile = appSnap.responsive === "mobile"
   const [showSearch, setShowSearch] = useState(true)
-  // const auth = useAuth()
-  const t = useMessages({
-    zh: zh_system_user,
-    en: en_system_user,
-  })
+  const t = useLocales<Zh_System_User|En_System_User>({ zh: ()=>import('@/i18n/zh/system/user'), en: ()=>import('@/i18n/en/system/user') })
   const {
     list,
     refresh,
     total,
     loading,
-    exportExcel,
     search,
     reset,
     params: queryForm,
@@ -43,12 +38,11 @@ export default function PageUser() {
     setPageInfo,
   } = usePageList({
     searchApi: list_user,
-    excelApi: download_user_table,
     // initParams: { timeRange: curMonth() },
     autoSearchDelay: 300,
   })
   useEffect(() => {
-    console.log("page-init")
+    //console.log("page-init")
     refresh()
   }, [])
 
@@ -74,13 +68,7 @@ export default function PageUser() {
       )
     },
   } satisfies TableColumnsType<Item>[0]
-
-  const {
-    cols,
-    checkedCols,
-    setCols,
-    reset: restCols,
-  } = useCols<TableColumnsType<Item>[0] & { dataIndex: string; title: string }>(() => [
+  const memoCols = useMemo(()=>[
     {
       dataIndex: "username",
       title: t("label.username"),
@@ -142,7 +130,14 @@ export default function PageUser() {
         return dateFormat(item?.createTime)
       },
     },
-  ])
+  ]
+    ,[t])
+  const {
+    cols,
+    checkedCols,
+    setCols,
+    reset: restCols,
+  } = useCols<TableColumnsType<Item>[0] & { dataIndex: string; title: string }>(memoCols)
 
   const handleDelete = (item: Item) => {
     Modal.confirm({
@@ -202,7 +197,7 @@ export default function PageUser() {
       )}
       <div className="btn-bar">
         <BtnAdd onClick={() => handleShowAdd()} />
-        <BtnExport v-if="auth('user.export')" onClick={exportExcel} />
+        <BtnExport v-if="auth('user.export')" onClick={()=>download_user_table(queryForm)} />
         <BtnCols cols={cols} setCols={setCols} onReset={restCols} />
         <BtnSearch value={showSearch} onChange={setShowSearch} />
         <BtnRefresh onClick={refresh} />

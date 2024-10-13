@@ -1,6 +1,4 @@
-import { title } from "process"
-
-export const zh_system_menu = {
+const zh_system_menu = {
   label: {
     menuTitle: "菜单名称",
     menuType: "菜单类型",
@@ -48,3 +46,5 @@ export const zh_system_menu = {
     modifySuccess: "修改菜单成功",
   },
 } as const
+export default zh_system_menu
+export type Zh_System_Menu = typeof zh_system_menu

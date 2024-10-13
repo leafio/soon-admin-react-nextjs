@@ -39,7 +39,7 @@ export const detail_user = soon.API("/user/:id").GET<undefined, UserInfo>()
 export const download_user_table = async (query: ListQueryUser) => {
   return soon.get("/user/export", { query }).then(async (res) => {
     const body = await res.blob()
-    console.log("body", body)
+    //console.log("body", body)
     const filename = getAttachmentFilenameFormHeader(res.headers) ?? "user.xlsx"
     downloadBlob(body, filename)
   })

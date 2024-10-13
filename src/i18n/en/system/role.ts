@@ -1,4 +1,4 @@
-export const en_system_role = {
+const en_system_role = {
   label: {
     name: "Name",
     code: "Code",
@@ -24,3 +24,6 @@ export const en_system_role = {
     title: "Tip",
   },
 } as const
+
+export default en_system_role
+export type En_System_Role = typeof en_system_role

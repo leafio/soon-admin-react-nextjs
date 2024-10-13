@@ -2,11 +2,11 @@ import { Button, Cascader, Form, FormInstance, Input, message, Modal } from "ant
 
 import { tree_dept, Dept, add_dept, update_dept } from "@/api"
 import { useDialog } from "@/hooks/dialog"
-import { useMessages } from "@/i18n"
+import { useLocales } from "@/i18n"
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react"
 import { makeVModel } from "react-vmodel"
-import { zh_system_dept } from "@/i18n/zh/system/dept"
-import { en_system_dept } from "@/i18n/en/system/dept"
+import  { Zh_System_Dept }  from "@/i18n/zh/system/dept"
+import  { En_System_Dept }  from "@/i18n/en/system/dept"
 
 export type FormDialogRef = {
   open: (type?: "add" | "edit" | "detail", data?: Partial<Dept> | undefined, link?: boolean) => void
@@ -16,7 +16,7 @@ const FormDialog = forwardRef(({ onSuccess }: { onSuccess?: () => void }, ref) =
   type Item = Dept
   const formRef = useRef<FormInstance>(null)
 
-  const t = useMessages({ zh: zh_system_dept, en: en_system_dept })
+  const t = useLocales<Zh_System_Dept|En_System_Dept>({ zh: ()=>import('@/i18n/zh/system/dept'), en:()=>import('@/i18n/en/system/dept') })
   const titles = () => ({
     add: t("add"),
     edit: t("edit"),
@@ -84,7 +84,7 @@ const FormDialog = forwardRef(({ onSuccess }: { onSuccess?: () => void }, ref) =
         labelCol={{ span: 6 }}
         onFinish={submit}
         onFinishFailed={(err) => {
-          console.log("err", err)
+          //console.log("err", err)
         }}
       >
         <Form.Item label={t("label.superiorDepartment")} name="parentId" className="dialog-form-item">

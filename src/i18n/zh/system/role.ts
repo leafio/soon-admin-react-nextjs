@@ -1,4 +1,4 @@
-export const zh_system_role = {
+const zh_system_role = {
   label: {
     name: "名称",
     code: "标识",
@@ -24,3 +24,6 @@ export const zh_system_role = {
     modifySuccess: "修改角色成功",
   },
 } as const
+
+export default zh_system_role
+export type Zh_System_Role = typeof zh_system_role

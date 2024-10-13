@@ -23,7 +23,7 @@ export default function SoonDetail({
   const [maxHeight, setMaxHeight] = useState(0)
   const refDes = useRef<HTMLDivElement>(null)
   useLayoutEffect(() => {
-    console.log(refDes.current?.getBoundingClientRect().height)
+    //console.log(refDes.current?.getBoundingClientRect().height)
     setTimeout(() => {
       setMaxHeight(refDes.current?.getBoundingClientRect().height ?? 0)
     })

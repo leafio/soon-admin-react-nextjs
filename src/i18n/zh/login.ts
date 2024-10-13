@@ -1,4 +1,4 @@
-export const zh_login = {
+const zh_login = {
   username: "用户名",
   password: "密码",
   code: "验证码",
@@ -9,3 +9,4 @@ export const zh_login = {
     code: "请填写验证码",
   },
 }
+export default zh_login

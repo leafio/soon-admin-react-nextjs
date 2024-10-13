@@ -14,11 +14,11 @@ import {
 
 import { Menu, add_menu, update_menu, tree_menu } from "@/api"
 import { useDialog } from "@/hooks/dialog"
-import { useMessages } from "@/i18n"
+import { useLocales } from "@/i18n"
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react"
 import { makeVModel } from "react-vmodel"
-import { zh_system_menu } from "@/i18n/zh/system/menu"
-import { en_system_menu } from "@/i18n/en/system/menu"
+import  { Zh_System_Menu }  from "@/i18n/zh/system/menu"
+import  { En_System_Menu }  from "@/i18n/en/system/menu"
 
 export type FormDialogRef = {
   open: (type?: "add" | "edit" | "detail", data?: Partial<Menu> | undefined, link?: boolean) => void
@@ -28,7 +28,7 @@ const FormDialog = forwardRef(({ onSuccess }: { onSuccess?: () => void }, ref) =
   type Item = Menu
   const formRef = useRef<FormInstance>(null)
 
-  const t = useMessages({ zh: zh_system_menu, en: en_system_menu })
+  const t = useLocales<Zh_System_Menu|En_System_Menu>({ zh: ()=>import('@/i18n/zh/system/menu'), en: ()=>import('@/i18n/en/system/menu') })
   const titles = () => ({
     add: t("add"),
     edit: t("edit"),
@@ -125,7 +125,7 @@ const FormDialog = forwardRef(({ onSuccess }: { onSuccess?: () => void }, ref) =
         labelCol={{ span: 6 }}
         onFinish={submit}
         onFinishFailed={(err) => {
-          console.log("err", err)
+          //console.log("err", err)
         }}
       >
         <Form.Item

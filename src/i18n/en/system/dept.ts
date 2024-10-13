@@ -1,4 +1,4 @@
-export const en_system_dept = {
+const en_system_dept = {
   label: {
     name: "Name",
     createTime: "Create Time",
@@ -17,3 +17,6 @@ export const en_system_dept = {
     title: "Tip",
   },
 } as const
+
+export default en_system_dept
+export type En_System_Dept = typeof en_system_dept

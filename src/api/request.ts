@@ -1,6 +1,6 @@
 import { createSoon, SoonOptions } from "soon-fetch"
 import { parseBaseUrl } from "../../env/parse.mjs"
-import { getLang, tMessages } from "@/i18n"
+import {  getLang, tLocales } from "@/i18n"
 import { message } from "antd"
 
 export const baseURL = parseBaseUrl(
@@ -11,46 +11,50 @@ export const baseURL = parseBaseUrl(
   },
   process.env.NODE_ENV === "development",
 )
-// console.log(`baseURL: ${baseURL}`)
+// //console.log(`baseURL: ${baseURL}`)
 
-const t = tMessages()
+const t = tLocales()
 
 export const soon = createSoon<SoonOptions>({
   baseURL,
-  defaultOptions: () => ({
+  options: () => ({
     timeout: 20 * 1000,
     headers: new Headers({
       Authorization: localStorage.getItem("token") ?? "",
       "soon-lang": getLang(),
     }),
   }),
-  afterResponse: async (result, resolve, reject) => {
-    const res = result.response
-    if (res) {
-      if (res.ok) {
-        if (res.headers.get("content-type")?.includes("json")) {
-          const body = await res.json()
-          if (body.code === 0) {
-            resolve(body.data)
+  fetching: (url, options) =>
+    new Promise(async (resolve, reject) => {
+      try {
+        const res = await fetch(url, options)
+        if (res.ok) {
+          if (res.headers.get("content-type")?.includes("json")) {
+            const body = await res.json()
+            if (body.code === 0) {
+              resolve(body.data)
+            } else {
+              message.error(body.err ?? t('tip.requestError'))
+              reject(body.err)
+            }
           } else {
-            message.error(body.err ?? "Invalid JSON Response")
-            reject(body.err)
+            resolve(res)
           }
+        } else if (res.status === 401) {
+          localStorage.removeItem("token")
+          location.href = "/login"
         } else {
-          resolve(res)
+          message.error(res.statusText)
         }
-      } else if (res.status === 401) {
-        localStorage.removeItem("token")
-        location.href = "/login"
-      } else {
-        message.error(res.statusText)
+        reject(res.statusText)
+      } catch (err: any) {
+        if (err.name === "TimeoutError") {
+          message.error(t("tip.requestTimeout"))
+        }
+        // else if (err.name === "AbortError") {
+        //   // message.error(err)
+        // }
+        reject(err)
       }
-      reject(res.statusText)
-    } else if (result.isTimeout) {
-      message.error(t("tip.requestTimeout"))
-    } else if (result.error) {
-      message.error(result.error)
-    }
-    reject(result.error ?? "Request Error")
-  },
+    }),
 })

@@ -1,4 +1,4 @@
-export const en_login = {
+const en_login = {
   username: "Username",
   password: "Password",
   code: "Code",
@@ -9,3 +9,4 @@ export const en_login = {
     code: "Please input code",
   },
 }
+export default en_login

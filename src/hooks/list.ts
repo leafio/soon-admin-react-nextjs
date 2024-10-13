@@ -7,7 +7,6 @@ type ListHookProps<
   MapFun extends (item: Awaited<ReturnType<T>>["list"][0]) => R,
 > = {
   searchApi: T
-  excelApi?: (args: any) => Promise<any>
   initParams?: Parameters<T>[0]
   initPageInfo?: { pageIndex?: number; pageSize?: number }
   mapFun?: MapFun
@@ -18,7 +17,7 @@ export function usePageList<
   R,
   T extends (args: any) => Promise<{ list: any[]; total?: number }>,
   MapFun extends (item: Awaited<ReturnType<T>>["list"][0]) => R,
->({ searchApi, excelApi, initPageInfo, mapFun, initParams, autoSearchDelay }: ListHookProps<R, T, MapFun>) {
+>({ searchApi, initPageInfo, mapFun, initParams, autoSearchDelay }: ListHookProps<R, T, MapFun>) {
   type Item = Awaited<ReturnType<T>>["list"][0]
   const [list, setList] = useState<(R extends unknown ? Item : R)[]>([])
   const [total, setTotal] = useState(0)
@@ -62,19 +61,14 @@ export function usePageList<
     Object.assign(params, obj, initParams)
   }
 
-  const exportExcel = async () => {
-    if (excelApi) {
-      excelApi(params)
-    }
-  }
 
   const initAuto = useRef(false)
   useDebounceEffect(
     () => {
-      console.log("init-auto")
+      //console.log("init-auto")
       if (initAuto.current && autoSearchDelay !== undefined) {
         if (pageInfo.pageIndex == 1) {
-          console.log("auto")
+          //console.log("auto")
           refresh()
         } else {
           pageInfo.pageIndex = 1
@@ -90,9 +84,9 @@ export function usePageList<
   )
   const initPage = useRef(false)
   useEffect(() => {
-    console.log("page--", JSON.parse(JSON.stringify(pageInfo)))
+    //console.log("page--", JSON.parse(JSON.stringify(pageInfo)))
     if (initPage.current) {
-      console.log("pageInfo-change")
+      //console.log("pageInfo-change")
       refresh()
     }
     initPage.current = true
@@ -101,7 +95,6 @@ export function usePageList<
     list,
     refresh,
     total,
-    exportExcel,
     loading,
     resData,
     search,

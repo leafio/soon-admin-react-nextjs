@@ -3,7 +3,7 @@ import { Button, Checkbox, Divider, Popover } from "antd"
 import { Col } from "./type"
 
 import Sortable from "sortablejs"
-import { tMessages } from "@/i18n"
+import { useLocales } from "@/i18n"
 import { ArrowDownUp } from "react-bootstrap-icons"
 import { ReactNode, useEffect, useRef, useState } from "react"
 export default function SoonCols({
@@ -17,7 +17,7 @@ export default function SoonCols({
   setModel: (value: Col[]) => void
   onReset: () => void
 }) {
-  const t = tMessages()
+  const t = useLocales()
   const cachedCols = model.map(({ key, title }) => ({ prop: key, label: title }))
 
   const refSort = useRef<{ destroy: () => void }>()
@@ -25,7 +25,7 @@ export default function SoonCols({
 
   const [visible, setVisible] = useState(false)
   useEffect(() => {
-    console.log("Mount", listContainerRef.current)
+    //console.log("Mount", listContainerRef.current)
     if (refSort.current) refSort.current?.destroy()
     if (listContainerRef.current)
       refSort.current = Sortable.create(listContainerRef.current, {
@@ -48,12 +48,12 @@ export default function SoonCols({
   const checkAll = model.filter((col) => col.checked).length === model.length
   const setCheckAll = (val: boolean) => {
     const list = [...model.map((m) => ({ ...m, checked: val }))]
-    console.log(JSON.parse(JSON.stringify(list)))
+    //console.log(JSON.parse(JSON.stringify(list)))
     setModel(list)
   }
 
   useEffect(() => {
-    console.log("model", model)
+    //console.log("model", model)
   }, [model])
 
   return (
@@ -90,10 +90,10 @@ export default function SoonCols({
                       onChange={(e) => {
                         const list = [...model.map((m) => ({ ...m }))]
                         const target = list.find((col) => col.key === item.prop)
-                        console.log("target", JSON.parse(JSON.stringify(target)))
+                        //console.log("target", JSON.parse(JSON.stringify(target)))
                         if (target) target.checked = !target?.checked
-                        console.log("target", JSON.parse(JSON.stringify(target)))
-                        console.log(JSON.parse(JSON.stringify(list)))
+                        //console.log("target", JSON.parse(JSON.stringify(target)))
+                        //console.log(JSON.parse(JSON.stringify(list)))
                         setModel(list)
                       }}
                     >

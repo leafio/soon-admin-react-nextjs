@@ -1,10 +1,9 @@
-import { Menu } from "@/api"
-import { tMessages } from "@/i18n"
-import { en_menu } from "@/i18n/en/menu"
-import { zh_menu } from "@/i18n/zh/menu"
+import { tLocales } from "@/i18n"
+import en_menu from "@/i18n/en/menu"
+import zh_menu from "@/i18n/zh/menu"
 import { SoonRoute } from "./utils"
 
-const t = tMessages({ zh: zh_menu, en: en_menu })
+const t = tLocales({ zh: zh_menu, en: en_menu })
 export const staticRoutes = [
   {
     path: "/login",
