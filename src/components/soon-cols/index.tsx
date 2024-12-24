@@ -20,7 +20,7 @@ export default function SoonCols({
   const t = useLocales()
   const cachedCols = model.map(({ key, title }) => ({ prop: key, label: title }))
 
-  const refSort = useRef<{ destroy: () => void }>()
+  const refSort = useRef<{ destroy: () => void } | null>(null)
   const listContainerRef = useRef(null)
 
   const [visible, setVisible] = useState(false)

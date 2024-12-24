@@ -26,4 +26,3 @@ const zh_system_role = {
 } as const
 
 export default zh_system_role
-export type Zh_System_Role = typeof zh_system_role

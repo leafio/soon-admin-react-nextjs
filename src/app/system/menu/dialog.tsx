@@ -16,9 +16,9 @@ import { Menu, add_menu, update_menu, tree_menu } from "@/api"
 import { useDialog } from "@/hooks/dialog"
 import { useLocales } from "@/i18n"
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react"
-import { makeVModel } from "react-vmodel"
-import  { Zh_System_Menu }  from "@/i18n/zh/system/menu"
-import  { En_System_Menu }  from "@/i18n/en/system/menu"
+import { Model } from "react-vmodel"
+
+import { getTreePathArr } from "@/utils"
 
 export type FormDialogRef = {
   open: (type?: "add" | "edit" | "detail", data?: Partial<Menu> | undefined, link?: boolean) => void
@@ -28,7 +28,10 @@ const FormDialog = forwardRef(({ onSuccess }: { onSuccess?: () => void }, ref) =
   type Item = Menu
   const formRef = useRef<FormInstance>(null)
 
-  const t = useLocales<Zh_System_Menu|En_System_Menu>({ zh: ()=>import('@/i18n/zh/system/menu'), en: ()=>import('@/i18n/en/system/menu') })
+  const t = useLocales({
+    zh: () => import("@/i18n/zh/system/menu"),
+    en: () => import("@/i18n/en/system/menu"),
+  })
   const titles = () => ({
     add: t("add"),
     edit: t("edit"),
@@ -64,8 +67,10 @@ const FormDialog = forwardRef(({ onSuccess }: { onSuccess?: () => void }, ref) =
         const parseChildren = (data: { children?: any[]; label?: any; meta: any }[]) => {
           data.forEach((item) => {
             item.label = item.meta.title
-            if (item.children) {
+            if (item.children && item.children.filter((ch) => ch.menuType === "page").length) {
               parseChildren(item.children)
+            } else {
+              delete item.children
             }
           })
         }
@@ -74,6 +79,8 @@ const FormDialog = forwardRef(({ onSuccess }: { onSuccess?: () => void }, ref) =
       })
     }
   }, [visible])
+
+
 
   const submit = (values: any) => {
     const data = Object.assign({}, formData) as Item
@@ -100,7 +107,7 @@ const FormDialog = forwardRef(({ onSuccess }: { onSuccess?: () => void }, ref) =
     "meta.title": [{ required: true, message: "请输入标题", trigger: "blur" }],
   })
 
-  const vModel = makeVModel(formData, setFormData)
+
   useImperativeHandle(ref, () => ({
     open,
     close,
@@ -137,12 +144,20 @@ const FormDialog = forwardRef(({ onSuccess }: { onSuccess?: () => void }, ref) =
           <Segmented options={menuTypeOptions()} />
         </Form.Item>
         <Form.Item label={t("label.parentMenu")} className="dialog-form-item" name={"parentId"}>
-          <Cascader
-            v-model="cascader_value"
-            options={menuTree}
-            allowClear
-            fieldNames={{ value: "id", children: "children" }}
-          ></Cascader>
+          <Model>
+            {(_vModel, value, onChange) => (
+              <Cascader
+                value={getTreePathArr(menuTree, 'id', value).map(p => p.id)}
+                options={menuTree}
+                allowClear
+                changeOnSelect
+                fieldNames={{ value: "id", children: "children" }}
+                onChange={(val) => {
+                  onChange && onChange(val ? val.slice(-1)[0] : val)
+                }}
+              />
+            )}
+          </Model>
         </Form.Item>
         <Form.Item
           label={t("label.menuTitle")}

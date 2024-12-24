@@ -32,7 +32,7 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "dist/types/**/*.ts", "build/parse.mjs", "next.config.mjs",
+    "dist/types/**/*.ts", "env/parse.mjs", "next.config.mjs",
   ],
   "exclude": [
     "node_modules"

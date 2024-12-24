@@ -5,7 +5,7 @@ import { Button, Form, Input, List, message, Modal, Table, Tag } from "antd"
 import { appStore } from "@/store/app"
 import { useSnapshot } from "valtio"
 import { useEffect, useMemo, useRef, useState } from "react"
-import { useCols} from "@/hooks/cols"
+import { useCols } from "@/hooks/cols"
 import { usePageList } from "@/hooks/list"
 import BtnAdd from "@/components/soon-tool-bar/btn-add"
 import BtnSearch from "@/components/soon-tool-bar/btn-search"
@@ -13,16 +13,16 @@ import BtnRefresh from "@/components/soon-tool-bar/btn-refresh"
 import FormDialog, { FormDialogRef } from "./dialog"
 import type { TableColumnsType } from "antd"
 import SoonDetail from "@/components/soon-detail"
-import { Zh_System_Role } from "@/i18n/zh/system/role"
-import { En_System_Role } from "@/i18n/en/system/role"
+
+import { useAuth } from "@/hooks/auth"
 
 export default function PageRole() {
   type Item = Role
   const appSnap = useSnapshot(appStore)
   const isMobile = appSnap.responsive === "mobile"
   const [showSearch, setShowSearch] = useState(true)
-  // const auth = useAuth()
-  const t = useLocales<Zh_System_Role | En_System_Role>({ zh: () => import('@/i18n/zh/system/role'), en: () => import('@/i18n/en/system/role') })
+  const auth = useAuth()
+  const t = useLocales({ zh: () => import('@/i18n/zh/system/role'), en: () => import('@/i18n/en/system/role') })
   useEffect(() => {
     //console.log('role-change', t)
   })
@@ -52,14 +52,14 @@ export default function PageRole() {
     render(_: any, item: Item) {
       return (
         <div>
-          {item.id !== "admin" && (
+          {item.id !== "admin" && auth('role.del') && (
             <Button size="small" type="link" danger onClick={() => handleDelete(item)}>
               {t("del")}
             </Button>
           )}
-          <Button size="small" type="link" className=" !text-soon" onClick={() => handleShowEdit(item)}>
+          {auth('role.edit') && <Button size="small" type="link" className=" !text-soon" onClick={() => handleShowEdit(item)}>
             {t("edit")}
-          </Button>
+          </Button>}
           <Button size="small" type="link" className="!text-soon" onClick={() => handleShowDetail(item)}>
             {t("detail")}
           </Button>
@@ -83,9 +83,9 @@ export default function PageRole() {
           item?.status == 1 ? <Tag color="success">{t("status.enabled")}</Tag> : <Tag>{t("status.disabled")}</Tag>,
       },
     ], [t])
-    useEffect(()=>{
-      //console.log('t-change')
-    },[t])
+  useEffect(() => {
+    //console.log('t-change')
+  }, [t])
 
 
   const {
@@ -152,7 +152,7 @@ export default function PageRole() {
         </Form>
       )}
       <div className="btn-bar">
-        <BtnAdd onClick={() => handleShowAdd()} />
+        {auth('role.add') && <BtnAdd onClick={() => handleShowAdd()} />}
         <BtnSearch value={showSearch} onChange={setShowSearch} />
         <BtnRefresh onClick={refresh} />
       </div>

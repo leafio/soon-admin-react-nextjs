@@ -22,7 +22,7 @@ import Layout from "@/layout"
 import { runStrFun } from "@/utils"
 import { Menu } from "@/api"
 import { AntdRegistry } from "@ant-design/nextjs-registry"
-import { ConfigProvider,theme as antTheme } from "antd"
+import { ConfigProvider, theme as antTheme } from "antd"
 import { useSnapshot } from "valtio"
 import { everyRoute } from "@/router"
 
@@ -67,7 +67,7 @@ export default function RootLayout({
   const { theme } = useSnapshot(appStore)
 
   return (
-    <html lang="en" >
+    <html lang={lang} >
       <link rel="icon" type="image/svg+xml" href="/logo.svg" />
       <body >
         <BrowserTitle menu={current} />

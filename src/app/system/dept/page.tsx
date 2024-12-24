@@ -12,8 +12,7 @@ import BtnAdd from "@/components/soon-tool-bar/btn-add"
 import BtnRefresh from "@/components/soon-tool-bar/btn-refresh"
 import FormDialog, { FormDialogRef } from "./dialog"
 import type { TableColumnsType } from "antd"
-import { En_System_Dept } from "@/i18n/en/system/dept"
-import { Zh_System_Dept } from "@/i18n/zh/system/dept"
+import { useAuth } from "@/hooks/auth"
 
 
 export default function PageDept() {
@@ -21,8 +20,8 @@ export default function PageDept() {
   const appSnap = useSnapshot(appStore)
   const isMobile = appSnap.responsive === "mobile"
   const [showSearch, setShowSearch] = useState(true)
-  // const auth = useAuth()
-  const t = useLocales<Zh_System_Dept|En_System_Dept>({ zh: ()=>import('@/i18n/zh/system/dept'), en:()=>import('@/i18n/en/system/dept') })
+  const auth = useAuth()
+  const t = useLocales({ zh: () => import('@/i18n/zh/system/dept'), en: () => import('@/i18n/en/system/dept') })
   const {
     list,
     refresh,
@@ -50,12 +49,12 @@ export default function PageDept() {
     render(_: any, item: Item) {
       return (
         <div>
-          <Button size="small" type="link" danger onClick={() => handleDelete(item)}>
+          {auth('dept.del') && <Button size="small" type="link" danger onClick={() => handleDelete(item)}>
             {t("del")}
-          </Button>
-          <Button size="small" type="link" className=" !text-soon" onClick={() => handleShowEdit(item)}>
+          </Button>}
+          {auth('dept.edit') && <Button size="small" type="link" className=" !text-soon" onClick={() => handleShowEdit(item)}>
             {t("edit")}
-          </Button>
+          </Button>}
           <Button size="small" type="link" className="!text-soon" onClick={() => handleShowDetail(item)}>
             {t("detail")}
           </Button>
@@ -63,8 +62,8 @@ export default function PageDept() {
       )
     },
   } satisfies TableColumnsType<Item>[0]
-  
-  const checkedCols=useMemo(() => [
+
+  const checkedCols = useMemo(() => [
     {
       dataIndex: "name",
       title: t("label.name"),
@@ -84,7 +83,7 @@ export default function PageDept() {
         return dateFormat(item?.createTime)
       },
     },
-  ],[t])
+  ], [t])
 
 
 

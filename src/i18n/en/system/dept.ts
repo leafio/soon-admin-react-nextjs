@@ -19,4 +19,3 @@ const en_system_dept = {
 } as const
 
 export default en_system_dept
-export type En_System_Dept = typeof en_system_dept

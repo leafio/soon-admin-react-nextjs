@@ -3,10 +3,9 @@ import { Button, Cascader, Form, FormInstance, Input, message, Modal, Select, Sw
 import { list_role, add_user, update_user, Role, tree_dept, Dept, User } from "@/api"
 import { useDialog } from "@/hooks/dialog"
 import { useLocales } from "@/i18n"
-import  { Zh_System_User } from "@/i18n/zh/system/user"
-import  { En_System_User }  from "@/i18n/en/system/user"
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react"
-import { makeVModel } from "react-vmodel"
+import { makeVModel, Model } from "react-vmodel"
+import { getTreePathArr } from "@/utils"
 
 export type FormDialogRef = {
   open: (type?: "add" | "edit" | "detail", data?: Partial<User> | undefined, link?: boolean) => void
@@ -16,7 +15,7 @@ const FormDialog = forwardRef(({ onSuccess }: { onSuccess?: () => void }, ref) =
   type Item = User
   const formRef = useRef<FormInstance>(null)
 
-  const t = useLocales<Zh_System_User|En_System_User>({ zh: ()=>import('@/i18n/zh/system/user'), en: ()=>import('@/i18n/en/system/user') })
+  const t = useLocales({ zh: () => import('@/i18n/zh/system/user'), en: () => import('@/i18n/en/system/user') })
   const titles = () => ({
     add: t("add"),
     edit: t("edit"),
@@ -144,13 +143,22 @@ const FormDialog = forwardRef(({ onSuccess }: { onSuccess?: () => void }, ref) =
           <Select placeholder="" allowClear options={roleOptions} fieldNames={{ label: "name", value: "id" }}></Select>
         </Form.Item>
         <Form.Item label={t("label.deptName")} name="deptId" className="dialog-form-item">
-          <Cascader
-            allowClear
-            options={deptOptions}
-            fieldNames={{ label: "name", value: "id", children: "children" }}
-            placeholder={t("label.selectDept")}
-            className="w-full"
-          />
+          <Model>
+            {(_vModel,value,onChange)=>
+                  <Cascader
+                  value={getTreePathArr(deptOptions, 'id', value).map(p => p.id)}
+                  allowClear
+                  options={deptOptions}
+                  fieldNames={{ label: "name", value: "id", children: "children" }}
+                  placeholder={t("label.selectDept")}
+                  className="w-full"
+                  onChange={(val) => {
+                    onChange && onChange(val ? val.slice(-1)[0] : val)
+                  }}
+                />
+            }
+          </Model>
+    
         </Form.Item>
         <Form.Item label={t("label.remark")} name="desc" className="dialog-form-item" labelCol={{ span: 6 }}>
           <Input.TextArea allowClear rows={2} />

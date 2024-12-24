@@ -35,9 +35,8 @@ export default function SoonAside() {
       ></div>
       <div
         ref={refContent}
-        className={`w-[208px] ${
-          appSnap.sideBar.isHide ? " translate-x-[-208px] " : ""
-        }  z-50   fixed left-0 flex h-svh flex-col border-r border-solid border-gray-100 dark:border-black transition-transform duration-300 `}
+        className={`w-[208px] ${appSnap.sideBar.isHide ? " translate-x-[-208px] " : ""
+          }  z-50 bg-white  fixed left-0 flex h-svh flex-col border-r border-solid border-gray-100 dark:border-black transition-transform duration-300 `}
       >
         <div className="flex h-12 items-center justify-center">
           <img className="w-8 h-8" src="/logo.svg" alt="logo" />

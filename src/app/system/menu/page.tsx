@@ -11,17 +11,17 @@ import BtnAdd from "@/components/soon-tool-bar/btn-add"
 import BtnRefresh from "@/components/soon-tool-bar/btn-refresh"
 import FormDialog, { FormDialogRef } from "./dialog"
 import type { TableColumnsType } from "antd"
-import { Zh_System_Menu } from "@/i18n/zh/system/menu"
-import { En_System_Menu } from "@/i18n/en/system/menu"
+
+import { useAuth } from "@/hooks/auth"
 
 export default function PageMenu() {
   type Item = Menu
-  type Col=TableColumnsType<Item>[0] & { dataIndex: string; title: string }
+  type Col = TableColumnsType<Item>[0] & { dataIndex: string; title: string }
   const appSnap = useSnapshot(appStore)
   const isMobile = appSnap.responsive === "mobile"
   const [showSearch, setShowSearch] = useState(true)
-  // const auth = useAuth()
-  const t = useLocales<Zh_System_Menu | En_System_Menu>({ zh: () => import('@/i18n/zh/system/menu'), en: () => import('@/i18n/en/system/menu') })
+  const auth = useAuth()
+  const t = useLocales({ zh: () => import('@/i18n/zh/system/menu'), en: () => import('@/i18n/en/system/menu') })
   const {
     list,
     refresh,
@@ -49,12 +49,12 @@ export default function PageMenu() {
     render(_: any, item: Item) {
       return (
         <div>
-          <Button size="small" type="link" danger onClick={() => handleDelete(item)}>
+          {auth('menu.del') && <Button size="small" type="link" danger onClick={() => handleDelete(item)}>
             {t("del")}
-          </Button>
-          <Button size="small" type="link" className=" !text-soon" onClick={() => handleShowEdit(item)}>
+          </Button>}
+          {auth('menu.edit') && <Button size="small" type="link" className=" !text-soon" onClick={() => handleShowEdit(item)}>
             {t("edit")}
-          </Button>
+          </Button>}
           <Button size="small" type="link" className="!text-soon" onClick={() => handleShowDetail(item)}>
             {t("detail")}
           </Button>
@@ -149,7 +149,7 @@ export default function PageMenu() {
   return (
     <div className="page-container bg flex-1 flex flex-col overflow-auto">
       <div className="btn-bar">
-        <BtnAdd onClick={() => handleShowAdd()} />
+        {auth('menu.add') && <BtnAdd onClick={() => handleShowAdd()} />}
         <BtnRefresh onClick={refresh} />
       </div>
       {!isMobile && (

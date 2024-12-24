@@ -26,4 +26,3 @@ const en_system_role = {
 } as const
 
 export default en_system_role
-export type En_System_Role = typeof en_system_role

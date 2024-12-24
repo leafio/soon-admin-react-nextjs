@@ -1,11 +1,9 @@
 import { Menu, own_auth_codes, own_menus, own_userinfo, User } from "@/api"
-import { tLocales } from "@/i18n"
-import  en_menu  from "@/i18n/en/menu"
-import  zh_menu  from "@/i18n/zh/menu"
-import { proxy, useSnapshot } from "valtio"
+
+import { proxy } from "valtio"
 import { appStore } from "./app"
 import { parseMenuTitle, parseRedirectNext } from "@/router/utils"
-const t = tLocales({ zh: zh_menu, en: en_menu })
+
 export const userStore = proxy({
   userInfo: null as User | null,
   token: "",
@@ -13,12 +11,16 @@ export const userStore = proxy({
   btnList: [] as string[],
 })
 
-// userStore.menus=menus
 
 export const initUser = async () => {
   if (!userStore.userInfo) {
-    userStore.userInfo = await own_userinfo()
-    userStore.btnList = await own_auth_codes()
+    try {
+      userStore.userInfo = await own_userinfo()
+      userStore.btnList = await own_auth_codes()
+    } catch (error) {
+      console.error("info", error)
+    }
+
   }
 }
 

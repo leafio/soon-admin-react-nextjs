@@ -47,4 +47,4 @@ const zh_system_menu = {
   },
 } as const
 export default zh_system_menu
-export type Zh_System_Menu = typeof zh_system_menu
+

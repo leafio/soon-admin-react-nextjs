@@ -43,6 +43,7 @@ export default function PageLogin() {
   const handleLogin = (values: { username: string; password: string }) => {
     login({ ...form, ...values }).then((res) => {
       localStorage.setItem("token", res.token)
+      localStorage.setItem('refresh_token',res.refreshToken)
       router.push("/")
     })
   }
@@ -62,23 +63,22 @@ export default function PageLogin() {
     <Container className="relative min-h-[100vh]">
       <Form
         ref={formRef}
-        className="w-full md:w-1/2 lg:w-1/3 xl:w-1/4 absolute md:right-[12.5%] top-1/4 p-4"
+        className="w-full md:w-1/2 lg:w-1/3 xl:w-1/4 absolute md:right-[12.5%] top-1/4 !p-4"
         size="large"
         initialValues={form}
         onFinish={handleLogin}
       >
         <div className="flex justify-end">
-          <LangSwitch icon-className="w-6 h-6" className="mb-4" />
+          <LangSwitch className="w-6 h-6 mb-4"  />
         </div>
         <Form.Item name="username" rules={rules().username}>
-          <Input v-model="form.username" placeholder={t("username") + ":  admin"}></Input>
+          <Input  placeholder={t("username") + ":  admin"}></Input>
         </Form.Item>
         <Form.Item name="password" rules={rules().password}>
-          <Input v-model="form.password" placeholder={t("password") + ":  admin"} type="password"></Input>
+          <Input  placeholder={t("password") + ":  admin"} type="password"></Input>
         </Form.Item>
         <Form.Item name="code" rules={rules().code}>
           <Input
-            v-model="form.code"
             placeholder={t("code")}
             addonAfter={<div ref={refImg} className="cursor-pointer" onClick={refreshCaptcha} />}
           ></Input>

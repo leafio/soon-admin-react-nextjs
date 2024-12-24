@@ -18,4 +18,4 @@ const zh_system_dept = {
   },
 } as const
 export default zh_system_dept
-export type Zh_System_Dept = typeof zh_system_dept
+

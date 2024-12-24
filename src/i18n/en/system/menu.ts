@@ -49,4 +49,3 @@ const en_system_menu = {
 } as const
 
 export default en_system_menu
-export type En_System_Menu = typeof en_system_menu

@@ -2,6 +2,7 @@ import { Menu } from "@/api"
 import { tLocales } from "@/i18n"
 import en_menu from "@/i18n/en/menu"
 import zh_menu from "@/i18n/zh/menu"
+import { getTreePathArr } from "@/utils"
 export type SoonRouteMeta = {
   title?: string | (() => string)
   link?: string
@@ -50,16 +51,5 @@ export function parseRedirectNext(routes: { path: string; redirect?: string; chi
 }
 
 export const getPathMenu = (targetPath: string, menus: Menu[]) => {
-  let result: Menu[] = []
-  const target = menus.find((m) => m.path === targetPath)
-  if (target) return [target]
-  menus.some((m) => {
-    const _menu = getPathMenu(targetPath, m.children ?? [])
-
-    if (_menu.length) {
-      result = [m, ..._menu]
-      return true
-    }
-  })
-  return result
+  return getTreePathArr(menus,'path',targetPath)
 }

@@ -4,9 +4,8 @@ import { tree_dept, Dept, add_dept, update_dept } from "@/api"
 import { useDialog } from "@/hooks/dialog"
 import { useLocales } from "@/i18n"
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react"
-import { makeVModel } from "react-vmodel"
-import  { Zh_System_Dept }  from "@/i18n/zh/system/dept"
-import  { En_System_Dept }  from "@/i18n/en/system/dept"
+import { Model } from "react-vmodel"
+import { getTreePathArr } from "@/utils"
 
 export type FormDialogRef = {
   open: (type?: "add" | "edit" | "detail", data?: Partial<Dept> | undefined, link?: boolean) => void
@@ -16,7 +15,10 @@ const FormDialog = forwardRef(({ onSuccess }: { onSuccess?: () => void }, ref) =
   type Item = Dept
   const formRef = useRef<FormInstance>(null)
 
-  const t = useLocales<Zh_System_Dept|En_System_Dept>({ zh: ()=>import('@/i18n/zh/system/dept'), en:()=>import('@/i18n/en/system/dept') })
+  const t = useLocales({
+    zh: () => import("@/i18n/zh/system/dept"),
+    en: () => import("@/i18n/en/system/dept"),
+  })
   const titles = () => ({
     add: t("add"),
     edit: t("edit"),
@@ -59,7 +61,6 @@ const FormDialog = forwardRef(({ onSuccess }: { onSuccess?: () => void }, ref) =
     name: [{ required: true, message: t("label.inputName"), trigger: "blur" }],
   })
 
-  const vModel = makeVModel(formData, setFormData)
   useImperativeHandle(ref, () => ({
     open,
     close,
@@ -76,7 +77,7 @@ const FormDialog = forwardRef(({ onSuccess }: { onSuccess?: () => void }, ref) =
       <Form
         ref={formRef}
         disabled={type === "detail"}
-        label-width="7em"
+        label-width="8em"
         className="dialog-form"
         onValuesChange={(changed, values) => {
           setFormData({ ...formData, ...values })
@@ -87,21 +88,29 @@ const FormDialog = forwardRef(({ onSuccess }: { onSuccess?: () => void }, ref) =
           //console.log("err", err)
         }}
       >
-        <Form.Item label={t("label.superiorDepartment")} name="parentId" className="dialog-form-item">
-          <Cascader
-            allowClear
-            options={deptOptions}
-            fieldNames={{ label: "name", value: "id", children: "children" }}
-            placeholder={t("label.selectSuperior")}
-            className="w-full"
-          />
+        <Form.Item label={t("label.superiorDepartment")} name="parentId" className="dialog-form-item-full">
+          <Model>
+            {(_vModel, value, onChange) => (
+              <Cascader
+                value={getTreePathArr(deptOptions, "id", value).map((p) => p.id)}
+                allowClear
+                options={deptOptions}
+                fieldNames={{ label: "name", value: "id", children: "children" }}
+                placeholder={t("label.selectSuperior")}
+                className="w-full"
+                onChange={(val) => {
+                  onChange && onChange(val ? val.slice(-1)[0] : val)
+                }}
+              />
+            )}
+          </Model>
         </Form.Item>
 
-        <Form.Item label={t("label.name")} name="name" className="dialog-form-item" rules={rules().name}>
+        <Form.Item label={t("label.name")} name="name" className="dialog-form-item-full" rules={rules().name}>
           <Input allowClear></Input>
         </Form.Item>
 
-        <Form.Item label={t("label.remark")} name="desc" className="dialog-form-item" labelCol={{ span: 6 }}>
+        <Form.Item label={t("label.remark")} name="desc" className="dialog-form-item-full" labelCol={{ span: 6 }}>
           <Input.TextArea allowClear rows={2} />
         </Form.Item>
         <div className=" w-full flex justify-end px-2">

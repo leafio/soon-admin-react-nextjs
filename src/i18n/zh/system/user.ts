@@ -41,4 +41,4 @@ const zh_system_user = {
 } as const
 
 export default zh_system_user
-export type Zh_System_User = typeof zh_system_user
+

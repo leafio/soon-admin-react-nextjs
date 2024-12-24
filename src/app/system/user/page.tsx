@@ -2,8 +2,6 @@
 import { list_user, download_user_table, del_user, UserInfo } from "@/api"
 import { dateFormat } from "@/utils/tools"
 import { useLocales } from "@/i18n"
-import  { Zh_System_User }  from "@/i18n/zh/system/user"
-import  { En_System_User }  from "@/i18n/en/system/user"
 import { Avatar, Button, Form, Input, List, message, Modal, Table, Tag } from "antd"
 import { appStore } from "@/store/app"
 import { useSnapshot } from "valtio"
@@ -19,13 +17,15 @@ import type { TableColumnsType } from "antd"
 import SoonDetail from "@/components/soon-detail"
 import { GenderFemale, GenderMale } from "react-bootstrap-icons"
 import BtnCols from "@/components/soon-tool-bar/btn-cols"
+import { useAuth } from "@/hooks/auth"
 
 export default function PageUser() {
   type Item = UserInfo
   const appSnap = useSnapshot(appStore)
   const isMobile = appSnap.responsive === "mobile"
   const [showSearch, setShowSearch] = useState(true)
-  const t = useLocales<Zh_System_User|En_System_User>({ zh: ()=>import('@/i18n/zh/system/user'), en: ()=>import('@/i18n/en/system/user') })
+  const auth = useAuth()
+  const t = useLocales({ zh: () => import('@/i18n/zh/system/user'), en: () => import('@/i18n/en/system/user') })
   const {
     list,
     refresh,
@@ -53,14 +53,14 @@ export default function PageUser() {
     render(_: any, item: Item) {
       return (
         <div>
-          {item.username !== "admin" && (
+          {item.username !== "admin" && auth('user.del') && (
             <Button size="small" type="link" danger onClick={() => handleDelete(item)}>
               {t("del")}
             </Button>
           )}
-          <Button size="small" type="link" className=" !text-soon" onClick={() => handleShowEdit(item)}>
+          {auth('user.edit') && <Button size="small" type="link" className=" !text-soon" onClick={() => handleShowEdit(item)}>
             {t("edit")}
-          </Button>
+          </Button>}
           <Button size="small" type="link" className="!text-soon" onClick={() => handleShowDetail(item)}>
             {t("detail")}
           </Button>
@@ -68,7 +68,7 @@ export default function PageUser() {
       )
     },
   } satisfies TableColumnsType<Item>[0]
-  const memoCols = useMemo(()=>[
+  const memoCols = useMemo(() => [
     {
       dataIndex: "username",
       title: t("label.username"),
@@ -131,7 +131,7 @@ export default function PageUser() {
       },
     },
   ]
-    ,[t])
+    , [t])
   const {
     cols,
     checkedCols,
@@ -196,8 +196,8 @@ export default function PageUser() {
         </Form>
       )}
       <div className="btn-bar">
-        <BtnAdd onClick={() => handleShowAdd()} />
-        <BtnExport v-if="auth('user.export')" onClick={()=>download_user_table(queryForm)} />
+        {auth('user.add') && <BtnAdd onClick={() => handleShowAdd()} />}
+        {auth('user.export') && <BtnExport onClick={() => download_user_table(queryForm)} />}
         <BtnCols cols={cols} setCols={setCols} onReset={restCols} />
         <BtnSearch value={showSearch} onChange={setShowSearch} />
         <BtnRefresh onClick={refresh} />

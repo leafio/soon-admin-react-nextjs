@@ -1,12 +1,14 @@
-import { Button, Cascader, Form, FormInstance, Input, message, Modal, Switch } from "antd"
+import { Button, Cascader, Form, FormInstance, Input, message, Modal, Switch, Tree, TreeSelect } from "antd"
 
 import { Role, add_role, update_role, tree_menu, Menu } from "@/api"
 import { useDialog } from "@/hooks/dialog"
 import { useLocales } from "@/i18n"
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react"
-import { makeVModel } from "react-vmodel"
-import  zh_system_role  from "@/i18n/zh/system/role"
-import  en_system_role  from "@/i18n/en/system/role"
+import { makeVModel, Model } from "react-vmodel"
+import zh_system_role from "@/i18n/zh/system/role"
+import en_system_role from "@/i18n/en/system/role"
+import zh_menu from "@/i18n/zh/menu"
+import en_menu from "@/i18n/en/menu"
 
 export type FormDialogRef = {
   open: (type?: "add" | "edit" | "detail", data?: Partial<Role> | undefined, link?: boolean) => void
@@ -16,7 +18,10 @@ const FormDialog = forwardRef(({ onSuccess }: { onSuccess?: () => void }, ref) =
   type Item = Role
   const formRef = useRef<FormInstance>(null)
 
-  const t = useLocales({ zh: zh_system_role, en: en_system_role })
+  const t = useLocales({
+    zh: { ...zh_system_role, ...zh_menu },
+    en: { ...en_system_role, ...en_menu }
+  })
   const titles = () => ({
     add: t("add"),
     edit: t("edit"),
@@ -35,7 +40,7 @@ const FormDialog = forwardRef(({ onSuccess }: { onSuccess?: () => void }, ref) =
         const data = res.list
         const parseChildren = (data: { children: any[]; label: any; meta: any }[]) => {
           data.forEach((item) => {
-            item.label = item.meta.title
+            item.label = t(item.meta.title)
             if (item.children) {
               parseChildren(item.children)
             }
@@ -43,6 +48,7 @@ const FormDialog = forwardRef(({ onSuccess }: { onSuccess?: () => void }, ref) =
         }
         parseChildren(data as any)
         setMenuOptions(data)
+        console.log('data', data)
       })
     }
   }, [visible])
@@ -113,13 +119,24 @@ const FormDialog = forwardRef(({ onSuccess }: { onSuccess?: () => void }, ref) =
           ></Switch>
         </Form.Item>
 
-        <Form.Item label={t("label.permissions")} name="deptId" className="dialog-form-item">
-          <Cascader
-            allowClear
-            options={menuOptions}
-            fieldNames={{ label: "name", value: "id", children: "children" }}
-            className="w-full"
-          />
+        <Form.Item label={t("label.permissions")} name="permissions" className="dialog-form-item">
+          <Model>{
+            (_, value, onChange) => <Tree
+              checkedKeys={value}
+              onCheck={(data) => {
+                onChange && onChange((data as any).checked)
+              }}
+              //@ts-ignore
+              treeData={menuOptions}
+              fieldNames={{ title: 'label', key: "id" }}
+              multiple
+              className="w-full"
+              checkStrictly
+              checkable
+            />
+
+          }</Model>
+
         </Form.Item>
         <Form.Item label={t("label.remark")} name="desc" className="dialog-form-item" labelCol={{ span: 6 }}>
           <Input.TextArea allowClear rows={2} />
