@@ -1,36 +1,26 @@
-import {
-  Button,
-  Cascader,
-  Form,
-  FormInstance,
-  Input,
-  InputNumber,
-  message,
-  Modal,
-  Segmented,
-  Select,
-  Switch,
-} from "antd"
+import { Button, Cascader, Form, FormInstance, Input, InputNumber, Modal, Segmented, Select, Switch } from "antd"
 
 import { Menu, add_menu, update_menu, tree_menu } from "@/api"
 import { useDialog } from "@/hooks/dialog"
 import { useLocales } from "@/i18n"
-import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react"
+import { Ref, useEffect, useImperativeHandle, useRef, useState } from "react"
 import { Model } from "react-vmodel"
 
 import { getTreePathArr } from "@/utils"
+import { toast } from "react-toastify"
 
 export type FormDialogRef = {
   open: (type?: "add" | "edit" | "detail", data?: Partial<Menu> | undefined, link?: boolean) => void
   close: () => void
 }
-const FormDialog = forwardRef(({ onSuccess }: { onSuccess?: () => void }, ref) => {
+const FormDialog = ({ onSuccess, ref }: { onSuccess?: () => void; ref: Ref<FormDialogRef> }) => {
   type Item = Menu
   const formRef = useRef<FormInstance>(null)
 
   const t = useLocales({
     zh: () => import("@/i18n/zh/system/menu"),
     en: () => import("@/i18n/en/system/menu"),
+    ko: () => import("@/i18n/ko/system/menu"),
   })
   const titles = () => ({
     add: t("add"),
@@ -80,20 +70,22 @@ const FormDialog = forwardRef(({ onSuccess }: { onSuccess?: () => void }, ref) =
     }
   }, [visible])
 
-
-
   const submit = (values: any) => {
     const data = Object.assign({}, formData) as Item
     if (type === "add") {
       add_menu(data).then((res) => {
-        message.success(t("tip.addSuccess"))
-        onSuccess && onSuccess()
+        toast.success(t("tip.addSuccess"))
+        if (onSuccess) {
+          onSuccess()
+        }
         close()
       })
     } else if (type === "edit") {
       update_menu(data).then((res) => {
-        message.success(t("tip.modifySuccess"))
-        onSuccess && onSuccess()
+        toast.success(t("tip.modifySuccess"))
+        if (onSuccess) {
+          onSuccess()
+        }
         close()
       })
     }
@@ -106,7 +98,6 @@ const FormDialog = forwardRef(({ onSuccess }: { onSuccess?: () => void }, ref) =
   const rules = () => ({
     "meta.title": [{ required: true, message: "请输入标题", trigger: "blur" }],
   })
-
 
   useImperativeHandle(ref, () => ({
     open,
@@ -147,13 +138,13 @@ const FormDialog = forwardRef(({ onSuccess }: { onSuccess?: () => void }, ref) =
           <Model>
             {(_vModel, value, onChange) => (
               <Cascader
-                value={getTreePathArr(menuTree, 'id', value).map(p => p.id)}
+                value={getTreePathArr(menuTree, "id", value).map((p) => p.id)}
                 options={menuTree}
                 allowClear
                 changeOnSelect
                 fieldNames={{ value: "id", children: "children" }}
                 onChange={(val) => {
-                  onChange && onChange(val ? val.slice(-1)[0] : val)
+                  onChange(val ? val.slice(-1)[0] : val)
                 }}
               />
             )}
@@ -231,6 +222,6 @@ const FormDialog = forwardRef(({ onSuccess }: { onSuccess?: () => void }, ref) =
       </Form>
     </Modal>
   )
-})
+}
 FormDialog.displayName = "FormDialog"
 export default FormDialog

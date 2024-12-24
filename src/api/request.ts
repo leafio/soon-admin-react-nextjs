@@ -1,10 +1,11 @@
 import { createSoon, SoonOptions } from "soon-fetch"
-import { parseBaseUrl } from "../../env/parse.mjs"
+import { parseBaseUrl } from "../../env/parse"
 import { getLang, tLocales } from "@/i18n"
-import { message } from "antd"
+
 import { refresh_token } from "./modules/auth"
 import { createSilentRefresh } from "./addons/silentRefreshToken"
 import { retry } from "./addons/retry"
+import { toast } from "@/components/toast"
 
 export const baseURL = parseBaseUrl(
   {
@@ -16,14 +17,7 @@ export const baseURL = parseBaseUrl(
 )
 // //console.log(`baseURL: ${baseURL}`)
 
-const t = tLocales({
-  zh:{
-    requestError:'请求出错'
-  },
-  en:{
-    requestError:'Request Error'
-  }
-})
+const t = tLocales()
 
 const silentRefresh = createSilentRefresh(() =>
   refresh_token({ token: localStorage.getItem("refresh_token") ?? "" })
@@ -36,8 +30,6 @@ const silentRefresh = createSilentRefresh(() =>
       location.href = "/login"
     }),
 )
-
-
 
 function request<T = any>(
   url: string,
@@ -52,7 +44,7 @@ function request<T = any>(
           if (body.code === 0) {
             resolve(body.data)
           } else {
-            message.error(body.err ?? t("requestError"))
+            toast.error(body.err ?? t("tip.requestError"))
             reject(body.err)
           }
         } else {
@@ -64,16 +56,16 @@ function request<T = any>(
           return request(url, options)
         })
       } else {
-        message.error(res.statusText)
+        toast.error(res.statusText)
         reject(res.statusText)
       }
     } catch (err: any) {
       if (err.name === "TimeoutError") {
-        message.error(t("tip.requestTimeout"))
+        toast.error(t("tip.requestTimeout"))
         reject(err)
       }
       // else if (err.name === "AbortError") {
-      //  //message.error(err)
+      //  //toast.error(err)
       // reject(err)
       // }
       else {
@@ -88,7 +80,6 @@ function request<T = any>(
         ) {
           reject(err)
         }
-
       }
     }
   })

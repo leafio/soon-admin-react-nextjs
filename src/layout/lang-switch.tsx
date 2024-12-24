@@ -1,34 +1,31 @@
-import { useLang } from "@/i18n"
+import { Lang, useLang } from "@/i18n"
 import { Dropdown, MenuProps } from "antd"
-import { useState, useEffect } from "react"
+import { useEffect } from "react"
 import { Translate } from "react-bootstrap-icons"
+const langs = [
+  { value: "zh", label: "简体中文" },
+  { value: "en", label: "English" },
+  { value: "ko", label: "한국어" },
+] as const
 
 export default function LangSwitch({ className }: { className?: string }) {
   const [lang, setLang] = useLang()
-  const handelChangeLang = (lang: "zh" | "en") => {
+  const handelChangeLang = (lang: Lang) => {
     setLang(lang)
+    localStorage.setItem("lang", lang)
   }
-  const [isInit, setIsInit] = useState(false)
-
   useEffect(() => {
-    if (isInit) {
+    const _lang = localStorage.getItem("lang") as Lang
+    if (!_lang) {
       localStorage.setItem("lang", lang)
     } else {
-      const _lang = localStorage.getItem("lang")
-      if (!_lang) {
-        localStorage.setItem("lang", lang)
-      } else {
-        setLang(_lang as "zh" | "en")
-      }
-      setIsInit(true)
+      setLang(_lang)
     }
-  }, [lang])
-  const items: MenuProps["items"] = [
-    { value: "zh", label: "简体中文" },
-    { value: "en", label: "English" },
-  ].map((m) => ({
+  }, [])
+
+  const items: MenuProps["items"] = langs.map((m) => ({
     key: m.value,
-    label: <div onClick={() => handelChangeLang(m.value as "zh" | "en")}>{m.label}</div>,
+    label: <div onClick={() => handelChangeLang(m.value)}>{m.label}</div>,
     disabled: lang === m.value,
   }))
   return (

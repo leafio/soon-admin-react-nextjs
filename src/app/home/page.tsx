@@ -87,6 +87,7 @@ export default function PageHome() {
   const data = {
     zh,
     en,
+    ko: en,
   }
   const list = data[lang as "zh"]
   return (

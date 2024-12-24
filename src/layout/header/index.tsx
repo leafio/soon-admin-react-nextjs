@@ -1,14 +1,24 @@
 "user client"
 
-import { TextIndentLeft, TextIndentRight, Search, Gear, Bell, Github } from "react-bootstrap-icons"
+import { TextIndentLeft, TextIndentRight, Github } from "react-bootstrap-icons"
 import User from "./user"
-import { Alert, Breadcrumb, Tooltip } from "antd"
-import SoonBreadcrumb from "./soon-breadsrumb"
+import { Alert, Tooltip } from "antd"
+
 import LangSwitch from "../lang-switch"
 
 import { appStore } from "@/store/app"
 import { useSnapshot } from "valtio"
 import { useLocales } from "@/i18n"
+
+import { usePathname } from "next/navigation"
+import { userStore } from "@/store/user"
+import SoonBreadcrumb from "@/components/soon-breadcrumb"
+import { getTreePathArr } from "@/utils"
+import { ParsedMenu } from "@/router/side-menu"
+
+export const getPathMenu = (targetPath: string, menus: ParsedMenu[]) => {
+  return getTreePathArr(menus, "path", targetPath)
+}
 
 export default function Header() {
   const toggleSideMenu = (e: any) => {
@@ -29,14 +39,18 @@ export default function Header() {
     style: { color: "var(--soon-menu-hover-text-color)", backgroundColor: "var(--soon-menu-hover-bg-color)" },
     onClick: toggleSideMenu,
   }
+
+  const pathname = usePathname()
+  const { menus } = useSnapshot(userStore)
+  const breadcrumbList = getPathMenu(pathname, menus as ParsedMenu[])
   return (
     <header className="flex justify-between p-2  backdrop-saturate-200 backdrop-blur  bg-opacity-90 soon-header">
       <div className="flex items-center">
         {sideBar.isHide ? <TextIndentLeft {...iconProps} /> : <TextIndentRight {...iconProps} />}
-        <SoonBreadcrumb className="ml-4" />
+        <SoonBreadcrumb className="ml-4" items={breadcrumbList} />
       </div>
       <div className="hidden md:flex mx-6">
-        <Alert message={t('msg')} type="warning" className="!py-1"  closable/>
+        <Alert message={t("msg")} type="warning" className="!py-1" closable />
       </div>
 
       <div className="flex items-center">

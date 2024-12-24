@@ -1,8 +1,5 @@
-import { Menu } from "@/api"
-import { tLocales } from "@/i18n"
-import en_menu from "@/i18n/en/menu"
-import zh_menu from "@/i18n/zh/menu"
 import { getTreePathArr } from "@/utils"
+import { ReactNode } from "react"
 export type SoonRouteMeta = {
   title?: string | (() => string)
   link?: string
@@ -10,30 +7,16 @@ export type SoonRouteMeta = {
   isKeepAlive?: boolean
   isAffix?: boolean
   isIframe?: boolean
-  icon?: string | object
+  icon?: string | ReactNode
   layout?: string
 }
 export type SoonRoute = {
-  path?: string
+  path: string
   redirect?: string
   children?: SoonRoute[]
+  name?: string
 
   meta?: SoonRouteMeta
-}
-
-const t = tLocales({ zh: zh_menu, en: en_menu })
-
-export const parseMenuTitle = (menus: Menu[]): Menu[] => {
-  return menus.map((m) => {
-    return {
-      ...m,
-      meta: {
-        ...m.meta,
-        title: typeof m.meta.title === "string" ? () => t((m.meta.title ?? "") as any) : m.meta.title,
-      },
-      children: m.children ? parseMenuTitle(m.children) : [],
-    }
-  }) as unknown as Menu[]
 }
 
 // /**动态解析 redirect */
@@ -50,6 +33,7 @@ export function parseRedirectNext(routes: { path: string; redirect?: string; chi
   })
 }
 
-export const getPathMenu = (targetPath: string, menus: Menu[]) => {
-  return getTreePathArr(menus,'path',targetPath)
+export const getPathRoutes = (targetPath: string, routes?: SoonRoute[]) => {
+  if (!routes) return []
+  return getTreePathArr(routes as SoonRoute[], "path", targetPath)
 }

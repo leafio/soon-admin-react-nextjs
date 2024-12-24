@@ -1,5 +1,7 @@
-
 import { tLocales } from "@/i18n"
+import en_datetime from "@/i18n/en/datetime"
+import ko_datetime from "@/i18n/ko/datetime"
+import zh_datetime from "@/i18n/zh/datetime"
 import dayjs from "dayjs"
 const dayjsDateTimeFormat = "YYYY-MM-DD HH:mm:ss"
 
@@ -23,26 +25,9 @@ export const defaultTime: [Date, Date] = [
 ]
 
 const t = tLocales({
-  zh: {
-    yesterday: "昨天",
-    today: "今天",
-    lastWeek: "上周",
-    thisWeek: "本周",
-    lastMonth: "上月",
-    thisMonth: "本月",
-    lastYear: "去年",
-    soFarThisYear: "今年至今",
-  },
-  en: {
-    yesterday: "Yesterday",
-    today: "Today",
-    lastWeek: "Last Week",
-    thisWeek: "This Week",
-    lastMonth: "Last Month",
-    thisMonth: "This Month",
-    lastYear: "Last Year",
-    soFarThisYear: "So Far",
-  },
+  zh: zh_datetime,
+  en: en_datetime,
+  ko: ko_datetime,
 })
 export const timePickerOptions = () => ({
   shortcuts: [
@@ -113,7 +98,7 @@ export const timePickerOptions = () => ({
   ],
 })
 
-export function trimObject(obj: any) {
+export function trimObject(obj: Record<string, unknown>) {
   const v = Object.create(null)
   for (const k in obj) {
     if (obj[k] !== undefined && obj[k] !== null && obj[k] !== "") {

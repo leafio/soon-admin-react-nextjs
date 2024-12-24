@@ -1,21 +1,26 @@
-import { Button, Cascader, Form, FormInstance, Input, message, Modal, Select, Switch } from "antd"
+import { Button, Cascader, Form, FormInstance, Input, Modal, Select, Switch } from "antd"
 
 import { list_role, add_user, update_user, Role, tree_dept, Dept, User } from "@/api"
 import { useDialog } from "@/hooks/dialog"
 import { useLocales } from "@/i18n"
-import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react"
+import { Ref, useEffect, useImperativeHandle, useRef, useState } from "react"
 import { makeVModel, Model } from "react-vmodel"
 import { getTreePathArr } from "@/utils"
+import { toast } from "@/components/toast"
 
 export type FormDialogRef = {
   open: (type?: "add" | "edit" | "detail", data?: Partial<User> | undefined, link?: boolean) => void
   close: () => void
 }
-const FormDialog = forwardRef(({ onSuccess }: { onSuccess?: () => void }, ref) => {
+const FormDialog = ({ onSuccess, ref }: { onSuccess?: () => void; ref: Ref<FormDialogRef> }) => {
   type Item = User
   const formRef = useRef<FormInstance>(null)
 
-  const t = useLocales({ zh: () => import('@/i18n/zh/system/user'), en: () => import('@/i18n/en/system/user') })
+  const t = useLocales({
+    zh: () => import("@/i18n/zh/system/user"),
+    en: () => import("@/i18n/en/system/user"),
+    ko: () => import("@/i18n/ko/system/user"),
+  })
   const titles = () => ({
     add: t("add"),
     edit: t("edit"),
@@ -59,14 +64,18 @@ const FormDialog = forwardRef(({ onSuccess }: { onSuccess?: () => void }, ref) =
     const data = Object.assign({}, formData) as Item
     if (type === "add") {
       add_user(data).then((res) => {
-        message.success(t("tip.addSuccess"))
-        onSuccess && onSuccess()
+        toast.success(t("tip.addSuccess"))
+        if (onSuccess) {
+          onSuccess()
+        }
         close()
       })
     } else if (type === "edit") {
       update_user({ id: data.id }, data).then((res) => {
-        message.success(t("tip.modifySuccess"))
-        onSuccess && onSuccess()
+        toast.success(t("tip.modifySuccess"))
+        if (onSuccess) {
+          onSuccess()
+        }
         close()
       })
     }
@@ -144,21 +153,20 @@ const FormDialog = forwardRef(({ onSuccess }: { onSuccess?: () => void }, ref) =
         </Form.Item>
         <Form.Item label={t("label.deptName")} name="deptId" className="dialog-form-item">
           <Model>
-            {(_vModel,value,onChange)=>
-                  <Cascader
-                  value={getTreePathArr(deptOptions, 'id', value).map(p => p.id)}
-                  allowClear
-                  options={deptOptions}
-                  fieldNames={{ label: "name", value: "id", children: "children" }}
-                  placeholder={t("label.selectDept")}
-                  className="w-full"
-                  onChange={(val) => {
-                    onChange && onChange(val ? val.slice(-1)[0] : val)
-                  }}
-                />
-            }
+            {(_vModel, value, onChange) => (
+              <Cascader
+                value={getTreePathArr(deptOptions, "id", value).map((p) => p.id)}
+                allowClear
+                options={deptOptions}
+                fieldNames={{ label: "name", value: "id", children: "children" }}
+                placeholder={t("label.selectDept")}
+                className="w-full"
+                onChange={(val) => {
+                  onChange(val ? val.slice(-1)[0] : val)
+                }}
+              />
+            )}
           </Model>
-    
         </Form.Item>
         <Form.Item label={t("label.remark")} name="desc" className="dialog-form-item" labelCol={{ span: 6 }}>
           <Input.TextArea allowClear rows={2} />
@@ -172,6 +180,6 @@ const FormDialog = forwardRef(({ onSuccess }: { onSuccess?: () => void }, ref) =
       </Form>
     </Modal>
   )
-})
+}
 FormDialog.displayName = "FormDialog"
 export default FormDialog

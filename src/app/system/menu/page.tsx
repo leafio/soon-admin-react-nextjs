@@ -1,7 +1,7 @@
 "use client"
 import { del_dept, Menu, tree_menu } from "@/api"
 import { useLocales } from "@/i18n"
-import { Button, message, Modal, Table, Tag, Tree } from "antd"
+import { Button, Modal, Table, Tag, Tree } from "antd"
 import { appStore } from "@/store/app"
 import { useSnapshot } from "valtio"
 import { useEffect, useMemo, useRef, useState } from "react"
@@ -13,6 +13,7 @@ import FormDialog, { FormDialogRef } from "./dialog"
 import type { TableColumnsType } from "antd"
 
 import { useAuth } from "@/hooks/auth"
+import { toast } from "@/components/toast"
 
 export default function PageMenu() {
   type Item = Menu
@@ -21,7 +22,11 @@ export default function PageMenu() {
   const isMobile = appSnap.responsive === "mobile"
   const [showSearch, setShowSearch] = useState(true)
   const auth = useAuth()
-  const t = useLocales({ zh: () => import('@/i18n/zh/system/menu'), en: () => import('@/i18n/en/system/menu') })
+  const t = useLocales({
+    zh: () => import("@/i18n/zh/system/menu"),
+    en: () => import("@/i18n/en/system/menu"),
+    ko: () => import("@/i18n/ko/system/menu"),
+  })
   const {
     list,
     refresh,
@@ -49,12 +54,16 @@ export default function PageMenu() {
     render(_: any, item: Item) {
       return (
         <div>
-          {auth('menu.del') && <Button size="small" type="link" danger onClick={() => handleDelete(item)}>
-            {t("del")}
-          </Button>}
-          {auth('menu.edit') && <Button size="small" type="link" className=" !text-soon" onClick={() => handleShowEdit(item)}>
-            {t("edit")}
-          </Button>}
+          {auth("menu.del") && (
+            <Button size="small" type="link" danger onClick={() => handleDelete(item)}>
+              {t("del")}
+            </Button>
+          )}
+          {auth("menu.edit") && (
+            <Button size="small" type="link" className=" !text-soon" onClick={() => handleShowEdit(item)}>
+              {t("edit")}
+            </Button>
+          )}
           <Button size="small" type="link" className="!text-soon" onClick={() => handleShowDetail(item)}>
             {t("detail")}
           </Button>
@@ -63,49 +72,49 @@ export default function PageMenu() {
     },
   } satisfies Col
 
-  const checkedCols = useMemo(() => [
-    {
-      dataIndex: "meta.title",
-      title: t("label.menuTitle"),
-      // width: "",
-      render: (_, item) => item.meta.title,
-    },
-    {
-      dataIndex: "mete.menuType",
-      title: t("label.menuType"),
-      // width: "",
-      render: (_, item) => (
-        <>
-          {item.menuType == "page" ? (
-            <Tag color="blue">{t("menuType.page")}</Tag>
-          ) : item.menuType == "link" ? (
-            <Tag color="yellow">{t("menuType.link")}</Tag>
-          ) : item.menuType == "iframe" ? (
-            <Tag color="red">{t("menuType.iframe")}</Tag>
-          ) : item.menuType == "btn" ? (
-            <Tag color="green">{t("menuType.button")}</Tag>
-          ) : (
-            ""
-          )}
-        </>
-      ),
-    },
+  const checkedCols = useMemo(
+    () =>
+      [
+        {
+          dataIndex: "meta.title",
+          title: t("label.menuTitle"),
+          // width: "",
+          render: (_, item) => item.meta.title,
+        },
+        {
+          dataIndex: "mete.menuType",
+          title: t("label.menuType"),
+          // width: "",
+          render: (_, item) => (
+            <>
+              {item.menuType == "page" ? (
+                <Tag color="blue">{t("menuType.page")}</Tag>
+              ) : item.menuType == "link" ? (
+                <Tag color="yellow">{t("menuType.link")}</Tag>
+              ) : item.menuType == "iframe" ? (
+                <Tag color="red">{t("menuType.iframe")}</Tag>
+              ) : item.menuType == "btn" ? (
+                <Tag color="green">{t("menuType.button")}</Tag>
+              ) : (
+                ""
+              )}
+            </>
+          ),
+        },
 
-    {
-      dataIndex: "path",
-      title: t("label.routePath"),
-    },
+        {
+          dataIndex: "path",
+          title: t("label.routePath"),
+        },
 
-    {
-      dataIndex: "auth",
-      title: t("label.auth"),
+        {
+          dataIndex: "auth",
+          title: t("label.auth"),
+        },
+      ] satisfies Col[],
 
-    },
-  ] satisfies Col[]
-
-    , [t])
-
-
+    [t],
+  )
 
   const handleDelete = (item: Item) => {
     Modal.confirm({
@@ -116,15 +125,15 @@ export default function PageMenu() {
       async onOk() {
         await del_dept(item)
         refresh()
-        message.success(t("tip.delSuccess"))
+        toast.success(t("tip.delSuccess"))
       },
       onCancel() {
-        message.info(t("tip.delCanceled"))
+        toast.info(t("tip.delCanceled"))
       },
     })
   }
 
-  const refFormDialog = useRef<FormDialogRef | null>(null)
+  const refFormDialog = useRef<FormDialogRef>(null)
   const handleShowEdit = (item: Item) => {
     refFormDialog.current?.open("edit", item)
   }
@@ -149,7 +158,7 @@ export default function PageMenu() {
   return (
     <div className="page-container bg flex-1 flex flex-col overflow-auto">
       <div className="btn-bar">
-        {auth('menu.add') && <BtnAdd onClick={() => handleShowAdd()} />}
+        {auth("menu.add") && <BtnAdd onClick={() => handleShowAdd()} />}
         <BtnRefresh onClick={refresh} />
       </div>
       {!isMobile && (

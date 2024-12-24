@@ -1,34 +1,28 @@
 "user client"
 
 import { logout } from "@/api"
+import { toast } from "@/components/toast"
 import { useLocales } from "@/i18n"
+import en_logout from "@/i18n/en/logout"
+import ko_logout from "@/i18n/ko/logout"
+import zh_logout from "@/i18n/zh/logout"
 import { userStore } from "@/store/user"
 
-import { MenuProps, Dropdown, Space, message } from "antd"
+import { MenuProps, Dropdown } from "antd"
 import { useRouter } from "next/navigation"
 import { ChevronDown } from "react-bootstrap-icons"
 
 export default function User() {
   const router = useRouter()
   const t = useLocales({
-    zh: {
-      logout: "退出登录",
-      loggedOut: "已退出!",
-    },
-    en: {
-      logout: "Logout",
-      loggedOut: "Successfully logged out !",
-    },
+    zh: zh_logout,
+    en: en_logout,
+    ko: ko_logout,
   })
   const handleLogout = () => {
     logout().then(() => {
-      message.success(t("loggedOut"))
+      toast.success(t("loggedOut"))
       localStorage.clear()
-      // useUserStore().$reset()
-      // useTabsStore().$reset()
-      // useKeepAliveStore().$reset()
-      // useAppStore().$reset()
-
       router.push("/login")
     })
   }

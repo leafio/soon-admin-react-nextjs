@@ -2,8 +2,9 @@
 
 import { getCaptcha, login } from "@/api"
 import { useLang, useLocales } from "@/i18n"
-import  en_login  from "@/i18n/en/login"
-import  zh_login  from "@/i18n/zh/login"
+import en_login from "@/i18n/en/login"
+import ko_login from "@/i18n/ko/login"
+import zh_login from "@/i18n/zh/login"
 import LangSwitch from "@/layout/lang-switch"
 import { Button, Form, FormInstance, Input } from "antd"
 import { useRouter } from "next/navigation"
@@ -19,7 +20,7 @@ const Container = styled.div`
 `
 
 export default function PageLogin() {
-  const t = useLocales({ zh: zh_login, en: en_login })
+  const t = useLocales({ zh: zh_login, en: en_login, ko: ko_login })
 
   const [form, setForm] = useState({
     username: "",
@@ -43,7 +44,7 @@ export default function PageLogin() {
   const handleLogin = (values: { username: string; password: string }) => {
     login({ ...form, ...values }).then((res) => {
       localStorage.setItem("token", res.token)
-      localStorage.setItem('refresh_token',res.refreshToken)
+      localStorage.setItem("refresh_token", res.refreshToken)
       router.push("/")
     })
   }
@@ -69,13 +70,13 @@ export default function PageLogin() {
         onFinish={handleLogin}
       >
         <div className="flex justify-end">
-          <LangSwitch className="w-6 h-6 mb-4"  />
+          <LangSwitch className="w-6 h-6 mb-4" />
         </div>
         <Form.Item name="username" rules={rules().username}>
-          <Input  placeholder={t("username") + ":  admin"}></Input>
+          <Input placeholder={t("username") + ":  admin"}></Input>
         </Form.Item>
         <Form.Item name="password" rules={rules().password}>
-          <Input  placeholder={t("password") + ":  admin"} type="password"></Input>
+          <Input placeholder={t("password") + ":  admin"} type="password"></Input>
         </Form.Item>
         <Form.Item name="code" rules={rules().code}>
           <Input

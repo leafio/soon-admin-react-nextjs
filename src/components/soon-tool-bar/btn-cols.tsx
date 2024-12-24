@@ -5,7 +5,6 @@ import { ListOl } from "react-bootstrap-icons"
 import SoonCols from "../soon-cols"
 import { Col } from "../soon-cols/type"
 
-
 export default function BtnCols({
   onClick,
   cols,

@@ -18,4 +18,3 @@ const zh_system_dept = {
   },
 } as const
 export default zh_system_dept
-

@@ -14,7 +14,6 @@ const zh_system_user = {
     createTime: "创建时间",
     startTime: "开始日期",
     endTime: "结束日期",
-    timeTo: "至",
     keyword: "关键字",
     inputKeyword: "搜索关键字",
     createTimeRange: "创建时间区间",
@@ -41,4 +40,3 @@ const zh_system_user = {
 } as const
 
 export default zh_system_user
-

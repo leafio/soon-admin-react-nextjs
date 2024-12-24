@@ -1,4 +1,4 @@
-import { downloadBlob, getAttachmentFilenameFormHeader } from "../tools"
+import { downloadBlob, getAttachmentFilenameFormHeader } from "@/utils/download"
 import { PageParams } from "../types"
 import { Dept } from "./dept"
 import { Role } from "./role"

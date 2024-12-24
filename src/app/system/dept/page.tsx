@@ -2,7 +2,7 @@
 import { tree_dept, del_dept, Dept } from "@/api"
 import { dateFormat } from "@/utils/tools"
 import { useLocales } from "@/i18n"
-import { Button, message, Modal, Table, Tree } from "antd"
+import { Button, Modal, Table, Tree } from "antd"
 import { appStore } from "@/store/app"
 import { useSnapshot } from "valtio"
 import { useEffect, useMemo, useRef, useState } from "react"
@@ -13,7 +13,7 @@ import BtnRefresh from "@/components/soon-tool-bar/btn-refresh"
 import FormDialog, { FormDialogRef } from "./dialog"
 import type { TableColumnsType } from "antd"
 import { useAuth } from "@/hooks/auth"
-
+import { toast } from "@/components/toast"
 
 export default function PageDept() {
   type Item = Dept
@@ -21,7 +21,11 @@ export default function PageDept() {
   const isMobile = appSnap.responsive === "mobile"
   const [showSearch, setShowSearch] = useState(true)
   const auth = useAuth()
-  const t = useLocales({ zh: () => import('@/i18n/zh/system/dept'), en: () => import('@/i18n/en/system/dept') })
+  const t = useLocales({
+    zh: () => import("@/i18n/zh/system/dept"),
+    en: () => import("@/i18n/en/system/dept"),
+    ko: () => import("@/i18n/ko/system/dept"),
+  })
   const {
     list,
     refresh,
@@ -49,12 +53,16 @@ export default function PageDept() {
     render(_: any, item: Item) {
       return (
         <div>
-          {auth('dept.del') && <Button size="small" type="link" danger onClick={() => handleDelete(item)}>
-            {t("del")}
-          </Button>}
-          {auth('dept.edit') && <Button size="small" type="link" className=" !text-soon" onClick={() => handleShowEdit(item)}>
-            {t("edit")}
-          </Button>}
+          {auth("dept.del") && (
+            <Button size="small" type="link" danger onClick={() => handleDelete(item)}>
+              {t("del")}
+            </Button>
+          )}
+          {auth("dept.edit") && (
+            <Button size="small" type="link" className=" !text-soon" onClick={() => handleShowEdit(item)}>
+              {t("edit")}
+            </Button>
+          )}
           <Button size="small" type="link" className="!text-soon" onClick={() => handleShowDetail(item)}>
             {t("detail")}
           </Button>
@@ -63,29 +71,30 @@ export default function PageDept() {
     },
   } satisfies TableColumnsType<Item>[0]
 
-  const checkedCols = useMemo(() => [
-    {
-      dataIndex: "name",
-      title: t("label.name"),
-      // width: "",
-    },
-    {
-      dataIndex: "remark",
-      title: t("label.remark"),
-      // width: "",
-    },
-
-    {
-      dataIndex: "createTime",
-      title: t("label.createTime"),
-      // width: "",
-      render(_: any, item: Item) {
-        return dateFormat(item?.createTime)
+  const checkedCols = useMemo(
+    () => [
+      {
+        dataIndex: "name",
+        title: t("label.name"),
+        // width: "",
       },
-    },
-  ], [t])
+      {
+        dataIndex: "remark",
+        title: t("label.remark"),
+        // width: "",
+      },
 
-
+      {
+        dataIndex: "createTime",
+        title: t("label.createTime"),
+        // width: "",
+        render(_: any, item: Item) {
+          return dateFormat(item?.createTime)
+        },
+      },
+    ],
+    [t],
+  )
 
   const handleDelete = (item: Item) => {
     Modal.confirm({
@@ -96,15 +105,15 @@ export default function PageDept() {
       async onOk() {
         await del_dept(item)
         refresh()
-        message.success(t("tip.delSuccess"))
+        toast.success(t("tip.delSuccess"))
       },
       onCancel() {
-        message.info(t("tip.delCanceled"))
+        toast.info(t("tip.delCanceled"))
       },
     })
   }
 
-  const refFormDialog = useRef<FormDialogRef | null>(null)
+  const refFormDialog = useRef<FormDialogRef>(null)
   const handleShowEdit = (item: Item) => {
     refFormDialog.current?.open("edit", item)
   }

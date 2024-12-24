@@ -82,33 +82,36 @@ yarn lint:prettier
 ```text
 Soon-Admin-React-NextJs
 ├─ .husky                  # husky config
-├─ env                     # Vite config
+├─ env                     # URL parse
 ├─ mock                    # soon-mock  config and data
 ├─ public                  # static files
 ├─ src
 │  ├─ api                  #
-│  ├─ app                  # 
+│  ├─ app                  #
 │  ├─ components           #
 │  ├─ css                  #
 │  ├─ hooks                #
 │  ├─ i18n                 #
 │  ├─ layout               #
 │  ├─ router               #
-│  ├─ store                # 
-│  └─  utils               # helper functions
+│  ├─ store                #
+│  └─ utils                # helper functions
 ├─  types                  # ts types
 ├─ .env                    #
 ├─ .env.development        #
 ├─ .env.production         #
-├─ .eslintrc.json          #
 ├─ .gitignore              #
+├─ .lintstagedrc.js        #
 ├─ .prettierignore         #
 ├─ .prettierrc             #
-├─ next.config.mjs         #
+├─ Dockerfile              #
+├─ eslint.config.mjs       #
+├─ next.config.ts          #
+├─ nginx.conf              #
 ├─ package.json            # project info and dependencies
-├─ postcss.config.js       #
+├─ postcss.config.mjs      #
 ├─ README.md               # introduction
-├─ tailwind.config.ts      # 
+├─ tailwind.config.ts      #
 └─ tsconfig.json           # type script config
 
 ```
@@ -129,6 +132,7 @@ If you like this project, just star it.🚀
 ### 介绍 📖
 
 Soon-Admin 是一套完全以typescript开发的后台管理系统。
+
 - 🧑‍🤝‍🧑前端 soon-admin-react-nextjs`(本项目)`
 
 - 🧑‍🤝‍🧑前端 [soon-admin-vue3](https://github.com/leafio/soon-admin-vue3)
@@ -205,7 +209,7 @@ yarn lint:prettier
 ```text
 Soon-Admin-React-NextJs
 ├─ .husky                  # husky 配置文件
-├─ env                     # Vite 配置项
+├─ env                     # URL解析
 ├─ mock                    # soon-mock 配置及数据文件
 ├─ public                  # 静态资源文件（该文件夹不会被打包）
 ├─ src
@@ -224,15 +228,19 @@ Soon-Admin-React-NextJs
 ├─ .env                    # vite 常用配置
 ├─ .env.development        # 开发环境配置
 ├─ .env.production         # 生产环境配置
-├─ .eslintrc.json          # Eslint 校验配置文件
 ├─ .gitignore              # 忽略 git 提交
+├─ .lintstagedrc.js        # lint-staged 命令配置
 ├─ .prettierignore         # 忽略 Prettier 格式化
 ├─ .prettierrc             # Prettier 格式化配置
-├─ next.config.mjs         # next配置文件
+├─ Dockerfile              # docker 创建镜像文件
+├─ eslint.config.mjs       # Eslint 校验配置文件
+├─ next.config.ts          # next配置文件
+├─ nginx.conf              # nginx配置
 ├─ package.json            # 依赖包管理
-├─ postcss.config.js       # postcss 配置
+├─ postcss.config.mjs      # postcss 配置
 ├─ README.md               # README 介绍
-└─tsconfig.json            # typescript 全局配置
+├─ tailwind.config.ts      # tailwindcss 配置项
+└─ tsconfig.json           # typescript 全局配置
 
 ```
 

@@ -12,6 +12,14 @@ const zh_global = {
   cols: "列展示",
   tip: {
     requestTimeout: "请求超时",
+    requestError: "请求出错",
+  },
+  export: {
+    excel: "导出Excel",
+  },
+  searchArea: {
+    hide: "隐藏搜索",
+    show: "显示搜索",
   },
 } as const
 export default zh_global

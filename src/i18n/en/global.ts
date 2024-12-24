@@ -12,6 +12,14 @@ const en_global = {
   cols: "Columns",
   tip: {
     requestTimeout: "Request timeout",
+    requestError: "Request Error",
+  },
+  export: {
+    excel: "Export Excel",
+  },
+  searchArea: {
+    hide: "Hide Search Section",
+    show: "Show Search Section",
   },
 } as const
 export default en_global

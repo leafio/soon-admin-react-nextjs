@@ -1,11 +1,8 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-@import "./antd.scss";
-@import "./loading.scss";
-@import "./biz.scss";
-@import "./theme.scss";
+@use "./tailwind.scss";
+@use "./antd.scss";
+@use "./loading.scss";
+@use "./biz.scss";
+@use "./theme.scss";
 
 /* logo 过渡动画
 ------------------------------- */

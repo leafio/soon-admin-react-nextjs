@@ -1,7 +1,28 @@
 import { appStore } from "@/store/app"
-import { userStore, initRoutes } from "@/store/user"
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime"
-import { getPathMenu } from "./utils"
+import { getPathRoutes, parseRedirectNext, SoonRoute } from "./utils"
+import { bizRoutes, staticRoutes } from "./routes"
+import { own_menus } from "@/api"
+import { initUser, userStore } from "@/store/user"
+import { Menus2SideMenus, route2SideMenus } from "@/router/side-menu"
+
+export const initRoutesMenus = async (routes?: SoonRoute[]) => {
+  await initUser()
+  let result: SoonRoute[] = []
+  if (!routes) {
+    userStore.menus = Menus2SideMenus(await own_menus())
+  } else {
+    userStore.menus = route2SideMenus(routes as any)
+  }
+  result.push(...(userStore.menus ?? []), ...(route2SideMenus(staticRoutes) ?? []))
+  result = parseRedirectNext(result)
+
+  const notLoginRoutes = result.filter((p) => p.path !== appStore.route.loginUrl)
+  if (!appStore.route.homeUrl && notLoginRoutes.length) {
+    appStore.route.homeUrl = notLoginRoutes[0].redirect ?? notLoginRoutes[0].path
+  }
+  appStore.routes = result
+}
 
 const ROUTER_WHITE_LIST: string[] = []
 export const everyRoute = async (path: string, router: AppRouterInstance) => {
@@ -22,16 +43,16 @@ export const everyRoute = async (path: string, router: AppRouterInstance) => {
   }
 
   // 4.如果没有菜单列表，就重新请求菜单列表并添加动态路由
-  if (!userStore.menus) {
+  if (!appStore.routes) {
     // 前端写死路由
-    // await userStore.initRoutes(bizRoutes as any)
+    // await initRoutesMenus(bizRoutes)
     // 从后端获取路由
-    await initRoutes()
+    await initRoutesMenus()
   }
 
-  const menus = getPathMenu(path, (userStore.menus as any) ?? []) ?? []
+  const cur_routes = getPathRoutes(path, appStore.routes)
   const url = appStore.route.homeUrl ?? "/"
-  const current = menus.slice(-1)[0]
+  const current = cur_routes.slice(-1)[0]
   if (!current || path === "/") {
     router.replace(url)
     return false

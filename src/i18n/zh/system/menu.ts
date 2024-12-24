@@ -47,4 +47,3 @@ const zh_system_menu = {
   },
 } as const
 export default zh_system_menu
-

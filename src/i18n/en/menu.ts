@@ -5,7 +5,6 @@ const en_menu = {
   external: "Open in Browser Tab",
   system: "System",
   user: "User",
-  pwd: "Password",
   dept: "Department",
   menu: "Menu",
   role: "Role",

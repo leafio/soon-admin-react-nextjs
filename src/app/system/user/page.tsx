@@ -2,7 +2,7 @@
 import { list_user, download_user_table, del_user, UserInfo } from "@/api"
 import { dateFormat } from "@/utils/tools"
 import { useLocales } from "@/i18n"
-import { Avatar, Button, Form, Input, List, message, Modal, Table, Tag } from "antd"
+import { Avatar, Button, Form, Input, List, Modal, Table, Tag } from "antd"
 import { appStore } from "@/store/app"
 import { useSnapshot } from "valtio"
 import { useEffect, useMemo, useRef, useState } from "react"
@@ -18,6 +18,7 @@ import SoonDetail from "@/components/soon-detail"
 import { GenderFemale, GenderMale } from "react-bootstrap-icons"
 import BtnCols from "@/components/soon-tool-bar/btn-cols"
 import { useAuth } from "@/hooks/auth"
+import { toast } from "@/components/toast"
 
 export default function PageUser() {
   type Item = UserInfo
@@ -25,7 +26,11 @@ export default function PageUser() {
   const isMobile = appSnap.responsive === "mobile"
   const [showSearch, setShowSearch] = useState(true)
   const auth = useAuth()
-  const t = useLocales({ zh: () => import('@/i18n/zh/system/user'), en: () => import('@/i18n/en/system/user') })
+  const t = useLocales({
+    zh: () => import("@/i18n/zh/system/user"),
+    en: () => import("@/i18n/en/system/user"),
+    ko: () => import("@/i18n/ko/system/user"),
+  })
   const {
     list,
     refresh,
@@ -53,14 +58,16 @@ export default function PageUser() {
     render(_: any, item: Item) {
       return (
         <div>
-          {item.username !== "admin" && auth('user.del') && (
+          {item.username !== "admin" && auth("user.del") && (
             <Button size="small" type="link" danger onClick={() => handleDelete(item)}>
               {t("del")}
             </Button>
           )}
-          {auth('user.edit') && <Button size="small" type="link" className=" !text-soon" onClick={() => handleShowEdit(item)}>
-            {t("edit")}
-          </Button>}
+          {auth("user.edit") && (
+            <Button size="small" type="link" className=" !text-soon" onClick={() => handleShowEdit(item)}>
+              {t("edit")}
+            </Button>
+          )}
           <Button size="small" type="link" className="!text-soon" onClick={() => handleShowDetail(item)}>
             {t("detail")}
           </Button>
@@ -68,70 +75,72 @@ export default function PageUser() {
       )
     },
   } satisfies TableColumnsType<Item>[0]
-  const memoCols = useMemo(() => [
-    {
-      dataIndex: "username",
-      title: t("label.username"),
-      // width: "",
-    },
-    {
-      dataIndex: "nickname",
-      title: t("label.nickname"),
-      // width: "",
-    },
-    {
-      dataIndex: "gender",
-      title: t("label.gender"),
-      // width: "100",
-      render: (_: any, item: Item) => {
-        return item?.gender === 1 ? (
-          <Tag color="processing">{t("gender.man")}</Tag>
-        ) : item?.gender === 2 ? (
-          <Tag color="error">{t("gender.woman")}</Tag>
-        ) : (
-          <Tag color="default">{t("gender.unknown")}</Tag>
-        )
+  const memoCols = useMemo(
+    () => [
+      {
+        dataIndex: "username",
+        title: t("label.username"),
+        // width: "",
       },
-    },
-    {
-      dataIndex: "role.name",
-      title: t("label.roleName"),
-      // width: "",
-      render(_: any, item: Item) {
-        return item.role?.name
+      {
+        dataIndex: "nickname",
+        title: t("label.nickname"),
+        // width: "",
       },
-    },
-    {
-      dataIndex: "phone",
-      title: t("label.phone"),
-      // width: "",
-    },
-    {
-      dataIndex: "dept.name",
-      title: t("label.deptName"),
-      // width: "",
-      render(_: any, item: Item) {
-        return item.dept?.name
+      {
+        dataIndex: "gender",
+        title: t("label.gender"),
+        // width: "100",
+        render: (_: any, item: Item) => {
+          return item?.gender === 1 ? (
+            <Tag color="processing">{t("gender.man")}</Tag>
+          ) : item?.gender === 2 ? (
+            <Tag color="error">{t("gender.woman")}</Tag>
+          ) : (
+            <Tag color="default">{t("gender.unknown")}</Tag>
+          )
+        },
       },
-    },
-    {
-      dataIndex: "status",
-      title: t("label.status"),
-      width: "100",
-      render: (_: any, item: Item) =>
-        item?.status == 1 ? <Tag color="success">{t("status.enabled")}</Tag> : <Tag>{t("status.disabled")}</Tag>,
-    },
+      {
+        dataIndex: "role.name",
+        title: t("label.roleName"),
+        // width: "",
+        render(_: any, item: Item) {
+          return item.role?.name
+        },
+      },
+      {
+        dataIndex: "phone",
+        title: t("label.phone"),
+        // width: "",
+      },
+      {
+        dataIndex: "dept.name",
+        title: t("label.deptName"),
+        // width: "",
+        render(_: any, item: Item) {
+          return item.dept?.name
+        },
+      },
+      {
+        dataIndex: "status",
+        title: t("label.status"),
+        width: "100",
+        render: (_: any, item: Item) =>
+          item?.status == 1 ? <Tag color="success">{t("status.enabled")}</Tag> : <Tag>{t("status.disabled")}</Tag>,
+      },
 
-    {
-      dataIndex: "createTime",
-      title: t("label.createTime"),
-      // width: "",
-      render(_: any, item: Item) {
-        return dateFormat(item?.createTime)
+      {
+        dataIndex: "createTime",
+        title: t("label.createTime"),
+        // width: "",
+        render(_: any, item: Item) {
+          return dateFormat(item?.createTime)
+        },
       },
-    },
-  ]
-    , [t])
+    ],
+    [t],
+  )
   const {
     cols,
     checkedCols,
@@ -148,15 +157,15 @@ export default function PageUser() {
       async onOk() {
         await del_user(item)
         refresh()
-        message.success(t("tip.delSuccess"))
+        toast.success(t("tip.delSuccess"))
       },
       onCancel() {
-        message.info(t("tip.delCanceled"))
+        toast.info(t("tip.delCanceled"))
       },
     })
   }
 
-  const refFormDialog = useRef<FormDialogRef | null>(null)
+  const refFormDialog = useRef<FormDialogRef>(null)
   const handleShowEdit = (item: Item) => {
     refFormDialog.current?.open("edit", item)
   }
@@ -196,8 +205,8 @@ export default function PageUser() {
         </Form>
       )}
       <div className="btn-bar">
-        {auth('user.add') && <BtnAdd onClick={() => handleShowAdd()} />}
-        {auth('user.export') && <BtnExport onClick={() => download_user_table(queryForm)} />}
+        {auth("user.add") && <BtnAdd onClick={() => handleShowAdd()} />}
+        {auth("user.export") && <BtnExport onClick={() => download_user_table(queryForm)} />}
         <BtnCols cols={cols} setCols={setCols} onReset={restCols} />
         <BtnSearch value={showSearch} onChange={setShowSearch} />
         <BtnRefresh onClick={refresh} />

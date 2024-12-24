@@ -2,30 +2,17 @@ import { tLocales } from "@/i18n"
 import en_menu from "@/i18n/en/menu"
 import zh_menu from "@/i18n/zh/menu"
 import { SoonRoute } from "./utils"
+import { GearWideConnected, House, Link45deg } from "react-bootstrap-icons"
+import ko_menu from "@/i18n/ko/menu"
 
-const t = tLocales({ zh: zh_menu, en: en_menu })
-export const staticRoutes = [
+const t = tLocales({ zh: zh_menu, en: en_menu, ko: ko_menu })
+export const staticRoutes: SoonRoute[] = [
   {
     path: "/login",
     name: "login",
     meta: {
       title: () => "登录",
     },
-  },
-  {
-    path: "/layout",
-    name: "layout",
-    redirect: "/",
-    children: [
-      {
-        path: "/:path(.*)*",
-        name: "notFound",
-        meta: {
-          title: () => "Not Found",
-          isHide: true,
-        },
-      },
-    ],
   },
 ]
 
@@ -36,6 +23,7 @@ export const bizRoutes: SoonRoute[] = [
     meta: {
       title: () => "首页",
       layout: "layout",
+      icon: <House />,
       isAffix: true,
     },
   },
@@ -45,6 +33,7 @@ export const bizRoutes: SoonRoute[] = [
     meta: {
       title: () => "功能",
       layout: "layout",
+      icon: <Link45deg />,
     },
     children: [
       {
@@ -74,7 +63,7 @@ export const bizRoutes: SoonRoute[] = [
     meta: {
       title: () => t("system"),
       isKeepAlive: true,
-      icon: Document,
+      icon: <GearWideConnected />,
       layout: "layout",
     },
     children: [

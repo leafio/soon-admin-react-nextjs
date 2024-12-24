@@ -3,7 +3,7 @@ import icons from "./icons"
 
 export default function SoonIcon(props: { icon?: ReactNode | string; className?: string }) {
   const { icon, ...rest } = props
-  let value = icon
+  const value = icon
   function render() {
     if (typeof value === "string") {
       //svg

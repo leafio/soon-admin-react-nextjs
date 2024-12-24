@@ -26,7 +26,7 @@ export function usePageList<
   const [pageInfo, setPageInfo] = useState(() => Object.assign({ pageIndex: 1, pageSize: 10 }, initPageInfo))
 
   //网络请求response原数据
-  const resData = useRef<any>()
+  const resData = useRef<any>(undefined)
 
   const refresh = () => {
     setLoading(true)
@@ -60,7 +60,6 @@ export function usePageList<
     })
     Object.assign(params, obj, initParams)
   }
-
 
   const initAuto = useRef(false)
   useDebounceEffect(

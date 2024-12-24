@@ -14,7 +14,6 @@ const en_system_user = {
     createTime: "Create Time",
     startTime: "Start Time",
     endTime: "End Time",
-    timeTo: "To",
     keyword: "Keyword",
     inputKeyword: "Search Keyword",
     createTimeRange: "Create Time Range",
@@ -40,4 +39,3 @@ const en_system_user = {
   },
 } as const
 export default en_system_user
-

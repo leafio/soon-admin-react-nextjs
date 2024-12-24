@@ -1,26 +1,30 @@
-import { Button, Cascader, Form, FormInstance, Input, message, Modal, Switch, Tree, TreeSelect } from "antd"
+import { Button, Cascader, Form, FormInstance, Input, Modal, Switch, Tree, TreeSelect } from "antd"
 
 import { Role, add_role, update_role, tree_menu, Menu } from "@/api"
 import { useDialog } from "@/hooks/dialog"
 import { useLocales } from "@/i18n"
-import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react"
+import { Ref, useEffect, useImperativeHandle, useRef, useState } from "react"
 import { makeVModel, Model } from "react-vmodel"
 import zh_system_role from "@/i18n/zh/system/role"
 import en_system_role from "@/i18n/en/system/role"
 import zh_menu from "@/i18n/zh/menu"
 import en_menu from "@/i18n/en/menu"
+import ko_system_role from "@/i18n/ko/system/role"
+import ko_menu from "@/i18n/ko/menu"
+import { toast } from "@/components/toast"
 
 export type FormDialogRef = {
   open: (type?: "add" | "edit" | "detail", data?: Partial<Role> | undefined, link?: boolean) => void
   close: () => void
 }
-const FormDialog = forwardRef(({ onSuccess }: { onSuccess?: () => void }, ref) => {
+const FormDialog = ({ onSuccess, ref }: { onSuccess?: () => void; ref: Ref<FormDialogRef> }) => {
   type Item = Role
   const formRef = useRef<FormInstance>(null)
 
   const t = useLocales({
     zh: { ...zh_system_role, ...zh_menu },
-    en: { ...en_system_role, ...en_menu }
+    en: { ...en_system_role, ...en_menu },
+    ko: { ...ko_system_role, ...ko_menu },
   })
   const titles = () => ({
     add: t("add"),
@@ -48,7 +52,7 @@ const FormDialog = forwardRef(({ onSuccess }: { onSuccess?: () => void }, ref) =
         }
         parseChildren(data as any)
         setMenuOptions(data)
-        console.log('data', data)
+        console.log("data", data)
       })
     }
   }, [visible])
@@ -57,14 +61,18 @@ const FormDialog = forwardRef(({ onSuccess }: { onSuccess?: () => void }, ref) =
     const data = Object.assign({}, formData) as Item
     if (type === "add") {
       add_role(data).then((res) => {
-        message.success(t("tip.addSuccess"))
-        onSuccess && onSuccess()
+        toast.success(t("tip.addSuccess"))
+        if (onSuccess) {
+          onSuccess()
+        }
         close()
       })
     } else if (type === "edit") {
       update_role(data).then((res) => {
-        message.success(t("tip.modifySuccess"))
-        onSuccess && onSuccess()
+        toast.success(t("tip.modifySuccess"))
+        if (onSuccess) {
+          onSuccess()
+        }
         close()
       })
     }
@@ -120,23 +128,23 @@ const FormDialog = forwardRef(({ onSuccess }: { onSuccess?: () => void }, ref) =
         </Form.Item>
 
         <Form.Item label={t("label.permissions")} name="permissions" className="dialog-form-item">
-          <Model>{
-            (_, value, onChange) => <Tree
-              checkedKeys={value}
-              onCheck={(data) => {
-                onChange && onChange((data as any).checked)
-              }}
-              //@ts-ignore
-              treeData={menuOptions}
-              fieldNames={{ title: 'label', key: "id" }}
-              multiple
-              className="w-full"
-              checkStrictly
-              checkable
-            />
-
-          }</Model>
-
+          <Model>
+            {(_, value, onChange) => (
+              <Tree
+                checkedKeys={value}
+                onCheck={(data) => {
+                  onChange((data as any).checked)
+                }}
+                //@ts-expect-error antd 类型错误
+                treeData={menuOptions}
+                fieldNames={{ title: "label", key: "id" }}
+                multiple
+                className="w-full"
+                checkStrictly
+                checkable
+              />
+            )}
+          </Model>
         </Form.Item>
         <Form.Item label={t("label.remark")} name="desc" className="dialog-form-item" labelCol={{ span: 6 }}>
           <Input.TextArea allowClear rows={2} />
@@ -150,6 +158,6 @@ const FormDialog = forwardRef(({ onSuccess }: { onSuccess?: () => void }, ref) =
       </Form>
     </Modal>
   )
-})
+}
 FormDialog.displayName = "FormDialog"
 export default FormDialog

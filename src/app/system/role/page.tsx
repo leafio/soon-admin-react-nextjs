@@ -1,7 +1,7 @@
 "use client"
 import { Role, list_role, del_role } from "@/api"
 import { useLocales } from "@/i18n"
-import { Button, Form, Input, List, message, Modal, Table, Tag } from "antd"
+import { Button, Form, Input, List, Modal, Table, Tag } from "antd"
 import { appStore } from "@/store/app"
 import { useSnapshot } from "valtio"
 import { useEffect, useMemo, useRef, useState } from "react"
@@ -15,6 +15,7 @@ import type { TableColumnsType } from "antd"
 import SoonDetail from "@/components/soon-detail"
 
 import { useAuth } from "@/hooks/auth"
+import { toast } from "@/components/toast"
 
 export default function PageRole() {
   type Item = Role
@@ -22,7 +23,11 @@ export default function PageRole() {
   const isMobile = appSnap.responsive === "mobile"
   const [showSearch, setShowSearch] = useState(true)
   const auth = useAuth()
-  const t = useLocales({ zh: () => import('@/i18n/zh/system/role'), en: () => import('@/i18n/en/system/role') })
+  const t = useLocales({
+    zh: () => import("@/i18n/zh/system/role"),
+    en: () => import("@/i18n/en/system/role"),
+    ko: () => import("@/i18n/ko/system/role"),
+  })
   useEffect(() => {
     //console.log('role-change', t)
   })
@@ -52,14 +57,16 @@ export default function PageRole() {
     render(_: any, item: Item) {
       return (
         <div>
-          {item.id !== "admin" && auth('role.del') && (
+          {item.id !== "admin" && auth("role.del") && (
             <Button size="small" type="link" danger onClick={() => handleDelete(item)}>
               {t("del")}
             </Button>
           )}
-          {auth('role.edit') && <Button size="small" type="link" className=" !text-soon" onClick={() => handleShowEdit(item)}>
-            {t("edit")}
-          </Button>}
+          {auth("role.edit") && (
+            <Button size="small" type="link" className=" !text-soon" onClick={() => handleShowEdit(item)}>
+              {t("edit")}
+            </Button>
+          )}
           <Button size="small" type="link" className="!text-soon" onClick={() => handleShowDetail(item)}>
             {t("detail")}
           </Button>
@@ -82,11 +89,12 @@ export default function PageRole() {
         render: (_: any, item: Item) =>
           item?.status == 1 ? <Tag color="success">{t("status.enabled")}</Tag> : <Tag>{t("status.disabled")}</Tag>,
       },
-    ], [t])
+    ],
+    [t],
+  )
   useEffect(() => {
     //console.log('t-change')
   }, [t])
-
 
   const {
     cols,
@@ -104,15 +112,15 @@ export default function PageRole() {
       async onOk() {
         await del_role(item)
         refresh()
-        message.success(t("tip.delSuccess"))
+        toast.success(t("tip.delSuccess"))
       },
       onCancel() {
-        message.info(t("tip.delCanceled"))
+        toast.info(t("tip.delCanceled"))
       },
     })
   }
 
-  const refFormDialog = useRef<FormDialogRef | null>(null)
+  const refFormDialog = useRef<FormDialogRef>(null)
   const handleShowEdit = (item: Item) => {
     refFormDialog.current?.open("edit", item)
   }
@@ -152,7 +160,7 @@ export default function PageRole() {
         </Form>
       )}
       <div className="btn-bar">
-        {auth('role.add') && <BtnAdd onClick={() => handleShowAdd()} />}
+        {auth("role.add") && <BtnAdd onClick={() => handleShowAdd()} />}
         <BtnSearch value={showSearch} onChange={setShowSearch} />
         <BtnRefresh onClick={refresh} />
       </div>

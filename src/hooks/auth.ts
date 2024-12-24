@@ -1,6 +1,6 @@
 import { userStore } from "@/store/user"
 import { useSnapshot } from "valtio"
-type USER_AUTH = "user.add" | "user.edit" | "user.del" | 'user.export'
+type USER_AUTH = "user.add" | "user.edit" | "user.del" | "user.export"
 type DEPT_AUTH = "dept.add" | "dept.edit" | "dept.del"
 type ROLE_AUTH = "role.add" | "role.edit" | "role.del"
 type MENU = "menu.add" | "menu.edit" | "menu.del"
