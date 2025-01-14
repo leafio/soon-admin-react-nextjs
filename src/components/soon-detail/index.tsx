@@ -29,13 +29,13 @@ export default function SoonDetail({
     })
   }, [])
   return (
-    <div className="flex flex-col bg-white">
+    <div className="flex flex-col bg-white dark:bg-neutral-900">
       {children}
       <div className="flex justify-between p-1">
         {action}
         <ChevronLeft
           className={clsx(
-            "transition-transform bg-soon-light rounded-full w-6 h-6 p-1 text-soon stroke-2 cursor-pointer",
+            "transition-transform bg-primary-100 text-primary-700 rounded-full w-6 h-6 p-1 text-soon stroke-2 cursor-pointer",
             expanded && "-rotate-90",
           )}
           onClick={() => setExpanded(!expanded)}

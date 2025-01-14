@@ -1,9 +1,6 @@
-:root {
-  --soon-color-primary: #8c57ff;
-  --soon-menu-hover-bg-color: #ece8f7;
-  --soon-menu-hover-text-color: var(--soon-color-primary);
-  --soon-color-bg: #181818;
-  --soon-color-bg-light: #1f1f1f;
+.dark {
+  background: #1f1f1f;
+  color: white;
 }
 
 // .dark {
@@ -37,10 +34,10 @@
 // }
 
 #nprogress .bar {
-  background: var(--soon-color-primary);
+  background: rgb(var(--color-primary-600));
 }
 
 #nprogress .spinner-icon {
-  border-top-color: var(--soon-color-primary);
-  border-left-color: var(--soon-color-primary);
+  border-top-color: rgb(var(--color-primary-600));
+  border-left-color: rgb(var(--color-primary-600));
 }

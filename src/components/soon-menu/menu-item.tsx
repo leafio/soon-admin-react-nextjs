@@ -7,22 +7,22 @@ import styled from "styled-components"
 
 const MenuLi = styled.li`
   &.current {
-    border-right: solid 1px var(--soon-menu-hover-text-color);
+    border-right: solid 1px rgb(var(--color-primary-600));
   }
   &.current .base {
-    color: var(--soon-menu-hover-text-color);
+    color: rgb(var(--color-primary-600));
     font-weight: bold;
   }
 
   @media screen and (min-width: 768px) {
     .menu:hover {
-      color: var(--soon-menu-hover-text-color);
-      background-color: var(--soon-menu-hover-bg-color);
+      color: rgb(var(--color-primary-600));
+      background-color: rgb(var(--color-primary-100));
     }
   }
   .menu.active {
     color: white;
-    background-color: var(--soon-color-primary);
+    background-color: rgb(var(--color-primary-600));
   }
 
   .isCollapse > div {

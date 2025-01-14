@@ -16,6 +16,7 @@ Soon-Admin is full stuck admin system written by Typescript。
 
 ![pc](https://raw.githubusercontent.com/leafio/soon-admin-react-nextjs/main/public/pc-en.png)
 ![mobile](https://raw.githubusercontent.com/leafio/soon-admin-react-nextjs/main/public/mobile-en.png)
+![settings](https://raw.githubusercontent.com/leafio/soon-admin-react-nextjs/main/public/settings-en.png)
 
 ### Features 🔨
 
@@ -60,9 +61,6 @@ yarn dev:mock
 - **Build：**
 
 ```bash
-# development
-yarn build:dev
-
 # production
 yarn build
 ```
@@ -120,7 +118,6 @@ Soon-Admin-React-NextJs
 
 If you like this project, just star it.🚀
 
-> I'm looking for a frontend job in Shanghai , hope a offer for me.
 > Email: leafnote@outlook.com
 
 <br />
@@ -143,6 +140,7 @@ Soon-Admin 是一套完全以typescript开发的后台管理系统。
 
 ![pc](https://raw.githubusercontent.com/leafio/soon-admin-react-nextjs/main/public/pc-zh.png)
 ![mobile](https://raw.githubusercontent.com/leafio/soon-admin-react-nextjs/main/public/mobile-zh.png)
+![settings](https://raw.githubusercontent.com/leafio/soon-admin-react-nextjs/main/public/settings-zh.png)
 
 ### 项目功能 🔨
 
@@ -187,9 +185,6 @@ yarn dev:mock
 - **Build：**
 
 ```bash
-# 开发环境
-yarn build:dev
-
 # 生产环境
 yarn build
 ```
@@ -217,7 +212,6 @@ Soon-Admin-React-NextJs
 │  ├─ app                  # 项目所有页面
 │  ├─ components           # 全局组件
 │  ├─ css                  # 全局样式文件
-│  ├─ directives           # 全局指令文件
 │  ├─ hooks                # 常用 Hooks 封装
 │  ├─ i18n                 # 语言国际化 i18n
 │  ├─ layout               # 框架布局模块
@@ -248,5 +242,4 @@ Soon-Admin-React-NextJs
 
 喜欢 soon-admin 的话 , 在 github 上给个 star 吧.
 
-> 我目前在找前端的工作，位置上海。有岗位机会的话，可以联系我。
 > Email: leafnote@outlook.com

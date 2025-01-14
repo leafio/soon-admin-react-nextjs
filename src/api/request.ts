@@ -1,10 +1,9 @@
-import { createSoon, SoonOptions } from "soon-fetch"
+import { createSoon, parseUrlOptions, SoonOptions } from "soon-fetch"
 import { parseBaseUrl } from "../../env/parse"
 import { getLang, tLocales } from "@/i18n"
 
 import { refresh_token } from "./modules/auth"
 import { createSilentRefresh } from "./addons/silentRefreshToken"
-import { retry } from "./addons/retry"
 import { toast } from "@/components/toast"
 
 export const baseURL = parseBaseUrl(
@@ -18,11 +17,10 @@ export const baseURL = parseBaseUrl(
 // //console.log(`baseURL: ${baseURL}`)
 
 const t = tLocales()
-
 const silentRefresh = createSilentRefresh(() =>
   refresh_token({ token: localStorage.getItem("refresh_token") ?? "" })
     .then((res) => {
-      localStorage.setItem("token", res)
+      localStorage.setItem("token", res.token)
     })
     .catch(() => {
       localStorage.removeItem("token")
@@ -30,69 +28,93 @@ const silentRefresh = createSilentRefresh(() =>
       location.href = "/login"
     }),
 )
+type RequestOptions = SoonOptions & {
+  retryLimit?: number
+  retryCondition?: (result?: { data?: any; res?: Response; err?: any }) => boolean
+  retryDelay?: number
+  toastErr?: boolean
+}
 
-function request<T = any>(
-  url: string,
-  options: { headers: Headers; retries?: number | (() => boolean); delay?: number },
-) {
+function request<T = any>(url: string, options?: RequestOptions) {
   return new Promise<T>(async (resolve, reject) => {
+    const [_url, _options] = parseUrlOptions({
+      url,
+      options,
+      baseURL,
+      baseOptions: {
+        timeout: 20 * 1000,
+        headers: new Headers({
+          Authorization: localStorage.getItem("token") ?? "",
+          "soon-lang": getLang(),
+        }),
+      },
+    })
+
+    let res,
+      err,
+      data,
+      errMsg = ""
+
     try {
-      const res = await fetch(url, options)
+      res = await fetch(_url, _options)
+    } catch (error: any) {
+      err = error
+    }
+
+    if (res) {
       if (res.ok) {
         if (res.headers.get("content-type")?.includes("json")) {
           const body = await res.json()
           if (body.code === 0) {
-            resolve(body.data)
+            data = body.data
           } else {
-            toast.error(body.err ?? t("tip.requestError"))
-            reject(body.err)
+            errMsg = body.err ?? t("tip.requestError")
+            err = body.err
           }
         } else {
-          resolve(res as any)
+          data = res
         }
       } else if (res.status === 401) {
-        silentRefresh(resolve, reject, () => {
-          options.headers.set("Authorization", localStorage.getItem("token") ?? "")
-          return request(url, options)
-        })
+        silentRefresh(() => resolve(request(url, options)))
+        return
       } else {
-        toast.error(res.statusText)
-        reject(res.statusText)
+        errMsg = res.statusText
+        err = res.statusText
       }
-    } catch (err: any) {
+    }
+
+    //重试
+
+    const { retryLimit, retryCondition, retryDelay } = options || {}
+    const retry = retryLimit && (retryCondition ? retryCondition({ data, res, err }) : true)
+    if (retry) {
+      setTimeout(() => resolve(request(url, { ...options, retryLimit: retryLimit - 1 })), retryDelay)
+      return
+    }
+
+    if (err) {
       if (err.name === "TimeoutError") {
-        toast.error(t("tip.requestTimeout"))
-        reject(err)
+        errMsg = t("tip.requestTimeout")
       }
       // else if (err.name === "AbortError") {
-      //  //toast.error(err)
+      //  //message.error(err)
       // reject(err)
       // }
-      else {
-        if (
-          !retry(
-            (retries) => {
-              resolve(request(url, { ...options, retries }))
-            },
-            options.retries,
-            options.delay,
-          )
-        ) {
-          reject(err)
-        }
-      }
+    }
+
+    //完成promise
+    if (err) {
+      reject(err)
+    } else {
+      resolve(data)
+    }
+
+    //显示错误信息
+    const showErrToast = options?.toastErr ?? true
+    if (showErrToast && errMsg) {
+      toast.error(errMsg)
     }
   })
 }
 
-export const soon = createSoon<SoonOptions & { retries?: number | (() => boolean); delay?: number }>({
-  baseURL,
-  baseOptions: () => ({
-    timeout: 20 * 1000,
-    headers: new Headers({
-      Authorization: localStorage.getItem("token") ?? "",
-      "soon-lang": getLang(),
-    }),
-  }),
-  fetching: (url, options) => request(url, options),
-})
+export const soon = createSoon(request)

@@ -1,10 +1,11 @@
-import { appStore } from "@/store/app"
+import { appStore } from "@/store/modules/app"
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime"
 import { getPathRoutes, parseRedirectNext, SoonRoute } from "./utils"
 import { bizRoutes, staticRoutes } from "./routes"
 import { own_menus } from "@/api"
-import { initUser, userStore } from "@/store/user"
+import { initUser, userStore } from "@/store/modules/user"
 import { Menus2SideMenus, route2SideMenus } from "@/router/side-menu"
+import { routeStore } from "@/store/modules/route"
 
 export const initRoutesMenus = async (routes?: SoonRoute[]) => {
   await initUser()
@@ -17,11 +18,11 @@ export const initRoutesMenus = async (routes?: SoonRoute[]) => {
   result.push(...(userStore.menus ?? []), ...(route2SideMenus(staticRoutes) ?? []))
   result = parseRedirectNext(result)
 
-  const notLoginRoutes = result.filter((p) => p.path !== appStore.route.loginUrl)
-  if (!appStore.route.homeUrl && notLoginRoutes.length) {
-    appStore.route.homeUrl = notLoginRoutes[0].redirect ?? notLoginRoutes[0].path
+  const notLoginRoutes = result.filter((p) => p.path !== routeStore.route.loginUrl)
+  if (!routeStore.route.homeUrl && notLoginRoutes.length) {
+    routeStore.route.homeUrl = notLoginRoutes[0].redirect ?? notLoginRoutes[0].path
   }
-  appStore.routes = result
+  routeStore.routes = result
 }
 
 const ROUTER_WHITE_LIST: string[] = []
@@ -32,26 +33,26 @@ export const everyRoute = async (path: string, router: AppRouterInstance) => {
   if (ROUTER_WHITE_LIST.includes(path)) return true
 
   // 2.判断是访问登陆页，有 token 就在当前页面，没有 token 重置路由到登陆页
-  if (path.toLocaleLowerCase() === appStore.route.loginUrl) {
+  if (path.toLocaleLowerCase() === routeStore.route.loginUrl) {
     return true
   }
 
   // 3.判断是否有 token，没有重定向到 login 页面
   if (!token) {
-    router.replace(appStore.route.loginUrl)
+    router.replace(routeStore.route.loginUrl)
     return false
   }
 
   // 4.如果没有菜单列表，就重新请求菜单列表并添加动态路由
-  if (!appStore.routes) {
+  if (!routeStore.routes) {
     // 前端写死路由
     // await initRoutesMenus(bizRoutes)
     // 从后端获取路由
     await initRoutesMenus()
   }
 
-  const cur_routes = getPathRoutes(path, appStore.routes)
-  const url = appStore.route.homeUrl ?? "/"
+  const cur_routes = getPathRoutes(path, routeStore.routes)
+  const url = routeStore.route.homeUrl ?? "/"
   const current = cur_routes.slice(-1)[0]
   if (!current || path === "/") {
     router.replace(url)

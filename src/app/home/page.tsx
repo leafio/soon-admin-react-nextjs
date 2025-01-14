@@ -5,7 +5,7 @@ import { Github } from "react-bootstrap-icons"
 
 export default function PageHome() {
   const [lang] = useLang()
-  const t = useLocales({ zh: { msg: "请赏个star吧" }, en: { msg: "Your star is important for me" } })
+  const t = useLocales({ zh: { msg: "给个star,支持下吧" }, en: { msg: "Your star is important for me" } })
 
   const zh = [
     {

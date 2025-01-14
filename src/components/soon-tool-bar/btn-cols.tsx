@@ -19,7 +19,7 @@ export default function BtnCols({
   const t = useLocales()
   return (
     <SoonCols model={cols} setModel={setCols} onReset={onReset}>
-      <Tooltip className="" title={t("add")} placement="top">
+      <Tooltip className="" title={t("cols")} placement="top">
         <Button shape="circle" onClick={onClick} icon={<ListOl />}></Button>
       </Tooltip>
     </SoonCols>

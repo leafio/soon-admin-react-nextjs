@@ -1,26 +1,26 @@
 :root {
   @media screen and (max-width: 768px) {
     .ant-modal {
-      width: 100%;
+      width: 100% !important;
     }
   }
 
   //    ant-modal
   @media screen and (min-width: 768px) {
     .ant-modal {
-      width: 80%;
+      width: 80% !important;
     }
   }
 
   @media screen and (min-width: 1280px) {
     .ant-modal {
-      width: 60%;
+      width: 60% !important;
     }
   }
 
   @media screen and (min-width: 1600px) {
     .ant-modal {
-      width: 50%;
+      width: 50% !important;
     }
   }
 

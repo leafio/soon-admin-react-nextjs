@@ -12,7 +12,7 @@ export type FormDialogRef = {
   open: (type?: "add" | "edit" | "detail", data?: Partial<Dept> | undefined, link?: boolean) => void
   close: () => void
 }
-const FormDialog = ({ onSuccess, ref }: { onSuccess?: () => void; ref: Ref<FormDialogRef> }) => {
+const FormDialog = ({ onSuccess = () => {}, ref }: { onSuccess?: () => void; ref: Ref<FormDialogRef> }) => {
   type Item = Dept
   const formRef = useRef<FormInstance>(null)
 
@@ -43,17 +43,13 @@ const FormDialog = ({ onSuccess, ref }: { onSuccess?: () => void; ref: Ref<FormD
     if (type === "add") {
       add_dept(data).then((res) => {
         toast.success(t("tip.addSuccess"))
-        if (onSuccess) {
-          onSuccess()
-        }
+        onSuccess()
         close()
       })
     } else if (type === "edit") {
       update_dept(data).then((res) => {
         toast.success(t("tip.modifySuccess"))
-        if (onSuccess) {
-          onSuccess()
-        }
+        onSuccess()
         close()
       })
     }

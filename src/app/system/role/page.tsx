@@ -2,7 +2,7 @@
 import { Role, list_role, del_role } from "@/api"
 import { useLocales } from "@/i18n"
 import { Button, Form, Input, List, Modal, Table, Tag } from "antd"
-import { appStore } from "@/store/app"
+import { appStore } from "@/store/modules/app"
 import { useSnapshot } from "valtio"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useCols } from "@/hooks/cols"
@@ -16,6 +16,7 @@ import SoonDetail from "@/components/soon-detail"
 
 import { useAuth } from "@/hooks/auth"
 import { toast } from "@/components/toast"
+import { modal } from "@/components/modal"
 
 export default function PageRole() {
   type Item = Role
@@ -63,11 +64,11 @@ export default function PageRole() {
             </Button>
           )}
           {auth("role.edit") && (
-            <Button size="small" type="link" className=" !text-soon" onClick={() => handleShowEdit(item)}>
+            <Button size="small" type="link" className=" !text-primary-600" onClick={() => handleShowEdit(item)}>
               {t("edit")}
             </Button>
           )}
-          <Button size="small" type="link" className="!text-soon" onClick={() => handleShowDetail(item)}>
+          <Button size="small" type="link" className="!text-primary-600" onClick={() => handleShowDetail(item)}>
             {t("detail")}
           </Button>
         </div>
@@ -104,7 +105,7 @@ export default function PageRole() {
   } = useCols<TableColumnsType<Item>[0] & { dataIndex: string; title: string }>(memoCols)
 
   const handleDelete = (item: Item) => {
-    Modal.confirm({
+    modal.confirm({
       title: t("tip.title"),
       content: t("tip.confirmDel", { name: item.name }),
       okText: t("del"),

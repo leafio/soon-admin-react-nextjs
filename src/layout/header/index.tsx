@@ -1,20 +1,31 @@
-"user client"
+"use client"
 
-import { TextIndentLeft, TextIndentRight, Github } from "react-bootstrap-icons"
+import {
+  TextIndentLeft,
+  TextIndentRight,
+  Github,
+  FullscreenExit,
+  Fullscreen,
+  Sun,
+  Moon,
+  Gear,
+} from "react-bootstrap-icons"
 import User from "./user"
-import { Alert, Tooltip } from "antd"
 
 import LangSwitch from "../lang-switch"
 
-import { appStore } from "@/store/app"
+import { appStore } from "@/store/modules/app"
 import { useSnapshot } from "valtio"
-import { useLocales } from "@/i18n"
 
 import { usePathname } from "next/navigation"
-import { userStore } from "@/store/user"
+import { userStore } from "@/store/modules/user"
 import SoonBreadcrumb from "@/components/soon-breadcrumb"
 import { getTreePathArr } from "@/utils"
 import { ParsedMenu } from "@/router/side-menu"
+import { useFullscreen } from "ahooks"
+import { useState } from "react"
+
+import Settings from "./settings"
 
 export const getPathMenu = (targetPath: string, menus: ParsedMenu[]) => {
   return getTreePathArr(menus, "path", targetPath)
@@ -26,35 +37,41 @@ export default function Header() {
     //console.log("result", appStore.sideBar.isHide)
   }
   const sideBar = useSnapshot(appStore.sideBar)
-  const t = useLocales({
-    zh: { msg: "我在上海找工作，如果有机会给到我，请联系我，email: leafnote@outlook.com ", star: "给个⭐" },
-    en: {
-      msg: "I'm looking for job in Shanghai, if you have a offer for me , email me : leafnote@outlook.com ",
-      star: "⭐ me",
-    },
-  })
+
+  const [isFullscreen, { enterFullscreen, exitFullscreen, toggleFullscreen }] = useFullscreen(document.body)
 
   const iconProps = {
     className: "w-8 h-8 cursor-pointer p-1 rounded-sm",
-    style: { color: "var(--soon-menu-hover-text-color)", backgroundColor: "var(--soon-menu-hover-bg-color)" },
+    style: { color: "rgb(var(--color-primary-600))", backgroundColor: "var(--color-primary-100)" },
     onClick: toggleSideMenu,
   }
 
   const pathname = usePathname()
   const { menus } = useSnapshot(userStore)
   const breadcrumbList = getPathMenu(pathname, menus as ParsedMenu[])
+
+  const { theme } = useSnapshot(appStore)
+  const isDark = theme === "dark"
+  const toggleDark = () => {
+    appStore.theme = isDark ? "light" : "dark"
+  }
+  const [showDraw, setShowDraw] = useState(false)
+
   return (
-    <header className="flex justify-between p-2  backdrop-saturate-200 backdrop-blur  bg-opacity-90 soon-header">
+    <header className="flex justify-between p-2  backdrop-saturate-200 backdrop-blur  bg-opacity-90 soon-header bg-white dark:bg-neutral-900 dark:text-neutral-100">
       <div className="flex items-center">
         {sideBar.isHide ? <TextIndentLeft {...iconProps} /> : <TextIndentRight {...iconProps} />}
         <SoonBreadcrumb className="ml-4" items={breadcrumbList} />
       </div>
-      <div className="hidden md:flex mx-6">
-        <Alert message={t("msg")} type="warning" className="!py-1" closable />
-      </div>
-
       <div className="flex items-center">
+        <div className="mr-4 cursor-pointer hidden md:block" onClick={toggleFullscreen}>
+          {isFullscreen ? <FullscreenExit /> : <Fullscreen />}
+        </div>
         <LangSwitch className="mr-4" />
+
+        <div className="mr-4 cursor-pointer hidden md:block" onClick={toggleDark}>
+          {isDark ? <Moon /> : <Sun />}
+        </div>
         {/* <div className="mr-4 cursor-pointer hidden md:block">
           <Search />
         </div>
@@ -64,15 +81,16 @@ export default function Header() {
         <div className="mr-4 cursor-pointer hidden md:block">
           <Bell />
         </div> */}
-
+        <div className="mr-4 cursor-pointer hidden md:block select-none" onClick={() => setShowDraw(true)}>
+          <Gear />
+        </div>
         <a href="https://github.com/leafio/soon-admin-vue3" target="_blank">
-          <Tooltip title={t("star")}>
-            <Github className="mr-4" />
-          </Tooltip>
+          <Github className="mr-4" />
         </a>
 
         <User />
       </div>
+      <Settings open={showDraw} onClose={() => setShowDraw(false)} />
     </header>
   )
 }

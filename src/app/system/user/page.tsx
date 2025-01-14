@@ -3,7 +3,7 @@ import { list_user, download_user_table, del_user, UserInfo } from "@/api"
 import { dateFormat } from "@/utils/tools"
 import { useLocales } from "@/i18n"
 import { Avatar, Button, Form, Input, List, Modal, Table, Tag } from "antd"
-import { appStore } from "@/store/app"
+import { appStore } from "@/store/modules/app"
 import { useSnapshot } from "valtio"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useCols } from "@/hooks/cols"
@@ -19,6 +19,7 @@ import { GenderFemale, GenderMale } from "react-bootstrap-icons"
 import BtnCols from "@/components/soon-tool-bar/btn-cols"
 import { useAuth } from "@/hooks/auth"
 import { toast } from "@/components/toast"
+import { modal } from "@/components/modal"
 
 export default function PageUser() {
   type Item = UserInfo
@@ -64,11 +65,11 @@ export default function PageUser() {
             </Button>
           )}
           {auth("user.edit") && (
-            <Button size="small" type="link" className=" !text-soon" onClick={() => handleShowEdit(item)}>
+            <Button size="small" type="link" className=" !text-primary-600" onClick={() => handleShowEdit(item)}>
               {t("edit")}
             </Button>
           )}
-          <Button size="small" type="link" className="!text-soon" onClick={() => handleShowDetail(item)}>
+          <Button size="small" type="link" className="!text-primary-600" onClick={() => handleShowDetail(item)}>
             {t("detail")}
           </Button>
         </div>
@@ -149,7 +150,7 @@ export default function PageUser() {
   } = useCols<TableColumnsType<Item>[0] & { dataIndex: string; title: string }>(memoCols)
 
   const handleDelete = (item: Item) => {
-    Modal.confirm({
+    modal.confirm({
       title: t("tip.title"),
       content: t("tip.confirmDel", { name: item.name ?? item.username }),
       okText: t("del"),
@@ -232,8 +233,8 @@ export default function PageUser() {
           renderItem={(item, index) => (
             <List.Item>
               <SoonDetail cols={cols} item={item} action={actionCol.render(null, item)}>
-                <div className="flex-1 flex p-1 border-b ">
-                  <Avatar className="w-12 mr-1 h-12" src={item.avatar ?? ""}></Avatar>
+                <div className="flex-1 flex p-1 border-b dark:border-b-neutral-800">
+                  <Avatar className="w-12 mr-1 h-12" src={item.avatar ?? "#"}></Avatar>
                   <div className="flex-1">
                     <div className="flex justify-between">
                       <div className="text-lg">

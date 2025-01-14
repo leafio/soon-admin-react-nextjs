@@ -1,4 +1,4 @@
-import { userStore } from "@/store/user"
+import { userStore } from "@/store/modules/user"
 import { useSnapshot } from "valtio"
 type USER_AUTH = "user.add" | "user.edit" | "user.del" | "user.export"
 type DEPT_AUTH = "dept.add" | "dept.edit" | "dept.del"
