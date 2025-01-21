@@ -1,4 +1,4 @@
-import { downloadBlob, getAttachmentFilenameFormHeader } from "@/utils/download"
+import { downloadBlob, getHeaderFilename } from "soon-utils"
 import { PageParams } from "../types"
 import { Dept } from "./dept"
 import { Role } from "./role"
@@ -40,7 +40,7 @@ export const download_user_table = async (query: ListQueryUser) => {
   return soon.get<Response>("/user/export", { query }).then(async (res) => {
     const body = await res.blob()
     //console.log("body", body)
-    const filename = getAttachmentFilenameFormHeader(res.headers) ?? "user.xlsx"
+    const filename = getHeaderFilename(res.headers) ?? "user.xlsx"
     downloadBlob(body, filename)
   })
 }

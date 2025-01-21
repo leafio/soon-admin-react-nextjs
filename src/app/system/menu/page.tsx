@@ -1,20 +1,20 @@
 "use client"
 import { del_dept, Menu, tree_menu } from "@/api"
 import { useLocales } from "@/i18n"
-import { Button, Modal, Table, Tag, Tree } from "antd"
+import { Button, Modal, Pagination, Table, Tag, Tree } from "antd"
 import { appStore } from "@/store/modules/app"
 import { useSnapshot } from "valtio"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useCols } from "@/hooks/cols"
 import { usePageList } from "@/hooks/list"
-import BtnAdd from "@/components/soon-tool-bar/btn-add"
-import BtnRefresh from "@/components/soon-tool-bar/btn-refresh"
+
 import FormDialog, { FormDialogRef } from "./dialog"
 import type { TableColumnsType } from "antd"
 
 import { useAuth } from "@/hooks/auth"
 import { toast } from "@/components/toast"
 import { modal } from "@/components/modal"
+import { BtnAdd, BtnRefresh } from "@/components/soon"
 
 export default function PageMenu() {
   type Item = Menu
@@ -35,12 +35,11 @@ export default function PageMenu() {
     loading,
     search,
     reset,
-    params: queryForm,
-    pageInfo,
-    setPageInfo,
+    query: queryForm,
+    setQuery,
   } = usePageList({
     searchApi: tree_menu,
-    initParams: { hasBtn: true },
+    initQuery: { hasBtn: true },
     autoSearchDelay: 300,
   })
   useEffect(() => {
@@ -144,17 +143,6 @@ export default function PageMenu() {
   const handleShowDetail = (item: Item) => {
     refFormDialog.current?.open("detail", item)
   }
-  const pagination = {
-    total,
-    current: pageInfo.pageIndex,
-    pageSize: pageInfo.pageSize,
-    onChange(pageIndex: any) {
-      setPageInfo({ ...pageInfo, pageIndex })
-    },
-    onShowSizeChange(pageSize: any) {
-      setPageInfo({ ...pageInfo, pageSize })
-    },
-  }
 
   return (
     <div className="page-container bg flex-1 flex flex-col overflow-auto">
@@ -165,7 +153,7 @@ export default function PageMenu() {
       {!isMobile && (
         <div className="table-container">
           <Table
-            pagination={pagination}
+            pagination={false}
             loading={loading}
             columns={[...checkedCols, actionCol]}
             dataSource={list}
@@ -202,6 +190,14 @@ export default function PageMenu() {
           )}
         ></Tree>
       )}
+      <Pagination
+        className="pagination-container"
+        showTotal={() => t("total", total)}
+        current={queryForm.pageIndex}
+        pageSize={queryForm.pageSize}
+        onChange={(pageIndex, pageSize) => setQuery({ ...queryForm, pageIndex, pageSize })}
+        total={total}
+      />
       <FormDialog ref={refFormDialog} onSuccess={refresh} />
     </div>
   )

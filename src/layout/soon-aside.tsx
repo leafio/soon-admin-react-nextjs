@@ -2,7 +2,7 @@ import { appStore } from "@/store/modules/app"
 import { useEffect, useRef } from "react"
 
 import { useSnapshot } from "valtio"
-import SoonMenu from "../components/soon-menu"
+import SoonMenu from "../components/soon/soon-menu"
 
 import { usePathname, useRouter } from "next/navigation"
 import { userStore } from "@/store/modules/user"

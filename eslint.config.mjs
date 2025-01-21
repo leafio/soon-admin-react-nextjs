@@ -18,7 +18,7 @@ const eslintConfig = [
       "@typescript-eslint/no-unused-vars": "off",
       "@next/next/no-img-element":"off",
       "prefer-const": [
-        "error",
+        "warn",
         {
           destructuring: "all",
         },

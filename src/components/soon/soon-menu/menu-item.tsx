@@ -1,9 +1,9 @@
-import SoonIcon from "@/components/soon-icon"
-import { SoonMenuData } from "@/components/soon-menu/type"
 import { runStrFun } from "@/utils"
 import { useEffect, useState } from "react"
 import { ChevronLeft } from "react-bootstrap-icons"
 import styled from "styled-components"
+import SoonIcon from "../soon-icon"
+import { SoonMenuData } from "./type"
 
 const MenuLi = styled.li`
   &.current {

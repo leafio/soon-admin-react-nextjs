@@ -41,7 +41,7 @@ git clone https://github.com/leafio/soon-admin-react-nextjs.git
 - **Install：**
 
 ```bash
-yarn install
+pnpm install
 ```
 
 - **Run：**
@@ -49,30 +49,30 @@ yarn install
 1.  general dev mode (need backend project opened)
 
 ```bash
-yarn dev
+pnpm dev
 ```
 
 2.  mock dev mode (auto open a mock server and connect to it )
 
 ```bash
-yarn dev:mock
+pnpm dev:mock
 ```
 
 - **Build：**
 
 ```bash
 # production
-yarn build
+pnpm build
 ```
 
 - **Lint：**
 
 ```bash
 # eslint check
-yarn lint
+pnpm lint
 
 # prettier format
-yarn lint:prettier
+pnpm lint:prettier
 ```
 
 ### Project Directory 📚
@@ -165,7 +165,7 @@ git clone https://github.com/leafio/soon-admin-react-nextjs.git
 - **Install：**
 
 ```bash
-yarn install
+pnpm install
 ```
 
 - **Run：**
@@ -173,30 +173,30 @@ yarn install
 1.  普通dev模式 (需开启后端项目进行连接)
 
 ```bash
-yarn dev
+pnpm dev
 ```
 
 2.  mock dev模式（会自动启动并连接本地mock服务器）
 
 ```bash
-yarn dev:mock
+pnpm dev:mock
 ```
 
 - **Build：**
 
 ```bash
 # 生产环境
-yarn build
+pnpm build
 ```
 
 - **Lint：**
 
 ```bash
 # eslint 检测代码
-yarn lint
+pnpm lint
 
 # prettier 格式化代码
-yarn lint:prettier
+pnpm lint:prettier
 ```
 
 ### 文件资源目录 📚

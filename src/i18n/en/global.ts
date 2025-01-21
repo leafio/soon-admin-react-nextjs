@@ -21,5 +21,8 @@ const en_global = {
     hide: "Hide Search Section",
     show: "Show Search Section",
   },
+  total(number: number) {
+    return `Total ${number}`
+  },
 } as const
 export default en_global

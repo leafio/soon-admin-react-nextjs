@@ -1,6 +1,7 @@
 import { appStore } from "@/store/modules/app"
-import { createThemeColors, themeColors2cssText, addStyle } from "@/utils/color"
+import { createThemeColors, themeColors2cssText } from "@/utils/color"
 import { useEffect } from "react"
+import { replaceStyleTag } from "soon-utils"
 import { useSnapshot } from "valtio"
 
 export function useDark(key: string = "themeMode") {
@@ -25,7 +26,7 @@ export function useThemeColors() {
   useEffect(() => {
     const _colors = createThemeColors(colors, isDark)
     const text = themeColors2cssText(_colors)
-    addStyle("theme-vars", text)
+    replaceStyleTag("theme-vars", text)
   }, [isDark, colors])
   return [isDark, colors] as const
 }

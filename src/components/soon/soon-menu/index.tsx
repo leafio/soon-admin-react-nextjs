@@ -1,6 +1,5 @@
 import MenuItem from "./menu-item"
-
-import { SoonMenuData } from "@/components/soon-menu/type"
+import { SoonMenuData } from "./type"
 
 export default function SoonMenu({
   menus,

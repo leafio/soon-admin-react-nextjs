@@ -1,22 +1,21 @@
 "use client"
 import { Role, list_role, del_role } from "@/api"
 import { useLocales } from "@/i18n"
-import { Button, Form, Input, List, Modal, Table, Tag } from "antd"
+import { Button, Form, Input, List, Modal, Pagination, Table, Tag } from "antd"
 import { appStore } from "@/store/modules/app"
 import { useSnapshot } from "valtio"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useCols } from "@/hooks/cols"
 import { usePageList } from "@/hooks/list"
-import BtnAdd from "@/components/soon-tool-bar/btn-add"
-import BtnSearch from "@/components/soon-tool-bar/btn-search"
-import BtnRefresh from "@/components/soon-tool-bar/btn-refresh"
+
 import FormDialog, { FormDialogRef } from "./dialog"
 import type { TableColumnsType } from "antd"
-import SoonDetail from "@/components/soon-detail"
 
 import { useAuth } from "@/hooks/auth"
 import { toast } from "@/components/toast"
 import { modal } from "@/components/modal"
+import { makeVModel } from "react-vmodel"
+import { BtnAdd, BtnRefresh, BtnSearch, SoonDetail } from "@/components/soon"
 
 export default function PageRole() {
   type Item = Role
@@ -39,9 +38,8 @@ export default function PageRole() {
     loading,
     search,
     reset,
-    params: queryForm,
-    pageInfo,
-    setPageInfo,
+    query: queryForm,
+    setQuery,
   } = usePageList({
     searchApi: list_role,
     // initParams: { timeRange: curMonth() },
@@ -131,24 +129,14 @@ export default function PageRole() {
   const handleShowDetail = (item: Item) => {
     refFormDialog.current?.open("detail", item)
   }
-  const pagination = {
-    total,
-    current: pageInfo.pageIndex,
-    pageSize: pageInfo.pageSize,
-    onChange(pageIndex: any) {
-      setPageInfo({ ...pageInfo, pageIndex })
-    },
-    onShowSizeChange(pageSize: any) {
-      setPageInfo({ ...pageInfo, pageSize })
-    },
-  }
 
+  const vModel = makeVModel(queryForm, setQuery)
   return (
     <div className="page-container bg flex-1 flex flex-col overflow-auto">
       {showSearch && (
         <Form className="query-form" label-position="left">
           <Form.Item label={t("label.keyword")} className="query-form-item">
-            <Input value={queryForm.keyword} allowClear placeholder={t("label.inputKeyword")}></Input>
+            <Input {...vModel("keyword")} allowClear placeholder={t("label.inputKeyword")}></Input>
           </Form.Item>
           <div className="query-btn-container">
             <Button className="ml-4" type="primary" onClick={search}>
@@ -168,7 +156,7 @@ export default function PageRole() {
       {!isMobile && (
         <div className="table-container">
           <Table
-            pagination={pagination}
+            pagination={false}
             loading={loading}
             columns={[...checkedCols, actionCol]}
             dataSource={list}
@@ -181,7 +169,7 @@ export default function PageRole() {
         <List
           className="md:hidden mt-2"
           split={false}
-          pagination={pagination}
+          pagination={false}
           dataSource={list}
           renderItem={(item, index) => (
             <List.Item>
@@ -203,6 +191,15 @@ export default function PageRole() {
           )}
         />
       )}
+      <Pagination
+        className="pagination-container"
+        showTotal={() => t("total", total)}
+        current={queryForm.pageIndex}
+        pageSize={queryForm.pageSize}
+        onChange={(pageIndex, pageSize) => setQuery({ ...queryForm, pageIndex, pageSize })}
+        total={total}
+      />
+
       <FormDialog ref={refFormDialog} onSuccess={refresh} />
     </div>
   )

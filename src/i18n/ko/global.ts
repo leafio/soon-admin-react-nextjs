@@ -21,5 +21,8 @@ const ko_global = {
     hide: "검색 숨기기 ", //"隐藏搜索",
     show: "검색 표시 ", //"显示搜索",
   },
+  total(number: number) {
+    return `총 ${number} 건`
+  },
 } as const
 export default ko_global

@@ -21,5 +21,8 @@ const zh_global = {
     hide: "隐藏搜索",
     show: "显示搜索",
   },
+  total(number: number) {
+    return `共 ${number} 条`
+  },
 } as const
 export default zh_global

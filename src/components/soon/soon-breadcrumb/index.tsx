@@ -1,8 +1,9 @@
 import { ChevronRight } from "react-bootstrap-icons"
 import { runStrFun } from "@/utils"
-import SoonIcon from "@/components/soon-icon"
+
 import clsx from "clsx"
 import { ReactNode } from "react"
+import SoonIcon from "../soon-icon"
 
 export default function SoonBreadcrumb({
   className,

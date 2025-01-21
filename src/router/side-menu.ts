@@ -1,5 +1,5 @@
 import { Menu } from "@/api"
-import { SoonMenuData } from "@/components/soon-menu/type"
+import { SoonMenuData } from "@/components/soon/soon-menu/type"
 import { tLocales } from "@/i18n"
 import en_menu from "@/i18n/en/menu"
 import ko_menu from "@/i18n/ko/menu"

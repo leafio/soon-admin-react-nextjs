@@ -2,24 +2,23 @@
 import { list_user, download_user_table, del_user, UserInfo } from "@/api"
 import { dateFormat } from "@/utils/tools"
 import { useLocales } from "@/i18n"
-import { Avatar, Button, Form, Input, List, Modal, Table, Tag } from "antd"
+import { Avatar, Button, Form, Input, List, Modal, Pagination, Table, Tag } from "antd"
 import { appStore } from "@/store/modules/app"
 import { useSnapshot } from "valtio"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useCols } from "@/hooks/cols"
 import { usePageList } from "@/hooks/list"
-import BtnAdd from "@/components/soon-tool-bar/btn-add"
-import BtnExport from "@/components/soon-tool-bar/btn-export"
-import BtnSearch from "@/components/soon-tool-bar/btn-search"
-import BtnRefresh from "@/components/soon-tool-bar/btn-refresh"
+
 import FormDialog, { FormDialogRef } from "./dialog"
 import type { TableColumnsType } from "antd"
-import SoonDetail from "@/components/soon-detail"
+
 import { GenderFemale, GenderMale } from "react-bootstrap-icons"
-import BtnCols from "@/components/soon-tool-bar/btn-cols"
+
 import { useAuth } from "@/hooks/auth"
 import { toast } from "@/components/toast"
 import { modal } from "@/components/modal"
+import { makeVModel } from "react-vmodel"
+import { BtnAdd, BtnCols, BtnExport, BtnRefresh, BtnSearch, SoonDetail } from "@/components/soon"
 
 export default function PageUser() {
   type Item = UserInfo
@@ -39,9 +38,8 @@ export default function PageUser() {
     loading,
     search,
     reset,
-    params: queryForm,
-    pageInfo,
-    setPageInfo,
+    query: queryForm,
+    setQuery,
   } = usePageList({
     searchApi: list_user,
     // initParams: { timeRange: curMonth() },
@@ -176,24 +174,14 @@ export default function PageUser() {
   const handleShowDetail = (item: Item) => {
     refFormDialog.current?.open("detail", item)
   }
-  const pagination = {
-    total,
-    current: pageInfo.pageIndex,
-    pageSize: pageInfo.pageSize,
-    onChange(pageIndex: any) {
-      setPageInfo({ ...pageInfo, pageIndex })
-    },
-    onShowSizeChange(pageSize: any) {
-      setPageInfo({ ...pageInfo, pageSize })
-    },
-  }
 
+  const vModel = makeVModel(queryForm, setQuery)
   return (
     <div className="page-container bg flex-1 flex flex-col overflow-auto">
       {showSearch && (
         <Form className="query-form" label-position="left">
           <Form.Item label={t("label.keyword")} className="query-form-item">
-            <Input value={queryForm.keyword} allowClear placeholder={t("label.inputKeyword")}></Input>
+            <Input {...vModel("keyword")} allowClear placeholder={t("label.inputKeyword")}></Input>
           </Form.Item>
           <div className="query-btn-container">
             <Button className="ml-4" type="primary" onClick={search}>
@@ -205,6 +193,7 @@ export default function PageUser() {
           </div>
         </Form>
       )}
+
       <div className="btn-bar">
         {auth("user.add") && <BtnAdd onClick={() => handleShowAdd()} />}
         {auth("user.export") && <BtnExport onClick={() => download_user_table(queryForm)} />}
@@ -215,7 +204,7 @@ export default function PageUser() {
       {!isMobile && (
         <div className="table-container">
           <Table
-            pagination={pagination}
+            pagination={false}
             loading={loading}
             columns={[...checkedCols, actionCol]}
             dataSource={list}
@@ -224,11 +213,12 @@ export default function PageUser() {
           ></Table>
         </div>
       )}
+
       {isMobile && (
         <List
           className="md:hidden mt-2"
           split={false}
-          pagination={pagination}
+          pagination={false}
           dataSource={list}
           renderItem={(item, index) => (
             <List.Item>
@@ -262,6 +252,14 @@ export default function PageUser() {
           )}
         />
       )}
+      <Pagination
+        className="pagination-container"
+        showTotal={() => t("total", total)}
+        current={queryForm.pageIndex}
+        pageSize={queryForm.pageSize}
+        onChange={(pageIndex, pageSize) => setQuery({ ...queryForm, pageIndex, pageSize })}
+        total={total}
+      />
       <FormDialog ref={refFormDialog} onSuccess={refresh} />
     </div>
   )

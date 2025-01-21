@@ -1,1 +1,464 @@
-[{"method":"GET","path":"menu/tree","response":{"body":{"dataType":"object","fields":[]}},"request":{"params":{"dataType":"object","fields":[]},"body":{"dataType":"object","fields":[]},"query":{"dataType":"object","fields":[]}},"actions":[],"actionCode":"const parseChildren = (data) => {\n  data.forEach((item) => {\n    if (item.children?.length) {\n      parseChildren(item.children)\n    } else {\n      item.children = undefined\n    }\n  })\n}\n\nconst menus=await action.menu.read()\nconst result=menus.filter(d=>!d.parentId).map(d=>({...d,children:menus.filter(ch=>ch.parentId===d.id).map(t=>({...t,children:menus.filter(m=>m.parentId===t.id)}))}))\nparseChildren(result)\nres.success({list:result} )","id":"a43479fe-7a62-4d29-831b-07f3998c19ae","group":"menu"},{"method":"GET","path":"auth/profile","response":{"body":{"dataType":"user","fields":[],"required":false,"isArray":false}},"request":{"params":{"dataType":"object","fields":[]},"body":{"dataType":"object","fields":[]},"query":{"dataType":"object","fields":[]}},"actions":[],"actionCode":"res.success((await action.user.read()).find(u=>u.username===req.username))","id":"7220002d-1a0c-4f7c-8493-dd1fbbaf3ec2","auth":true},{"method":"POST","path":"login","response":{"body":{"dataType":"object","fields":[{"name":"token","dataType":"string"}]}},"request":{"params":{"dataType":"object","fields":[]},"body":{"dataType":"object","fields":[{"name":"code","dataType":"string","required":true},{"fields":[],"name":"codeId","dataType":"string","isArray":false,"required":true},{"fields":[],"name":"password","dataType":"string","required":true},{"fields":[],"name":"username","dataType":"string","required":true}],"required":true},"query":{"dataType":"object","fields":[]}},"actions":[],"actionCode":"const {code,codeId,password,username}=req.body\nif((await action.captcha.detail({id:codeId})).code!==code) res.error(\"code is error\")\nconst user= (await action.user.read()).find(u=>u.username===username&&u.password===password)\nif(!user)res.error(\"user or password not correct\")\n\nres.success({token:jwt.sign({username},\"JWT_SECRET\")})","id":"7c9b924b-b54a-4c3e-b905-0e391839e613"},{"method":"GET","path":"auth/route","response":{"body":{"dataType":"object","fields":[]}},"request":{"params":{"dataType":"object","fields":[]},"body":{"dataType":"object","fields":[]},"query":{"dataType":"object","fields":[]}},"actions":[],"actionCode":"const users=await action.user.read()\nconst user=users.find(u=>u.username===req.username)\nconst roles=await action.role.read()\nconst role=roles.find(r=>r.id===user.roleId)\nconst permissions=role.permissions\nlet menus=await action.menu.read()\nmenus=menus.filter(m=>permissions.find(p=>p===m.id)&&m.menuType!=='btn')\nconst result=menus.filter(d=>!d.parentId).map(d=>({...d,children:menus.filter(ch=>ch.parentId===d.id).map(t=>({...t,children:menus.filter(m=>m.parentId===t.id)}))}))\nres.success(result )","id":"1a6b6cbc-7fc2-43f5-bea5-ec775466f688","auth":true},{"method":"GET","path":"auth/code","response":{"body":{"dataType":"string","fields":[],"isArray":true,"required":true}},"request":{"params":{"dataType":"object","fields":[]},"body":{"dataType":"object","fields":[]},"query":{"dataType":"object","fields":[]}},"actions":[],"id":"159e152f-4898-4018-a294-d4b35b7fee2f","actionCode":"const menus=await action.menu.read()\nconst user=(await action.user.read()).find(u=>u.username=req.username)\nconst role=(await action.role.read()).find(r=>r.id===user?.roleId)\nif(role.id==='admin'){\n  return res.success(menus.map(m=>m.auth))\n}\nconst result=menus.filter(m=>role?.permissions?.includes(m.auth)).map(m=>m.auth)\nres.success(result)","auth":true},{"method":"POST","path":"logout","response":{"body":{"dataType":"object","fields":[]}},"request":{"params":{"dataType":"object","fields":[]},"body":{"dataType":"object","fields":[]},"query":{"dataType":"object","fields":[]}},"actions":[],"id":"dc9fd474-1bb0-4e01-a450-55684c3f2847","actionCode":"res.success()"},{"method":"GET","path":"captcha","response":{"body":{"dataType":"object","fields":[{"id":"6dde44a4-923d-417a-b87f-0f55e21a96e4","name":"id","nullable":false,"dataType":"int","desc":"","mock":"","required":false},{"id":"cdef0336-86b7-48a4-838e-ccfe6a3c0bb4","name":"captcha","nullable":false,"dataType":"string","desc":"","mock":"","required":false}]}},"request":{"params":{"dataType":"object","fields":[]},"body":{"dataType":"object","fields":[]},"query":{"dataType":"object","fields":[]}},"actions":[],"id":"3108da7d-3580-4131-a0b3-37d89618a7df","actionCode":"  const captcha = svgCaptcha.create({\n    // ignoreChars:'abcdefghijklmnopqrstuvwxyz',\n    charPreset: \"0123456789\",\n    size: 4,\n    noise: 3,\n    color: true,\n    background: \"#f5f5f5\",\n  })\nconst {id}=await action.captcha.create({code:captcha.text})\nres.success({id,img:captcha.data})"},{"id":"a5152ed3-2fd8-4672-b1e7-e56dca6df010","path":"user","method":"GET","request":{"query":{"name":"root","dataType":"object","fields":[{"name":"pageIndex","dataType":"int"},{"name":"pageSize","dataType":"int"}]},"body":{"dataType":"object","fields":[]},"params":{"dataType":"object","fields":[]}},"response":{"body":{"name":"root","dataType":"user","isArray":true,"fields":[]}},"group":"user","actionCode":"const {pageIndex,pageSize}=req.query;\nconst {list,total,page,limit}= await action.user.list({page:pageIndex,limit:pageSize})\nconst depts=await action.dept.read()\nconst roles=await action.role.read()\nconst _list=list.map( u=>({...u,dept:depts.find(d=>d.id===u.deptId),role:roles.find(r=>r.id===u.roleId)}))\nres.success({pageIndex:page,pageSize:limit,total,list:_list})"},{"id":"20c387d1-95c2-49a2-bd5b-1b8664f3101b","path":"user/:id","method":"GET","request":{"params":{"name":"root","dataType":"object","fields":[{"primary":true,"required":true,"name":"id","dataType":"user.id"}]}},"response":{"body":{"name":"root","dataType":"user"}},"group":"user","actionCode":"res.success(await action.user.detail(req.params))"},{"id":"33150acc-7e84-4a14-b69c-9b49e9d8de7e","path":"user","method":"POST","request":{"body":{"name":"root","dataType":"user","hideFieldsNames":["{primaryKey}"]}},"response":{"body":{"name":"root","dataType":"user"}},"group":"user","actionCode":"res.success(await action.user.create(req.body))"},{"id":"e2ab95e4-e384-47a5-9866-0286b01955b1","path":"user/:id","method":"PUT","request":{"body":{"name":"root","dataType":"user"},"params":{"name":"root","dataType":"object","fields":[{"primary":true,"required":true,"name":"id","dataType":"user.id"}]}},"response":{"body":{"name":"root","dataType":"user"}},"group":"user","actionCode":"res.success(await action.user.update({...req.body,...req.params}))"},{"id":"e0cd0223-3004-403a-832c-64dba88d4b79","path":"user/:id","method":"DELETE","request":{"params":{"name":"root","dataType":"object","fields":[{"primary":true,"required":true,"name":"id","dataType":"user.id"}]}},"response":{"body":{"name":"root","dataType":"user"}},"group":"user","actionCode":"res.success(await action.user.del(req.params))"},{"id":"97d231b7-fd91-442f-8f52-9607396e63da","path":"role/list","method":"GET","request":{"query":{"name":"root","dataType":"object","fields":[{"name":"page","dataType":"int"},{"name":"limit","dataType":"int"}]}},"response":{"body":{"name":"root","dataType":"role","isArray":true}},"group":"role","actionCode":"res.success(await action.role.list(req.query))"},{"id":"9d790f7c-9824-42c1-8684-0818f5bc291b","path":"role/create","method":"POST","request":{"body":{"name":"root","dataType":"role","hideFieldsNames":["{primaryKey}"]}},"response":{"body":{"name":"root","dataType":"role"}},"group":"role","actionCode":"res.success(await action.role.create(req.body))"},{"id":"782b8fce-ebf3-422e-bf92-3f7a45a48289","path":"role/update","method":"PUT","request":{"body":{"name":"root","dataType":"role"},"params":{"dataType":"object","fields":[]},"query":{"dataType":"object","fields":[]}},"response":{"body":{"name":"root","dataType":"role","fields":[]}},"group":"role","actionCode":"res.success(await action.role.update({...req.body,...req.params}))"},{"id":"64972c84-eef8-4ddc-bdab-3f830f909fb6","path":"role/delete","method":"DELETE","request":{"params":{"dataType":"object","fields":[]},"body":{"dataType":"object","fields":[]},"query":{"dataType":"object","fields":[]}},"response":{"body":{"name":"root","dataType":"role","fields":[]}},"group":"role","actionCode":"res.success(await action.role.del(req.body))"},{"method":"GET","path":"dept/tree","group":"dept","response":{"body":{"dataType":"dept","fields":[],"isArray":false}},"request":{"params":{"dataType":"object","fields":[]},"body":{"dataType":"object","fields":[]},"query":{"dataType":"object","fields":[]}},"actions":[],"id":"02cfa3b8-02b3-4d34-a39e-c2082c694a30","actionCode":"\nconst depts=await action.dept.read()\nconst result=depts.filter(d=>!d.parentId).map(d=>({...d,children:depts.filter(ch=>ch.parentId===d.id)}))\nres.success({list:result} )"},{"id":"b1a2b8ad-ffc1-4b74-8418-40de0f6f8ea6","path":"dept","method":"GET","request":{"query":{"name":"root","dataType":"object","fields":[{"name":"pageIndex","dataType":"int"},{"name":"pageSize","dataType":"int"}]},"body":{"dataType":"object","fields":[]},"params":{"dataType":"object","fields":[]}},"response":{"body":{"name":"root","dataType":"dept","isArray":true,"fields":[]}},"group":"dept","actionCode":"const {pageIndex,pageSize}=req.query;\nconst {list,total,page,limit}= await action.dept.list({page:pageIndex,limit:pageSize})\nres.success({pageIndex:page,pageSize:limit,total,list})"},{"id":"27286632-d329-410b-bc11-a01979a1eca0","path":"dept/:id","method":"GET","request":{"params":{"name":"root","dataType":"object","fields":[{"primary":true,"required":true,"name":"id","dataType":"dept.id"}]}},"response":{"body":{"name":"root","dataType":"dept"}},"group":"dept","actionCode":"res.success(await action.dept.detail(req.params))"},{"id":"7a03256b-5926-44ef-90ed-9e0e45f2254f","path":"dept/create","method":"POST","request":{"body":{"name":"root","dataType":"dept","hideFieldsNames":["{primaryKey}"]},"params":{"dataType":"object","fields":[]},"query":{"dataType":"object","fields":[]}},"response":{"body":{"name":"root","dataType":"dept","fields":[]}},"group":"dept","actionCode":"res.success(await action.dept.create(req.body))"},{"id":"bf489947-9d18-4d19-b5f1-c80adf01d23b","path":"dept/update","method":"PUT","request":{"body":{"name":"root","dataType":"dept"},"params":{"dataType":"object","fields":[]},"query":{"dataType":"object","fields":[]}},"response":{"body":{"name":"root","dataType":"dept","fields":[]}},"group":"dept","actionCode":"res.success(await action.dept.update({...req.body,...req.params}))"},{"id":"460e4cff-1f78-497b-8aac-409e29aebba3","path":"dept/delete","method":"DELETE","request":{"params":{"dataType":"object","fields":[]},"body":{"dataType":"object","fields":[]},"query":{"dataType":"object","fields":[]}},"response":{"body":{"name":"root","dataType":"dept","fields":[]}},"group":"dept","actionCode":"res.success(await action.dept.del(req.body))"},{"enable":true,"dataAction":"list","path":"menu","method":"GET","response":{"body":{"name":"root","dataType":"menu","isArray":true}},"actionCode":"const {pageIndex,pageSize}=req.query;\n            const {list,total,page,limit}= await action.menu.list({page:pageIndex,limit:pageSize})\n            res.json({pageIndex:page,pageSize:limit,total,list})","request":{"query":{"name":"root","dataType":"object","fields":[{"name":"pageIndex","dataType":"int"},{"name":"pageSize","dataType":"int"}]}},"group":"menu","id":"e7ccd4e3-8404-42d4-8341-9f1ae29615ee"},{"enable":true,"dataAction":"detail","path":"menu/:id","method":"GET","response":{"body":{"name":"root","dataType":"menu"}},"actionCode":"res.success(await action.menu.detail(req.params))","request":{"params":{"name":"root","dataType":"object","fields":[{"id":"b600ded0-9b0a-48c3-a1fa-5a73251162c0","name":"id","nullable":false,"dataType":"int","desc":"","mock":"","required":true,"primary":true}]}},"group":"menu","id":"b1702274-cc05-4067-9eac-7bfbdc798b1d"},{"enable":true,"dataAction":"create","path":"menu/create","method":"POST","response":{"body":{"name":"root","dataType":"menu","fields":[]}},"actionCode":"res.success(await action.menu.create(req.body))","request":{"body":{"name":"root","dataType":"menu","hideFieldsNames":["id"]},"params":{"dataType":"object","fields":[]},"query":{"dataType":"object","fields":[]}},"group":"menu","id":"94e9facb-ad7a-4cd4-9896-cec84cd28966"},{"enable":true,"dataAction":"update","path":"menu/update","method":"PUT","response":{"body":{"name":"root","dataType":"menu","fields":[]}},"actionCode":"res.success(await action.menu.update({...req.body,...req.params}))","request":{"body":{"name":"root","dataType":"menu"},"params":{"dataType":"object","fields":[]},"query":{"dataType":"object","fields":[]}},"group":"menu","id":"41114198-db1b-4129-9db1-cae353f840bb"},{"enable":true,"dataAction":"del","path":"menu/delete","method":"DELETE","response":{"body":{"name":"root","dataType":"menu","fields":[]}},"actionCode":"res.success(await action.menu.del({...req.body,...req.params}))","request":{"params":{"dataType":"object","fields":[]},"body":{"dataType":"object","fields":[{"name":"id","dataType":"number","fields":[],"isArray":false}],"isArray":false},"query":{"dataType":"object","fields":[]}},"group":"menu","id":"1a4e3171-67b0-4aa5-8910-04af15a7f21c"}]
+[
+  {
+    "method": "GET",
+    "path": "menu/tree",
+    "response": { "body": { "dataType": "object", "fields": [] } },
+    "request": {
+      "params": { "dataType": "object", "fields": [] },
+      "body": { "dataType": "object", "fields": [] },
+      "query": { "dataType": "object", "fields": [] }
+    },
+    "actions": [],
+    "actionCode": "const parseChildren = (data) => {\n  data.forEach((item) => {\n    if (item.children?.length) {\n      parseChildren(item.children)\n    } else {\n      item.children = undefined\n    }\n  })\n}\n\nconst menus=await action.menu.read()\nconst result=menus.filter(d=>!d.parentId).map(d=>({...d,children:menus.filter(ch=>ch.parentId===d.id).map(t=>({...t,children:menus.filter(m=>m.parentId===t.id)}))}))\nparseChildren(result)\nres.success({list:result} )",
+    "id": "a43479fe-7a62-4d29-831b-07f3998c19ae",
+    "group": "menu"
+  },
+  {
+    "method": "GET",
+    "path": "auth/profile",
+    "response": { "body": { "dataType": "user", "fields": [], "required": false, "isArray": false } },
+    "request": {
+      "params": { "dataType": "object", "fields": [] },
+      "body": { "dataType": "object", "fields": [] },
+      "query": { "dataType": "object", "fields": [] }
+    },
+    "actions": [],
+    "actionCode": "res.success((await action.user.read()).find(u=>u.username===req.username))",
+    "id": "7220002d-1a0c-4f7c-8493-dd1fbbaf3ec2",
+    "auth": true
+  },
+  {
+    "method": "POST",
+    "path": "login",
+    "response": { "body": { "dataType": "object", "fields": [{ "name": "token", "dataType": "string" }] } },
+    "request": {
+      "params": { "dataType": "object", "fields": [] },
+      "body": {
+        "dataType": "object",
+        "fields": [
+          { "name": "code", "dataType": "string", "required": true },
+          { "fields": [], "name": "codeId", "dataType": "string", "isArray": false, "required": true },
+          { "fields": [], "name": "password", "dataType": "string", "required": true },
+          { "fields": [], "name": "username", "dataType": "string", "required": true }
+        ],
+        "required": true
+      },
+      "query": { "dataType": "object", "fields": [] }
+    },
+    "actions": [],
+    "actionCode": "const {code,codeId,password,username}=req.body\nif((await action.captcha.detail({id:codeId})).code!==code) res.error(\"code is error\")\nconst user= (await action.user.read()).find(u=>u.username===username&&u.password===password)\nif(!user)res.error(\"user or password not correct\")\n\nres.success({token:jwt.sign({username},\"JWT_SECRET\")})",
+    "id": "7c9b924b-b54a-4c3e-b905-0e391839e613"
+  },
+  {
+    "method": "GET",
+    "path": "auth/route",
+    "response": { "body": { "dataType": "object", "fields": [] } },
+    "request": {
+      "params": { "dataType": "object", "fields": [] },
+      "body": { "dataType": "object", "fields": [] },
+      "query": { "dataType": "object", "fields": [] }
+    },
+    "actions": [],
+    "actionCode": "const users=await action.user.read()\nconst user=users.find(u=>u.username===req.username)\nconst roles=await action.role.read()\nconst role=roles.find(r=>r.id===user.roleId)\nconst permissions=role.permissions\nlet menus=await action.menu.read()\nmenus=menus.filter(m=>permissions.find(p=>p===m.id)&&m.menuType!=='btn')\nconst result=menus.filter(d=>!d.parentId).map(d=>({...d,children:menus.filter(ch=>ch.parentId===d.id).map(t=>({...t,children:menus.filter(m=>m.parentId===t.id)}))}))\nres.success(result )",
+    "id": "1a6b6cbc-7fc2-43f5-bea5-ec775466f688",
+    "auth": true
+  },
+  {
+    "method": "GET",
+    "path": "auth/code",
+    "response": { "body": { "dataType": "string", "fields": [], "isArray": true, "required": true } },
+    "request": {
+      "params": { "dataType": "object", "fields": [] },
+      "body": { "dataType": "object", "fields": [] },
+      "query": { "dataType": "object", "fields": [] }
+    },
+    "actions": [],
+    "id": "159e152f-4898-4018-a294-d4b35b7fee2f",
+    "actionCode": "const menus=await action.menu.read()\nconst user=(await action.user.read()).find(u=>u.username=req.username)\nconst role=(await action.role.read()).find(r=>r.id===user?.roleId)\nif(role.id==='admin'){\n  return res.success(menus.map(m=>m.auth))\n}\nconst result=menus.filter(m=>role?.permissions?.includes(m.auth)).map(m=>m.auth)\nres.success(result)",
+    "auth": true
+  },
+  {
+    "method": "POST",
+    "path": "logout",
+    "response": { "body": { "dataType": "object", "fields": [] } },
+    "request": {
+      "params": { "dataType": "object", "fields": [] },
+      "body": { "dataType": "object", "fields": [] },
+      "query": { "dataType": "object", "fields": [] }
+    },
+    "actions": [],
+    "id": "dc9fd474-1bb0-4e01-a450-55684c3f2847",
+    "actionCode": "res.success()"
+  },
+  {
+    "method": "GET",
+    "path": "captcha",
+    "response": {
+      "body": {
+        "dataType": "object",
+        "fields": [
+          {
+            "id": "6dde44a4-923d-417a-b87f-0f55e21a96e4",
+            "name": "id",
+            "nullable": false,
+            "dataType": "int",
+            "desc": "",
+            "mock": "",
+            "required": false
+          },
+          {
+            "id": "cdef0336-86b7-48a4-838e-ccfe6a3c0bb4",
+            "name": "captcha",
+            "nullable": false,
+            "dataType": "string",
+            "desc": "",
+            "mock": "",
+            "required": false
+          }
+        ]
+      }
+    },
+    "request": {
+      "params": { "dataType": "object", "fields": [] },
+      "body": { "dataType": "object", "fields": [] },
+      "query": { "dataType": "object", "fields": [] }
+    },
+    "actions": [],
+    "id": "3108da7d-3580-4131-a0b3-37d89618a7df",
+    "actionCode": "  const captcha = svgCaptcha.create({\n    // ignoreChars:'abcdefghijklmnopqrstuvwxyz',\n    charPreset: \"0123456789\",\n    size: 4,\n    noise: 3,\n    color: true,\n    background: \"#f5f5f5\",\n  })\nconst {id}=await action.captcha.create({code:captcha.text})\nres.success({id,img:captcha.data})"
+  },
+  {
+    "id": "a5152ed3-2fd8-4672-b1e7-e56dca6df010",
+    "path": "user",
+    "method": "GET",
+    "request": {
+      "query": {
+        "name": "root",
+        "dataType": "object",
+        "fields": [
+          { "name": "pageIndex", "dataType": "int" },
+          { "name": "pageSize", "dataType": "int" }
+        ]
+      },
+      "body": { "dataType": "object", "fields": [] },
+      "params": { "dataType": "object", "fields": [] }
+    },
+    "response": { "body": { "name": "root", "dataType": "user", "isArray": true, "fields": [] } },
+    "group": "user",
+    "actionCode": "const {pageIndex,pageSize}=req.query;\nconst {list,total,page,limit}= await action.user.list({page:pageIndex,limit:pageSize})\nconst depts=await action.dept.read()\nconst roles=await action.role.read()\nconst _list=list.map( u=>({...u,dept:depts.find(d=>d.id===u.deptId),role:roles.find(r=>r.id===u.roleId)}))\nres.success({pageIndex:page,pageSize:limit,total,list:_list})"
+  },
+  {
+    "method": "GET",
+    "path": "user/export",
+    "response": { "body": { "dataType": "object", "fields": [] } },
+    "request": {
+      "params": { "dataType": "object", "fields": [] },
+      "body": { "dataType": "object", "fields": [] },
+      "query": {
+        "dataType": "object",
+        "fields": [
+          { "dataType": "int", "name": "pageIndex", "fields": [], "isArray": false },
+          { "dataType": "int", "name": "pageSize", "fields": [], "isArray": false }
+        ]
+      },
+      "bodyType": "json"
+    },
+    "actions": [],
+    "id": "c3e0366f-649c-4300-a1a2-bd986c2cb474",
+    "group": "user",
+    "actionCode": "const {pageIndex,pageSize}=req.query;\nconst {list,total,page,limit}= await action.user.list({page:pageIndex,limit:pageSize})\nconst depts=await action.dept.read()\nconst roles=await action.role.read()\nconst _list=list.map( u=>({...u,dept:depts.find(d=>d.id===u.deptId),role:roles.find(r=>r.id===u.roleId)}))\nconst file = genExcel(_list, {  fitWidth: true }) \nres.setHeader(\"Content-Type\", \"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet\" )   \nres.setHeader(\"Content-Disposition\", \"attachment; filename=user.xlsx\")   \nres.send(file)"
+  },
+  {
+    "id": "20c387d1-95c2-49a2-bd5b-1b8664f3101b",
+    "path": "user/:id",
+    "method": "GET",
+    "request": {
+      "params": {
+        "name": "root",
+        "dataType": "object",
+        "fields": [{ "primary": true, "required": true, "name": "id", "dataType": "user.id" }]
+      }
+    },
+    "response": { "body": { "name": "root", "dataType": "user" } },
+    "group": "user",
+    "actionCode": "res.success(await action.user.detail(req.params))"
+  },
+  {
+    "id": "33150acc-7e84-4a14-b69c-9b49e9d8de7e",
+    "path": "user",
+    "method": "POST",
+    "request": { "body": { "name": "root", "dataType": "user", "hideFieldsNames": ["{primaryKey}"] } },
+    "response": { "body": { "name": "root", "dataType": "user" } },
+    "group": "user",
+    "actionCode": "res.success(await action.user.create(req.body))"
+  },
+  {
+    "id": "e2ab95e4-e384-47a5-9866-0286b01955b1",
+    "path": "user/:id",
+    "method": "PUT",
+    "request": {
+      "body": { "name": "root", "dataType": "user" },
+      "params": {
+        "name": "root",
+        "dataType": "object",
+        "fields": [{ "primary": true, "required": true, "name": "id", "dataType": "user.id" }]
+      }
+    },
+    "response": { "body": { "name": "root", "dataType": "user" } },
+    "group": "user",
+    "actionCode": "res.success(await action.user.update({...req.body,...req.params}))"
+  },
+  {
+    "id": "e0cd0223-3004-403a-832c-64dba88d4b79",
+    "path": "user/:id",
+    "method": "DELETE",
+    "request": {
+      "params": {
+        "name": "root",
+        "dataType": "object",
+        "fields": [{ "primary": true, "required": true, "name": "id", "dataType": "user.id" }]
+      }
+    },
+    "response": { "body": { "name": "root", "dataType": "user" } },
+    "group": "user",
+    "actionCode": "res.success(await action.user.del(req.params))"
+  },
+  {
+    "id": "97d231b7-fd91-442f-8f52-9607396e63da",
+    "path": "role/list",
+    "method": "GET",
+    "request": {
+      "query": {
+        "name": "root",
+        "dataType": "object",
+        "fields": [
+          { "name": "page", "dataType": "int" },
+          { "name": "limit", "dataType": "int" }
+        ]
+      }
+    },
+    "response": { "body": { "name": "root", "dataType": "role", "isArray": true } },
+    "group": "role",
+    "actionCode": "res.success(await action.role.list(req.query))"
+  },
+  {
+    "id": "9d790f7c-9824-42c1-8684-0818f5bc291b",
+    "path": "role/create",
+    "method": "POST",
+    "request": { "body": { "name": "root", "dataType": "role", "hideFieldsNames": ["{primaryKey}"] } },
+    "response": { "body": { "name": "root", "dataType": "role" } },
+    "group": "role",
+    "actionCode": "res.success(await action.role.create(req.body))"
+  },
+  {
+    "id": "782b8fce-ebf3-422e-bf92-3f7a45a48289",
+    "path": "role/update",
+    "method": "PUT",
+    "request": {
+      "body": { "name": "root", "dataType": "role" },
+      "params": { "dataType": "object", "fields": [] },
+      "query": { "dataType": "object", "fields": [] }
+    },
+    "response": { "body": { "name": "root", "dataType": "role", "fields": [] } },
+    "group": "role",
+    "actionCode": "res.success(await action.role.update({...req.body,...req.params}))"
+  },
+  {
+    "id": "64972c84-eef8-4ddc-bdab-3f830f909fb6",
+    "path": "role/delete",
+    "method": "DELETE",
+    "request": {
+      "params": { "dataType": "object", "fields": [] },
+      "body": { "dataType": "object", "fields": [] },
+      "query": { "dataType": "object", "fields": [] }
+    },
+    "response": { "body": { "name": "root", "dataType": "role", "fields": [] } },
+    "group": "role",
+    "actionCode": "res.success(await action.role.del(req.body))"
+  },
+  {
+    "method": "GET",
+    "path": "dept/tree",
+    "group": "dept",
+    "response": { "body": { "dataType": "dept", "fields": [], "isArray": false } },
+    "request": {
+      "params": { "dataType": "object", "fields": [] },
+      "body": { "dataType": "object", "fields": [] },
+      "query": { "dataType": "object", "fields": [] }
+    },
+    "actions": [],
+    "id": "02cfa3b8-02b3-4d34-a39e-c2082c694a30",
+    "actionCode": "\nconst depts=await action.dept.read()\nconst result=depts.filter(d=>!d.parentId).map(d=>({...d,children:depts.filter(ch=>ch.parentId===d.id)}))\nres.success({list:result} )"
+  },
+  {
+    "id": "b1a2b8ad-ffc1-4b74-8418-40de0f6f8ea6",
+    "path": "dept",
+    "method": "GET",
+    "request": {
+      "query": {
+        "name": "root",
+        "dataType": "object",
+        "fields": [
+          { "name": "pageIndex", "dataType": "int" },
+          { "name": "pageSize", "dataType": "int" }
+        ]
+      },
+      "body": { "dataType": "object", "fields": [] },
+      "params": { "dataType": "object", "fields": [] }
+    },
+    "response": { "body": { "name": "root", "dataType": "dept", "isArray": true, "fields": [] } },
+    "group": "dept",
+    "actionCode": "const {pageIndex,pageSize}=req.query;\nconst {list,total,page,limit}= await action.dept.list({page:pageIndex,limit:pageSize})\nres.success({pageIndex:page,pageSize:limit,total,list})"
+  },
+  {
+    "id": "27286632-d329-410b-bc11-a01979a1eca0",
+    "path": "dept/:id",
+    "method": "GET",
+    "request": {
+      "params": {
+        "name": "root",
+        "dataType": "object",
+        "fields": [{ "primary": true, "required": true, "name": "id", "dataType": "dept.id" }]
+      }
+    },
+    "response": { "body": { "name": "root", "dataType": "dept" } },
+    "group": "dept",
+    "actionCode": "res.success(await action.dept.detail(req.params))"
+  },
+  {
+    "id": "7a03256b-5926-44ef-90ed-9e0e45f2254f",
+    "path": "dept/create",
+    "method": "POST",
+    "request": {
+      "body": { "name": "root", "dataType": "dept", "hideFieldsNames": ["{primaryKey}"] },
+      "params": { "dataType": "object", "fields": [] },
+      "query": { "dataType": "object", "fields": [] }
+    },
+    "response": { "body": { "name": "root", "dataType": "dept", "fields": [] } },
+    "group": "dept",
+    "actionCode": "res.success(await action.dept.create(req.body))"
+  },
+  {
+    "id": "bf489947-9d18-4d19-b5f1-c80adf01d23b",
+    "path": "dept/update",
+    "method": "PUT",
+    "request": {
+      "body": { "name": "root", "dataType": "dept" },
+      "params": { "dataType": "object", "fields": [] },
+      "query": { "dataType": "object", "fields": [] }
+    },
+    "response": { "body": { "name": "root", "dataType": "dept", "fields": [] } },
+    "group": "dept",
+    "actionCode": "res.success(await action.dept.update({...req.body,...req.params}))"
+  },
+  {
+    "id": "460e4cff-1f78-497b-8aac-409e29aebba3",
+    "path": "dept/delete",
+    "method": "DELETE",
+    "request": {
+      "params": { "dataType": "object", "fields": [] },
+      "body": { "dataType": "object", "fields": [] },
+      "query": { "dataType": "object", "fields": [] }
+    },
+    "response": { "body": { "name": "root", "dataType": "dept", "fields": [] } },
+    "group": "dept",
+    "actionCode": "res.success(await action.dept.del(req.body))"
+  },
+  {
+    "enable": true,
+    "dataAction": "list",
+    "path": "menu",
+    "method": "GET",
+    "response": { "body": { "name": "root", "dataType": "menu", "isArray": true } },
+    "actionCode": "const {pageIndex,pageSize}=req.query;\n            const {list,total,page,limit}= await action.menu.list({page:pageIndex,limit:pageSize})\n            res.json({pageIndex:page,pageSize:limit,total,list})",
+    "request": {
+      "query": {
+        "name": "root",
+        "dataType": "object",
+        "fields": [
+          { "name": "pageIndex", "dataType": "int" },
+          { "name": "pageSize", "dataType": "int" }
+        ]
+      }
+    },
+    "group": "menu",
+    "id": "e7ccd4e3-8404-42d4-8341-9f1ae29615ee"
+  },
+  {
+    "enable": true,
+    "dataAction": "detail",
+    "path": "menu/:id",
+    "method": "GET",
+    "response": { "body": { "name": "root", "dataType": "menu" } },
+    "actionCode": "res.success(await action.menu.detail(req.params))",
+    "request": {
+      "params": {
+        "name": "root",
+        "dataType": "object",
+        "fields": [
+          {
+            "id": "b600ded0-9b0a-48c3-a1fa-5a73251162c0",
+            "name": "id",
+            "nullable": false,
+            "dataType": "int",
+            "desc": "",
+            "mock": "",
+            "required": true,
+            "primary": true
+          }
+        ]
+      }
+    },
+    "group": "menu",
+    "id": "b1702274-cc05-4067-9eac-7bfbdc798b1d"
+  },
+  {
+    "enable": true,
+    "dataAction": "create",
+    "path": "menu/create",
+    "method": "POST",
+    "response": { "body": { "name": "root", "dataType": "menu", "fields": [] } },
+    "actionCode": "res.success(await action.menu.create(req.body))",
+    "request": {
+      "body": { "name": "root", "dataType": "menu", "hideFieldsNames": ["id"] },
+      "params": { "dataType": "object", "fields": [] },
+      "query": { "dataType": "object", "fields": [] }
+    },
+    "group": "menu",
+    "id": "94e9facb-ad7a-4cd4-9896-cec84cd28966"
+  },
+  {
+    "enable": true,
+    "dataAction": "update",
+    "path": "menu/update",
+    "method": "PUT",
+    "response": { "body": { "name": "root", "dataType": "menu", "fields": [] } },
+    "actionCode": "res.success(await action.menu.update({...req.body,...req.params}))",
+    "request": {
+      "body": { "name": "root", "dataType": "menu" },
+      "params": { "dataType": "object", "fields": [] },
+      "query": { "dataType": "object", "fields": [] }
+    },
+    "group": "menu",
+    "id": "41114198-db1b-4129-9db1-cae353f840bb"
+  },
+  {
+    "enable": true,
+    "dataAction": "del",
+    "path": "menu/delete",
+    "method": "DELETE",
+    "response": { "body": { "name": "root", "dataType": "menu", "fields": [] } },
+    "actionCode": "res.success(await action.menu.del({...req.body,...req.params}))",
+    "request": {
+      "params": { "dataType": "object", "fields": [] },
+      "body": {
+        "dataType": "object",
+        "fields": [{ "name": "id", "dataType": "number", "fields": [], "isArray": false }],
+        "isArray": false
+      },
+      "query": { "dataType": "object", "fields": [] }
+    },
+    "group": "menu",
+    "id": "1a4e3171-67b0-4aa5-8910-04af15a7f21c"
+  }
+]

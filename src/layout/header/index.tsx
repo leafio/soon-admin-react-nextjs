@@ -19,13 +19,14 @@ import { useSnapshot } from "valtio"
 
 import { usePathname } from "next/navigation"
 import { userStore } from "@/store/modules/user"
-import SoonBreadcrumb from "@/components/soon-breadcrumb"
+
 import { getTreePathArr } from "@/utils"
 import { ParsedMenu } from "@/router/side-menu"
 import { useFullscreen } from "ahooks"
 import { useState } from "react"
 
 import Settings from "./settings"
+import { SoonBreadcrumb } from "@/components/soon"
 
 export const getPathMenu = (targetPath: string, menus: ParsedMenu[]) => {
   return getTreePathArr(menus, "path", targetPath)
