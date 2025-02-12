@@ -1,11 +1,13 @@
 "use client"
 
 import { getCaptcha, login } from "@/api"
+import { useKeys } from "@/hooks/keys"
 import { useLang, useLocales } from "@/i18n"
-import en_login from "@/i18n/en/login"
-import ko_login from "@/i18n/ko/login"
-import zh_login from "@/i18n/zh/login"
+import en_login from "@/i18n/en/auth/login"
+import ko_login from "@/i18n/ko/auth/login"
+import zh_login from "@/i18n/zh/auth/login"
 import LangSwitch from "@/layout/lang-switch"
+import { soon_local } from "@/utils/storage"
 import { Button, Form, FormInstance, Input } from "antd"
 import { useRouter } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
@@ -21,13 +23,14 @@ const Container = styled.div`
 
 export default function PageLogin() {
   const t = useLocales({ zh: zh_login, en: en_login, ko: ko_login })
-
-  const [form, setForm] = useState({
+  const default_value = {
     username: "",
     password: "",
     codeId: -1,
     code: "",
-  })
+  }
+
+  const [form, setForm] = useState(default_value)
   const refImg = useRef<HTMLDivElement>(null)
   const refreshCaptcha = () => {
     getCaptcha().then((res) => {
@@ -43,8 +46,8 @@ export default function PageLogin() {
   const router = useRouter()
   const handleLogin = (values: { username: string; password: string }) => {
     login({ ...form, ...values }).then((res) => {
-      localStorage.setItem("token", res.token)
-      localStorage.setItem("refresh_token", res.refreshToken)
+      soon_local.token.set(res.token)
+      soon_local.refresh_token.set(res.refreshToken)
       router.push("/")
     })
   }
@@ -60,6 +63,7 @@ export default function PageLogin() {
     if (formRef.current?.isFieldsTouched()) formRef.current?.validateFields()
   }, [lang])
 
+  const keys = useKeys(default_value)
   return (
     <Container className="relative min-h-[100vh]">
       <Form
@@ -72,13 +76,13 @@ export default function PageLogin() {
         <div className="flex justify-end">
           <LangSwitch className="w-6 h-6 mb-4" />
         </div>
-        <Form.Item name="username" rules={rules().username}>
+        <Form.Item name={keys.username} rules={rules().username}>
           <Input placeholder={t("username") + ":  admin"}></Input>
         </Form.Item>
-        <Form.Item name="password" rules={rules().password}>
+        <Form.Item name={keys.password} rules={rules().password}>
           <Input placeholder={t("password") + ":  admin"} type="password"></Input>
         </Form.Item>
-        <Form.Item name="code" rules={rules().code}>
+        <Form.Item name={keys.code} rules={rules().code}>
           <Input
             placeholder={t("code")}
             addonAfter={<div ref={refImg} className="cursor-pointer" onClick={refreshCaptcha} />}

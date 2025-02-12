@@ -1,4 +1,5 @@
 import { Lang, useLang } from "@/i18n"
+import { soon_local } from "@/utils/storage"
 import { Dropdown, MenuProps } from "antd"
 import { useEffect } from "react"
 import { Translate } from "react-bootstrap-icons"
@@ -12,12 +13,12 @@ export default function LangSwitch({ className }: { className?: string }) {
   const [lang, setLang] = useLang()
   const handelChangeLang = (lang: Lang) => {
     setLang(lang)
-    localStorage.setItem("lang", lang)
+    soon_local.lang.set(lang)
   }
   useEffect(() => {
-    const _lang = localStorage.getItem("lang") as Lang
+    const _lang = soon_local.lang.get()
     if (!_lang) {
-      localStorage.setItem("lang", lang)
+      soon_local.lang.set(lang)
     } else {
       setLang(_lang)
     }

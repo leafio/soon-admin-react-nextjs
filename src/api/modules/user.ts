@@ -3,6 +3,7 @@ import { PageParams } from "../types"
 import { Dept } from "./dept"
 import { Role } from "./role"
 import { soon } from "../request"
+import { Simplify } from "type-fest"
 
 export type User = {
   id: number
@@ -19,17 +20,17 @@ export type User = {
   gender: number
   desc: string | null
 }
-export type UserInfo = Expand<
+export type UserInfo = Simplify<
   User & {
     id: number
     createTime: Date
     updateTime: Date | null
-    dept?: Expand<Pick<Dept, "id" | "name">>
-    role?: Expand<Pick<Role, "id" | "name">>
+    dept?: Pick<Dept, "id" | "name">
+    role?: Pick<Role, "id" | "name">
   }
 >
 
-type ListQueryUser = Expand<PageParams & { keyword?: string; timeRange?: [string, string] }>
+type ListQueryUser = Simplify<PageParams & { keyword?: string; timeRange?: [string, string] }>
 export const list_user = soon.API("/user").GET<ListQueryUser, { list: UserInfo[] }>()
 export const add_user = soon.API("/user").POST<User>()
 export const update_user = soon.API("/user/:id").PUT<User>()

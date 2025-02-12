@@ -6,6 +6,7 @@ import { own_menus } from "@/api"
 import { initUser, userStore } from "@/store/modules/user"
 import { Menus2SideMenus, route2SideMenus } from "@/router/side-menu"
 import { routeStore } from "@/store/modules/route"
+import { soon_local } from "@/utils/storage"
 
 export const initRoutesMenus = async (routes?: SoonRoute[]) => {
   await initUser()
@@ -27,7 +28,7 @@ export const initRoutesMenus = async (routes?: SoonRoute[]) => {
 
 const ROUTER_WHITE_LIST: string[] = []
 export const everyRoute = async (path: string, router: AppRouterInstance) => {
-  const token = localStorage.getItem("token")
+  const token = soon_local.token.get()
 
   // 1.判断访问页面是否在路由白名单地址(静态路由)中，如果存在直接放行
   if (ROUTER_WHITE_LIST.includes(path)) return true

@@ -38,11 +38,10 @@ export default function PageDept() {
     setQuery,
   } = usePageList({
     searchApi: tree_dept,
-    // initParams: { timeRange: curMonth() },
     autoSearchDelay: 300,
   })
+
   useEffect(() => {
-    //console.log("page-init")
     refresh()
   }, [])
 

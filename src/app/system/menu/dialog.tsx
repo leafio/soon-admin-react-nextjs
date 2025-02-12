@@ -1,13 +1,16 @@
 import { Button, Cascader, Form, FormInstance, Input, InputNumber, Modal, Segmented, Select, Switch } from "antd"
 
 import { Menu, add_menu, update_menu, tree_menu } from "@/api"
-import { useDialog } from "@/hooks/dialog"
+import { useFormDialog } from "@/hooks/form-dialog"
 import { useLocales } from "@/i18n"
 import { Ref, useEffect, useImperativeHandle, useRef, useState } from "react"
 import { Model } from "react-vmodel"
 
 import { getTreePathArr } from "@/utils"
-import { toast } from "react-toastify"
+import { toast } from "@/components/toast"
+import { useDraggableModal } from "@/hooks/draggable-modal"
+import { useKeys } from "@/hooks/keys"
+import { RequiredUndefined } from "soon-utils"
 
 export type FormDialogRef = {
   open: (type?: "add" | "edit" | "detail", data?: Partial<Menu> | undefined, link?: boolean) => void
@@ -28,7 +31,28 @@ const FormDialog = ({ onSuccess = () => {}, ref }: { onSuccess?: () => void; ref
     detail: t("detail"),
   })
 
-  const { visible, open, close, type, formData, setFormData } = useDialog<Item>({ formRef })
+  const initFormData: RequiredUndefined<Item> = {
+    id: undefined,
+    name: undefined,
+    desc: undefined,
+    sort: undefined,
+    parentId: undefined,
+    menuType: undefined,
+    auth: undefined,
+    path: undefined,
+    redirect: undefined,
+    children: undefined,
+    createTime: undefined,
+    updateTime: undefined,
+    meta: undefined,
+  }
+
+  const keys = useKeys(initFormData)
+
+  const { visible, open, close, type, formData, setFormData } = useFormDialog<Item>({
+    initFormData,
+    onOpen: (data) => formRef.current?.setFieldsValue(data),
+  })
   const menuTypeOptions = () => [
     {
       label: t("menuType.page"),
@@ -42,7 +66,6 @@ const FormDialog = ({ onSuccess = () => {}, ref }: { onSuccess?: () => void; ref
       label: t("menuType.link"),
       value: "link",
     },
-
     {
       label: t("menuType.button"),
       value: "btn",
@@ -100,14 +123,17 @@ const FormDialog = ({ onSuccess = () => {}, ref }: { onSuccess?: () => void; ref
     close,
   }))
 
-  useEffect(() => {
-    if (visible) {
-      const dom = document.querySelector(`[role="dialog"]`) as HTMLDivElement
-      if (dom) dom.style.width = ""
-    }
-  }, [visible])
+  const { modalRender, ModalTitle } = useDraggableModal()
+
   return (
-    <Modal open={visible} title={titles()[type]} closable onCancel={onCancel} footer={null}>
+    <Modal
+      open={visible}
+      title={<ModalTitle>{titles()[type]}</ModalTitle>}
+      closable
+      onCancel={onCancel}
+      footer={null}
+      modalRender={modalRender}
+    >
       <Form
         ref={formRef}
         disabled={type === "detail"}
@@ -125,12 +151,12 @@ const FormDialog = ({ onSuccess = () => {}, ref }: { onSuccess?: () => void; ref
         <Form.Item
           label={t("label.menuType")}
           className="dialog-form-item-full"
-          name={"menuType"}
+          name={keys.menuType}
           labelCol={{ span: 3 }}
         >
           <Segmented options={menuTypeOptions()} />
         </Form.Item>
-        <Form.Item label={t("label.parentMenu")} className="dialog-form-item" name={"parentId"}>
+        <Form.Item label={t("label.parentMenu")} className="dialog-form-item" name={keys.parentId}>
           <Model>
             {(_vModel, value, onChange) => (
               <Cascader
@@ -154,11 +180,11 @@ const FormDialog = ({ onSuccess = () => {}, ref }: { onSuccess?: () => void; ref
         >
           <Input allowClear></Input>
         </Form.Item>
-        <Form.Item label={t("label.auth")} className="dialog-form-item" name={"auth"}>
+        <Form.Item label={t("label.auth")} className="dialog-form-item" name={keys.auth}>
           <Input allowClear></Input>
         </Form.Item>
 
-        <Form.Item label={t("label.sort")} className="dialog-form-item" name={"sort"}>
+        <Form.Item label={t("label.sort")} className="dialog-form-item" name={keys.sort}>
           <InputNumber controls-position="right" className="w100" />
         </Form.Item>
         {formData.menuType !== "btn" && (
@@ -168,7 +194,7 @@ const FormDialog = ({ onSuccess = () => {}, ref }: { onSuccess?: () => void; ref
             </Form.Item>
             {formData.menuType !== "link" && (
               <>
-                <Form.Item label={t("label.routePath")} className="dialog-form-item" name={"path"}>
+                <Form.Item label={t("label.routePath")} className="dialog-form-item" name={keys.path}>
                   <Input allowClear></Input>
                 </Form.Item>
 
@@ -198,7 +224,7 @@ const FormDialog = ({ onSuccess = () => {}, ref }: { onSuccess?: () => void; ref
             )}
 
             {formData.menuType === "page" && (
-              <Form.Item label={t("label.redirect")} className="dialog-form-item" name="redirect">
+              <Form.Item label={t("label.redirect")} className="dialog-form-item" name={keys.redirect}>
                 <Input allowClear></Input>
               </Form.Item>
             )}

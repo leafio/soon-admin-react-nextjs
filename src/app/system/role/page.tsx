@@ -42,11 +42,10 @@ export default function PageRole() {
     setQuery,
   } = usePageList({
     searchApi: list_role,
-    // initParams: { timeRange: curMonth() },
     autoSearchDelay: 300,
   })
+
   useEffect(() => {
-    //console.log("page-init")
     refresh()
   }, [])
 

@@ -5,6 +5,7 @@ import { getLang, tLocales } from "@/i18n"
 import { refresh_token } from "./modules/auth"
 import { createSilentRefresh } from "./addons/silentRefreshToken"
 import { toast } from "@/components/toast"
+import { soon_local } from "@/utils/storage"
 
 export const baseURL = parseBaseUrl(
   {
@@ -18,13 +19,13 @@ export const baseURL = parseBaseUrl(
 
 const t = tLocales()
 const silentRefresh = createSilentRefresh(() =>
-  refresh_token({ token: localStorage.getItem("refresh_token") ?? "" })
+  refresh_token({ token: soon_local.refresh_token.get() ?? "" })
     .then((res) => {
-      localStorage.setItem("token", res.token)
+      soon_local.token.set(res.token)
     })
     .catch(() => {
-      localStorage.removeItem("token")
-      localStorage.removeItem("refresh_token")
+      soon_local.refresh_token.remove()
+      soon_local.token.remove()
       location.href = "/login"
     }),
 )
@@ -44,7 +45,7 @@ function request<T = any>(url: string, options?: RequestOptions) {
       baseOptions: {
         timeout: 20 * 1000,
         headers: new Headers({
-          Authorization: localStorage.getItem("token") ?? "",
+          Authorization: soon_local.token.get() ?? "",
           "soon-lang": getLang(),
         }),
       },

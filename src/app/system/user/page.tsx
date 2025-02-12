@@ -42,11 +42,10 @@ export default function PageUser() {
     setQuery,
   } = usePageList({
     searchApi: list_user,
-    // initParams: { timeRange: curMonth() },
     autoSearchDelay: 300,
   })
+
   useEffect(() => {
-    //console.log("page-init")
     refresh()
   }, [])
 

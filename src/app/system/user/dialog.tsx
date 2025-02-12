@@ -1,12 +1,15 @@
 import { Button, Cascader, Form, FormInstance, Input, Modal, Select, Switch } from "antd"
 
 import { list_role, add_user, update_user, Role, tree_dept, Dept, User } from "@/api"
-import { useDialog } from "@/hooks/dialog"
+import { useFormDialog } from "@/hooks/form-dialog"
 import { useLocales } from "@/i18n"
 import { Ref, useEffect, useImperativeHandle, useRef, useState } from "react"
 import { makeVModel, Model } from "react-vmodel"
 import { getTreePathArr } from "@/utils"
 import { toast } from "@/components/toast"
+import { useDraggableModal } from "@/hooks/draggable-modal"
+import { useKeys } from "@/hooks/keys"
+import { RequiredUndefined } from "soon-utils"
 
 export type FormDialogRef = {
   open: (type?: "add" | "edit" | "detail", data?: Partial<User> | undefined, link?: boolean) => void
@@ -26,11 +29,27 @@ const FormDialog = ({ onSuccess = () => {}, ref }: { onSuccess?: () => void; ref
     edit: t("edit"),
     detail: t("detail"),
   })
-  const initFormData = {
+  const initFormData: RequiredUndefined<Item> = {
+    id: undefined,
+    username: undefined,
+    password: undefined,
+    email: undefined,
+    phone: undefined,
+    name: undefined,
+    nickname: undefined,
+    avatar: undefined,
+    roleId: undefined,
+    deptId: undefined,
     status: 1,
+    gender: undefined,
+    desc: undefined,
   }
+  const keys = useKeys(initFormData)
 
-  const { visible, open, close, type, formData, setFormData } = useDialog<Item>({ formRef, initFormData })
+  const { visible, open, close, type, formData, setFormData } = useFormDialog<Item>({
+    initFormData,
+    onOpen: (data) => formRef.current?.setFieldsValue(data),
+  })
 
   const [roleOptions, setRoleOptions] = useState<Role[]>([])
   const [deptOptions, setDeptOptions] = useState<Dept[]>([])
@@ -91,14 +110,16 @@ const FormDialog = ({ onSuccess = () => {}, ref }: { onSuccess?: () => void; ref
     close,
   }))
 
-  useEffect(() => {
-    if (visible) {
-      const dom = document.querySelector(`[role="dialog"]`) as HTMLDivElement
-      if (dom) dom.style.width = ""
-    }
-  }, [visible])
+  const { modalRender, ModalTitle } = useDraggableModal()
   return (
-    <Modal open={visible} title={titles()[type]} closable onCancel={onCancel} footer={null}>
+    <Modal
+      open={visible}
+      title={<ModalTitle>{titles()[type]}</ModalTitle>}
+      closable
+      onCancel={onCancel}
+      footer={null}
+      modalRender={modalRender}
+    >
       <Form
         ref={formRef}
         disabled={type === "detail"}
@@ -113,26 +134,31 @@ const FormDialog = ({ onSuccess = () => {}, ref }: { onSuccess?: () => void; ref
           //console.log("err", err)
         }}
       >
-        <Form.Item label={t("label.username")} name="username" className="dialog-form-item" rules={rules().username}>
+        <Form.Item
+          label={t("label.username")}
+          name={keys.username}
+          className="dialog-form-item"
+          rules={rules().username}
+        >
           <Input allowClear disabled={type !== "add"} />
         </Form.Item>
-        <Form.Item label={t("label.password")} name="password" className="dialog-form-item">
+        <Form.Item label={t("label.password")} name={keys.password} className="dialog-form-item">
           <Input allowClear></Input>
         </Form.Item>
-        <Form.Item label={t("label.nickname")} name="nickname" className="dialog-form-item">
+        <Form.Item label={t("label.nickname")} name={keys.nickname} className="dialog-form-item">
           <Input allowClear></Input>
         </Form.Item>
-        <Form.Item label={t("label.name")} name="name" className="dialog-form-item">
+        <Form.Item label={t("label.name")} name={keys.name} className="dialog-form-item">
           <Input allowClear></Input>
         </Form.Item>
-        <Form.Item label={t("label.phone")} name="phone" className="dialog-form-item">
+        <Form.Item label={t("label.phone")} name={keys.phone} className="dialog-form-item">
           <Input placeholder="" allowClear></Input>
         </Form.Item>
-        <Form.Item label={t("label.email")} name="email" className="dialog-form-item">
+        <Form.Item label={t("label.email")} name={keys.email} className="dialog-form-item">
           <Input placeholder="" allowClear></Input>
         </Form.Item>
 
-        <Form.Item label={t("label.gender")} name="gender" className="dialog-form-item">
+        <Form.Item label={t("label.gender")} name={keys.gender} className="dialog-form-item">
           <Select placeholder="" allowClear options={genderOptions()}></Select>
         </Form.Item>
         <Form.Item label={t("label.status")} className="dialog-form-item">
@@ -144,10 +170,10 @@ const FormDialog = ({ onSuccess = () => {}, ref }: { onSuccess?: () => void; ref
           ></Switch>
         </Form.Item>
 
-        <Form.Item label={t("label.roleName")} name="roleId" className="dialog-form-item">
+        <Form.Item label={t("label.roleName")} name={keys.roleId} className="dialog-form-item">
           <Select placeholder="" allowClear options={roleOptions} fieldNames={{ label: "name", value: "id" }}></Select>
         </Form.Item>
-        <Form.Item label={t("label.deptName")} name="deptId" className="dialog-form-item">
+        <Form.Item label={t("label.deptName")} name={keys.deptId} className="dialog-form-item">
           <Model>
             {(_vModel, value, onChange) => (
               <Cascader
@@ -164,7 +190,7 @@ const FormDialog = ({ onSuccess = () => {}, ref }: { onSuccess?: () => void; ref
             )}
           </Model>
         </Form.Item>
-        <Form.Item label={t("label.remark")} name="desc" className="dialog-form-item" labelCol={{ span: 6 }}>
+        <Form.Item label={t("label.remark")} name={keys.desc} className="dialog-form-item" labelCol={{ span: 6 }}>
           <Input.TextArea allowClear rows={2} />
         </Form.Item>
         <div className=" w-full flex justify-end px-2">

@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react"
 
 type DialogHookProps<T> = {
-  formRef: any
   initFormData?: Partial<T>
+  onOpen?: (data: T) => void
 }
 
-export function useDialog<T>({ formRef, initFormData }: DialogHookProps<T>) {
+export function useFormDialog<T>({ initFormData, onOpen }: DialogHookProps<T>) {
   const [formData, setFormData] = useState(Object.assign({}, initFormData) as T)
   const [_type, set_type] = useState<"add" | "edit" | "detail">("add")
 
@@ -13,7 +13,6 @@ export function useDialog<T>({ formRef, initFormData }: DialogHookProps<T>) {
   // 关闭弹窗
   const close = () => {
     setVisible(false)
-    // formRef.value?.resetFields()
   }
 
   // 打开弹窗
@@ -28,9 +27,16 @@ export function useDialog<T>({ formRef, initFormData }: DialogHookProps<T>) {
     setFormData(_data)
     setVisible(true)
     setTimeout(() => {
-      formRef.current?.setFieldsValue(_data)
+      if (onOpen) onOpen(_data)
     })
   }
+
+  // useEffect(() => {
+  //   if (visible) {
+  //     const dom = document.querySelector(`[role="dialog"]`) as HTMLDivElement
+  //     if (dom) dom.style.width = ""
+  //   }
+  // }, [visible])
 
   return {
     visible,
