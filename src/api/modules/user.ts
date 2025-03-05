@@ -1,5 +1,5 @@
 import { downloadBlob, getHeaderFilename } from "soon-utils"
-import { PageParams } from "../types"
+import { PagedParams } from "../types"
 import { Dept } from "./dept"
 import { Role } from "./role"
 import { soon } from "../request"
@@ -30,7 +30,7 @@ export type UserInfo = Simplify<
   }
 >
 
-type ListQueryUser = Simplify<PageParams & { keyword?: string; timeRange?: [string, string] }>
+type ListQueryUser = Simplify<PagedParams & { keyword?: string; timeRange?: [string, string] }>
 export const list_user = soon.API("/user").GET<ListQueryUser, { list: UserInfo[] }>()
 export const add_user = soon.API("/user").POST<User>()
 export const update_user = soon.API("/user/:id").PUT<User>()

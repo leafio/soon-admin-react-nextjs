@@ -9,15 +9,13 @@ import { Model } from "react-vmodel"
 import { getTreePathArr } from "@/utils"
 import { toast } from "@/components/toast"
 import { useDraggableModal } from "@/hooks/draggable-modal"
-import { useKeys } from "@/hooks/keys"
-import { RequiredUndefined } from "soon-utils"
 
 export type FormDialogRef = {
   open: (type?: "add" | "edit" | "detail", data?: Partial<Menu> | undefined, link?: boolean) => void
   close: () => void
 }
 const FormDialog = ({ onSuccess = () => {}, ref }: { onSuccess?: () => void; ref: Ref<FormDialogRef> }) => {
-  type Item = Menu
+  type FieldType = Menu
   const formRef = useRef<FormInstance>(null)
 
   const t = useLocales({
@@ -31,26 +29,7 @@ const FormDialog = ({ onSuccess = () => {}, ref }: { onSuccess?: () => void; ref
     detail: t("detail"),
   })
 
-  const initFormData: RequiredUndefined<Item> = {
-    id: undefined,
-    name: undefined,
-    desc: undefined,
-    sort: undefined,
-    parentId: undefined,
-    menuType: undefined,
-    auth: undefined,
-    path: undefined,
-    redirect: undefined,
-    children: undefined,
-    createTime: undefined,
-    updateTime: undefined,
-    meta: undefined,
-  }
-
-  const keys = useKeys(initFormData)
-
-  const { visible, open, close, type, formData, setFormData } = useFormDialog<Item>({
-    initFormData,
+  const { visible, open, close, type, formData, setFormData } = useFormDialog<FieldType>({
     onOpen: (data) => formRef.current?.setFieldsValue(data),
   })
   const menuTypeOptions = () => [
@@ -94,7 +73,8 @@ const FormDialog = ({ onSuccess = () => {}, ref }: { onSuccess?: () => void; ref
   }, [visible])
 
   const submit = (values: any) => {
-    const data = Object.assign({}, formData) as Item
+    const data = Object.assign({}, formData) as FieldType
+    data.meta.isIframe = data.menuType === "iframe"
     if (type === "add") {
       add_menu(data).then((res) => {
         toast.success(t("tip.addSuccess"))
@@ -148,15 +128,15 @@ const FormDialog = ({ onSuccess = () => {}, ref }: { onSuccess?: () => void; ref
           //console.log("err", err)
         }}
       >
-        <Form.Item
+        <Form.Item<FieldType>
           label={t("label.menuType")}
           className="dialog-form-item-full"
-          name={keys.menuType}
+          name={"menuType"}
           labelCol={{ span: 3 }}
         >
           <Segmented options={menuTypeOptions()} />
         </Form.Item>
-        <Form.Item label={t("label.parentMenu")} className="dialog-form-item" name={keys.parentId}>
+        <Form.Item<FieldType> label={t("label.parentMenu")} className="dialog-form-item" name={"parentId"}>
           <Model>
             {(_vModel, value, onChange) => (
               <Cascader
@@ -172,7 +152,7 @@ const FormDialog = ({ onSuccess = () => {}, ref }: { onSuccess?: () => void; ref
             )}
           </Model>
         </Form.Item>
-        <Form.Item
+        <Form.Item<FieldType>
           label={t("label.menuTitle")}
           className="dialog-form-item"
           name={["meta", "title"]}
@@ -180,25 +160,25 @@ const FormDialog = ({ onSuccess = () => {}, ref }: { onSuccess?: () => void; ref
         >
           <Input allowClear></Input>
         </Form.Item>
-        <Form.Item label={t("label.auth")} className="dialog-form-item" name={keys.auth}>
+        <Form.Item<FieldType> label={t("label.auth")} className="dialog-form-item" name={"auth"}>
           <Input allowClear></Input>
         </Form.Item>
 
-        <Form.Item label={t("label.sort")} className="dialog-form-item" name={keys.sort}>
+        <Form.Item<FieldType> label={t("label.sort")} className="dialog-form-item" name={"sort"}>
           <InputNumber controls-position="right" className="w100" />
         </Form.Item>
         {formData.menuType !== "btn" && (
           <>
-            <Form.Item label={t("label.menuIcon")} className="dialog-form-item" name={["meta", "icon"]}>
+            <Form.Item<FieldType> label={t("label.menuIcon")} className="dialog-form-item" name={["meta", "icon"]}>
               <Input allowClear></Input>
             </Form.Item>
             {formData.menuType !== "link" && (
               <>
-                <Form.Item label={t("label.routePath")} className="dialog-form-item" name={keys.path}>
+                <Form.Item<FieldType> label={t("label.routePath")} className="dialog-form-item" name={"path"}>
                   <Input allowClear></Input>
                 </Form.Item>
 
-                <Form.Item label={t("label.layout")} className="dialog-form-item" name={["meta", "layout"]}>
+                <Form.Item<FieldType> label={t("label.layout")} className="dialog-form-item" name={["meta", "layout"]}>
                   <Select
                     allowClear
                     options={[
@@ -210,26 +190,30 @@ const FormDialog = ({ onSuccess = () => {}, ref }: { onSuccess?: () => void; ref
                   ></Select>
                 </Form.Item>
 
-                <Form.Item label={t("pageCache.title")} className="dialog-form-item" name={["meta", "isKeepAlive"]}>
+                <Form.Item<FieldType>
+                  label={t("pageCache.title")}
+                  className="dialog-form-item"
+                  name={["meta", "isKeepAlive"]}
+                >
                   <Switch />
                 </Form.Item>
 
-                <Form.Item label={t("fixed.title")} className="dialog-form-item" name={["meta", "isAffix"]}>
+                <Form.Item<FieldType> label={t("fixed.title")} className="dialog-form-item" name={["meta", "isAffix"]}>
                   <Switch />
                 </Form.Item>
-                <Form.Item label={t("hidden.title")} className="dialog-form-item" name={["meta", "isHide"]}>
+                <Form.Item<FieldType> label={t("hidden.title")} className="dialog-form-item" name={["meta", "isHide"]}>
                   <Switch />
                 </Form.Item>
               </>
             )}
 
             {formData.menuType === "page" && (
-              <Form.Item label={t("label.redirect")} className="dialog-form-item" name={keys.redirect}>
+              <Form.Item<FieldType> label={t("label.redirect")} className="dialog-form-item" name={"redirect"}>
                 <Input allowClear></Input>
               </Form.Item>
             )}
             {(formData.menuType === "iframe" || formData.menuType === "link") && (
-              <Form.Item label={t("label.linkUrl")} className="dialog-form-item" name={["meta", "link"]}>
+              <Form.Item<FieldType> label={t("label.linkUrl")} className="dialog-form-item" name={["meta", "link"]}>
                 <Input allowClear></Input>
               </Form.Item>
             )}

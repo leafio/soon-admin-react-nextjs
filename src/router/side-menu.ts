@@ -6,7 +6,7 @@ import ko_menu from "@/i18n/ko/menu"
 import zh_menu from "@/i18n/zh/menu"
 import { SoonRoute } from "@/router/utils"
 
-export type ParsedMenu = SoonRoute & SoonMenuData
+export type ParsedMenu = SoonRoute & SoonMenuData & { isLink?: boolean }
 
 const t = tLocales({ zh: zh_menu, en: en_menu, ko: ko_menu })
 

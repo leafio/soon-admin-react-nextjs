@@ -1,4 +1,4 @@
-import { Button, Cascader, Form, FormInstance, Input, Modal, Switch, Tree, TreeSelect } from "antd"
+import { Button, Form, FormInstance, Input, Modal, Switch, Tree } from "antd"
 
 import { Role, add_role, update_role, tree_menu, Menu } from "@/api"
 import { useFormDialog } from "@/hooks/form-dialog"
@@ -15,15 +15,13 @@ import ko_system_role from "@/i18n/ko/system/role"
 import zh_menu from "@/i18n/zh/menu"
 import en_menu from "@/i18n/en/menu"
 import ko_menu from "@/i18n/ko/menu"
-import { useKeys } from "@/hooks/keys"
-import { RequiredUndefined } from "soon-utils"
 
 export type FormDialogRef = {
   open: (type?: "add" | "edit" | "detail", data?: Partial<Role> | undefined, link?: boolean) => void
   close: () => void
 }
 const FormDialog = ({ onSuccess = () => {}, ref }: { onSuccess?: () => void; ref: Ref<FormDialogRef> }) => {
-  type Item = Role
+  type FieldType = Role
   const formRef = useRef<FormInstance>(null)
 
   const t = useLocales({
@@ -36,17 +34,8 @@ const FormDialog = ({ onSuccess = () => {}, ref }: { onSuccess?: () => void; ref
     edit: t("edit"),
     detail: t("detail"),
   })
-  const initFormData: RequiredUndefined<Item> = {
-    id: undefined,
-    name: undefined,
-    status: 1,
-    permissions: undefined,
-    desc: undefined,
-    createTime: undefined,
-    updateTime: undefined,
-  }
-  const { visible, open, close, type, formData, setFormData } = useFormDialog<Item>({
-    initFormData,
+  const { visible, open, close, type, formData, setFormData } = useFormDialog<FieldType>({
+    initFormData: { status: 1 },
     onOpen: (data) => formRef.current?.setFieldsValue(data),
   })
   const [menuOptions, setMenuOptions] = useState<Menu[]>([])
@@ -71,7 +60,7 @@ const FormDialog = ({ onSuccess = () => {}, ref }: { onSuccess?: () => void; ref
   }, [visible])
 
   const submit = (values: any) => {
-    const data = Object.assign({}, formData) as Item
+    const data = Object.assign({}, formData) as FieldType
     if (type === "add") {
       add_role(data).then((res) => {
         toast.success(t("tip.addSuccess"))
@@ -103,7 +92,6 @@ const FormDialog = ({ onSuccess = () => {}, ref }: { onSuccess?: () => void; ref
 
   const { modalRender, ModalTitle } = useDraggableModal()
 
-  const keys = useKeys(initFormData)
   return (
     <Modal
       open={visible}
@@ -127,7 +115,7 @@ const FormDialog = ({ onSuccess = () => {}, ref }: { onSuccess?: () => void; ref
           //console.log("err", err)
         }}
       >
-        <Form.Item label={t("label.name")} name={keys.name} className="dialog-form-item" rules={rules().name}>
+        <Form.Item<FieldType> label={t("label.name")} name={"name"} className="dialog-form-item" rules={rules().name}>
           <Input allowClear></Input>
         </Form.Item>
 
@@ -140,7 +128,7 @@ const FormDialog = ({ onSuccess = () => {}, ref }: { onSuccess?: () => void; ref
           ></Switch>
         </Form.Item>
 
-        <Form.Item label={t("label.permissions")} name={keys.permissions} className="dialog-form-item">
+        <Form.Item<FieldType> label={t("label.permissions")} name={"permissions"} className="dialog-form-item">
           <Model>
             {(_, value, onChange) => (
               <Tree
@@ -159,7 +147,12 @@ const FormDialog = ({ onSuccess = () => {}, ref }: { onSuccess?: () => void; ref
             )}
           </Model>
         </Form.Item>
-        <Form.Item label={t("label.remark")} name={keys.desc} className="dialog-form-item" labelCol={{ span: 6 }}>
+        <Form.Item<FieldType>
+          label={t("label.remark")}
+          name={"desc"}
+          className="dialog-form-item"
+          labelCol={{ span: 6 }}
+        >
           <Input.TextArea allowClear rows={2} />
         </Form.Item>
         <div className=" w-full flex justify-end px-2">

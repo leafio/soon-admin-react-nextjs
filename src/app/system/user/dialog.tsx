@@ -8,15 +8,13 @@ import { makeVModel, Model } from "react-vmodel"
 import { getTreePathArr } from "@/utils"
 import { toast } from "@/components/toast"
 import { useDraggableModal } from "@/hooks/draggable-modal"
-import { useKeys } from "@/hooks/keys"
-import { RequiredUndefined } from "soon-utils"
 
 export type FormDialogRef = {
   open: (type?: "add" | "edit" | "detail", data?: Partial<User> | undefined, link?: boolean) => void
   close: () => void
 }
 const FormDialog = ({ onSuccess = () => {}, ref }: { onSuccess?: () => void; ref: Ref<FormDialogRef> }) => {
-  type Item = User
+  type FieldType = User
   const formRef = useRef<FormInstance>(null)
 
   const t = useLocales({
@@ -29,25 +27,9 @@ const FormDialog = ({ onSuccess = () => {}, ref }: { onSuccess?: () => void; ref
     edit: t("edit"),
     detail: t("detail"),
   })
-  const initFormData: RequiredUndefined<Item> = {
-    id: undefined,
-    username: undefined,
-    password: undefined,
-    email: undefined,
-    phone: undefined,
-    name: undefined,
-    nickname: undefined,
-    avatar: undefined,
-    roleId: undefined,
-    deptId: undefined,
-    status: 1,
-    gender: undefined,
-    desc: undefined,
-  }
-  const keys = useKeys(initFormData)
 
-  const { visible, open, close, type, formData, setFormData } = useFormDialog<Item>({
-    initFormData,
+  const { visible, open, close, type, formData, setFormData } = useFormDialog<FieldType>({
+    initFormData: { status: 1 },
     onOpen: (data) => formRef.current?.setFieldsValue(data),
   })
 
@@ -80,7 +62,7 @@ const FormDialog = ({ onSuccess = () => {}, ref }: { onSuccess?: () => void; ref
   }, [visible])
 
   const submit = (values: any) => {
-    const data = Object.assign({}, formData) as Item
+    const data = Object.assign({}, formData) as FieldType
     if (type === "add") {
       add_user(data).then((res) => {
         toast.success(t("tip.addSuccess"))
@@ -111,6 +93,7 @@ const FormDialog = ({ onSuccess = () => {}, ref }: { onSuccess?: () => void; ref
   }))
 
   const { modalRender, ModalTitle } = useDraggableModal()
+
   return (
     <Modal
       open={visible}
@@ -134,34 +117,34 @@ const FormDialog = ({ onSuccess = () => {}, ref }: { onSuccess?: () => void; ref
           //console.log("err", err)
         }}
       >
-        <Form.Item
+        <Form.Item<FieldType>
           label={t("label.username")}
-          name={keys.username}
+          name={"username"}
           className="dialog-form-item"
           rules={rules().username}
         >
           <Input allowClear disabled={type !== "add"} />
         </Form.Item>
-        <Form.Item label={t("label.password")} name={keys.password} className="dialog-form-item">
+        <Form.Item<FieldType> label={t("label.password")} name={"password"} className="dialog-form-item">
           <Input allowClear></Input>
         </Form.Item>
-        <Form.Item label={t("label.nickname")} name={keys.nickname} className="dialog-form-item">
+        <Form.Item<FieldType> label={t("label.nickname")} name={"nickname"} className="dialog-form-item">
           <Input allowClear></Input>
         </Form.Item>
-        <Form.Item label={t("label.name")} name={keys.name} className="dialog-form-item">
+        <Form.Item<FieldType> label={t("label.name")} name={"name"} className="dialog-form-item">
           <Input allowClear></Input>
         </Form.Item>
-        <Form.Item label={t("label.phone")} name={keys.phone} className="dialog-form-item">
+        <Form.Item<FieldType> label={t("label.phone")} name={"phone"} className="dialog-form-item">
           <Input placeholder="" allowClear></Input>
         </Form.Item>
-        <Form.Item label={t("label.email")} name={keys.email} className="dialog-form-item">
+        <Form.Item<FieldType> label={t("label.email")} name={"email"} className="dialog-form-item">
           <Input placeholder="" allowClear></Input>
         </Form.Item>
 
-        <Form.Item label={t("label.gender")} name={keys.gender} className="dialog-form-item">
+        <Form.Item<FieldType> label={t("label.gender")} name={"gender"} className="dialog-form-item">
           <Select placeholder="" allowClear options={genderOptions()}></Select>
         </Form.Item>
-        <Form.Item label={t("label.status")} className="dialog-form-item">
+        <Form.Item<FieldType> label={t("label.status")} className="dialog-form-item">
           <Switch
             {...vModel.checked("status", { trueValue: 1, falseValue: 0 })}
             disabled={formData.username === "admin"}
@@ -170,10 +153,10 @@ const FormDialog = ({ onSuccess = () => {}, ref }: { onSuccess?: () => void; ref
           ></Switch>
         </Form.Item>
 
-        <Form.Item label={t("label.roleName")} name={keys.roleId} className="dialog-form-item">
+        <Form.Item<FieldType> label={t("label.roleName")} name={"roleId"} className="dialog-form-item">
           <Select placeholder="" allowClear options={roleOptions} fieldNames={{ label: "name", value: "id" }}></Select>
         </Form.Item>
-        <Form.Item label={t("label.deptName")} name={keys.deptId} className="dialog-form-item">
+        <Form.Item<FieldType> label={t("label.deptName")} name={"deptId"} className="dialog-form-item">
           <Model>
             {(_vModel, value, onChange) => (
               <Cascader
@@ -190,7 +173,12 @@ const FormDialog = ({ onSuccess = () => {}, ref }: { onSuccess?: () => void; ref
             )}
           </Model>
         </Form.Item>
-        <Form.Item label={t("label.remark")} name={keys.desc} className="dialog-form-item" labelCol={{ span: 6 }}>
+        <Form.Item<FieldType>
+          label={t("label.remark")}
+          name={"desc"}
+          className="dialog-form-item"
+          labelCol={{ span: 6 }}
+        >
           <Input.TextArea allowClear rows={2} />
         </Form.Item>
         <div className=" w-full flex justify-end px-2">

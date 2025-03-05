@@ -15,6 +15,7 @@ import { useAuth } from "@/hooks/auth"
 import { toast } from "@/components/toast"
 import { modal } from "@/components/modal"
 import { BtnAdd, BtnRefresh } from "@/components/soon"
+import { useAutoTable } from "@/hooks/table"
 
 export default function PageDept() {
   type Item = Dept
@@ -27,6 +28,10 @@ export default function PageDept() {
     en: () => import("@/i18n/en/system/dept"),
     ko: () => import("@/i18n/ko/system/dept"),
   })
+  const searchApi = ((...args: any) => {
+    setIsRepainting(true)
+    return tree_dept(...args)
+  }) as typeof tree_dept
   const {
     list,
     refresh,
@@ -37,13 +42,15 @@ export default function PageDept() {
     query: queryForm,
     setQuery,
   } = usePageList({
-    searchApi: tree_dept,
+    searchApi,
     autoSearchDelay: 300,
   })
 
   useEffect(() => {
     refresh()
   }, [])
+
+  type TableCol = TableColumnsType<Item>[0] & { dataIndex: string; title: string }
 
   const actionCol = {
     dataIndex: "action",
@@ -68,9 +75,9 @@ export default function PageDept() {
         </div>
       )
     },
-  } satisfies TableColumnsType<Item>[0]
+  } satisfies TableCol
 
-  const checkedCols = useMemo(
+  const checkedCols = useMemo<TableCol[]>(
     () => [
       {
         dataIndex: "name",
@@ -123,6 +130,9 @@ export default function PageDept() {
     refFormDialog.current?.open("detail", item)
   }
 
+  const refTableContainer = useRef<HTMLDivElement>(null)
+  const [height, isRepainting, setIsRepainting] = useAutoTable(list, refTableContainer)
+
   return (
     <div className="page-container bg flex-1 flex flex-col overflow-auto">
       <div className="btn-bar">
@@ -130,14 +140,18 @@ export default function PageDept() {
         <BtnRefresh onClick={refresh} />
       </div>
       {!isMobile && (
-        <div className="table-container">
+        <div
+          className="table-container"
+          ref={refTableContainer}
+          style={{ overflowY: isRepainting ? "scroll" : "unset" }}
+        >
           <Table
             pagination={false}
             loading={loading}
             columns={[...checkedCols, actionCol]}
             dataSource={list}
-            className="h-full"
             rowKey={"id"}
+            scroll={{ x: "max-content", y: isRepainting ? undefined : height }}
           ></Table>
         </div>
       )}
@@ -172,6 +186,7 @@ export default function PageDept() {
       <Pagination
         className="pagination-container"
         showTotal={() => t("total", total)}
+        showSizeChanger
         current={queryForm.pageIndex}
         pageSize={queryForm.pageSize}
         onChange={(pageIndex, pageSize) => setQuery({ ...queryForm, pageIndex, pageSize })}

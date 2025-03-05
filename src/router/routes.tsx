@@ -42,8 +42,8 @@ export const bizRoutes: SoonRoute[] = [
         meta: {
           title: () => "iframe",
           link: "https://www.baidu.com",
-          isIframe: true,
           isKeepAlive: true,
+          isIframe: true,
         },
       },
       {
@@ -52,7 +52,6 @@ export const bizRoutes: SoonRoute[] = [
         meta: {
           title: () => "link",
           link: "https://www.baidu.com",
-          isKeepAlive: true,
         },
       },
     ],

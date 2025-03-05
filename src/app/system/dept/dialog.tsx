@@ -8,15 +8,13 @@ import { Model } from "react-vmodel"
 import { getTreePathArr } from "@/utils"
 import { toast } from "@/components/toast"
 import { useDraggableModal } from "@/hooks/draggable-modal"
-import { useKeys } from "@/hooks/keys"
-import { RequiredUndefined } from "soon-utils"
 
 export type FormDialogRef = {
   open: (type?: "add" | "edit" | "detail", data?: Partial<Dept> | undefined, link?: boolean) => void
   close: () => void
 }
 const FormDialog = ({ onSuccess = () => {}, ref }: { onSuccess?: () => void; ref: Ref<FormDialogRef> }) => {
-  type Item = Dept
+  type FieldType = Dept
   const formRef = useRef<FormInstance>(null)
 
   const t = useLocales({
@@ -29,18 +27,8 @@ const FormDialog = ({ onSuccess = () => {}, ref }: { onSuccess?: () => void; ref
     edit: t("edit"),
     detail: t("detail"),
   })
-  const initFormData: RequiredUndefined<Item> = {
-    id: undefined,
-    name: undefined,
-    desc: undefined,
-    sort: undefined,
-    parentId: undefined,
-    children: undefined,
-    createTime: undefined,
-    updateTime: undefined,
-  }
-  const { visible, open, close, type, formData, setFormData } = useFormDialog<Item>({
-    initFormData,
+
+  const { visible, open, close, type, formData, setFormData } = useFormDialog<FieldType>({
     onOpen: (data) => formRef.current?.setFieldsValue(data),
   })
   const [deptOptions, setDeptOptions] = useState<Dept[]>([])
@@ -54,7 +42,7 @@ const FormDialog = ({ onSuccess = () => {}, ref }: { onSuccess?: () => void; ref
   }, [visible])
 
   const submit = (values: any) => {
-    const data = Object.assign({}, formData) as Item
+    const data = Object.assign({}, formData) as FieldType
     if (type === "add") {
       add_dept(data).then((res) => {
         toast.success(t("tip.addSuccess"))
@@ -85,8 +73,6 @@ const FormDialog = ({ onSuccess = () => {}, ref }: { onSuccess?: () => void; ref
 
   const { modalRender, ModalTitle } = useDraggableModal()
 
-  const keys = useKeys(initFormData)
-
   return (
     <Modal
       open={visible}
@@ -110,7 +96,7 @@ const FormDialog = ({ onSuccess = () => {}, ref }: { onSuccess?: () => void; ref
           //console.log("err", err)
         }}
       >
-        <Form.Item label={t("label.superiorDepartment")} name={keys.parentId} className="dialog-form-item-full">
+        <Form.Item<FieldType> label={t("label.superiorDepartment")} name={"parentId"} className="dialog-form-item-full">
           <Model>
             {(_vModel, value, onChange) => (
               <Cascader
@@ -129,11 +115,21 @@ const FormDialog = ({ onSuccess = () => {}, ref }: { onSuccess?: () => void; ref
           </Model>
         </Form.Item>
 
-        <Form.Item label={t("label.name")} name={keys.name} className="dialog-form-item-full" rules={rules().name}>
+        <Form.Item<FieldType>
+          label={t("label.name")}
+          name={"name"}
+          className="dialog-form-item-full"
+          rules={rules().name}
+        >
           <Input allowClear></Input>
         </Form.Item>
 
-        <Form.Item label={t("label.remark")} name={keys.desc} className="dialog-form-item-full" labelCol={{ span: 6 }}>
+        <Form.Item<FieldType>
+          label={t("label.remark")}
+          name={"desc"}
+          className="dialog-form-item-full"
+          labelCol={{ span: 6 }}
+        >
           <Input.TextArea allowClear rows={2} />
         </Form.Item>
         <div className=" w-full flex justify-end px-2">

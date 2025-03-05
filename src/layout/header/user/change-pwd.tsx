@@ -8,8 +8,6 @@ import { useDraggableModal } from "@/hooks/draggable-modal"
 import zh_change_pwd from "@/i18n/zh/auth/change-pwd"
 import en_change_pwd from "@/i18n/en/auth/change-pwd"
 import ko_change_pwd from "@/i18n/ko/auth/change-pwd"
-import { useKeys } from "@/hooks/keys"
-import { RequiredUndefined } from "soon-utils"
 
 const ChangePassword = ({ visible, onClose }: { visible: boolean; onClose: () => void }) => {
   const formRef = useRef<FormInstance>(null)
@@ -20,14 +18,14 @@ const ChangePassword = ({ visible, onClose }: { visible: boolean; onClose: () =>
     ko: ko_change_pwd,
   })
 
-  type Item = Parameters<typeof change_pwd>[0] & { confirm_new_password: string }
-  const defaultValue: RequiredUndefined<Item> = {
+  type FieldType = Parameters<typeof change_pwd>[0] & { confirm_new_password: string }
+  const defaultValue: FieldType = {
     password: "",
     new_password: "",
     confirm_new_password: "",
   }
 
-  const [formData, setFormData] = useState(defaultValue as Item)
+  const [formData, setFormData] = useState(defaultValue as FieldType)
 
   useEffect(() => {
     if (visible) {
@@ -52,7 +50,7 @@ const ChangePassword = ({ visible, onClose }: { visible: boolean; onClose: () =>
       password: [{ required: true, message: t("error.originalPassword"), trigger: "blur" }],
       new_password: [{ required: true, message: t("error.newPassword"), trigger: "blur" }],
       confirm_new_password: [{ required: true, message: t("error.confirmPassword"), trigger: "blur" }],
-    }) satisfies Record<keyof Item, any>
+    }) satisfies Record<keyof FieldType, any>
 
   const { modalRender, ModalTitle } = useDraggableModal()
   const [validSame, setValidSame] = useState<{ validateStatus: "error"; help: string } | null>(null)
@@ -69,8 +67,6 @@ const ChangePassword = ({ visible, onClose }: { visible: boolean; onClose: () =>
     }
     setValidSame(null)
   }, [formData])
-
-  const keys = useKeys(defaultValue)
 
   return (
     <Modal
@@ -91,25 +87,25 @@ const ChangePassword = ({ visible, onClose }: { visible: boolean; onClose: () =>
         labelCol={{ span: 6 }}
         onFinish={submit}
       >
-        <Form.Item
+        <Form.Item<FieldType>
           label={t("originalPassword")}
-          name={keys.password}
+          name={"password"}
           className="dialog-form-item-full"
           rules={rules().password}
         >
           <Input allowClear type="password"></Input>
         </Form.Item>
-        <Form.Item
+        <Form.Item<FieldType>
           label={t("newPassword")}
-          name={keys.new_password}
+          name={"new_password"}
           className="dialog-form-item-full"
           rules={rules().new_password}
         >
           <Input allowClear type="password"></Input>
         </Form.Item>
-        <Form.Item
+        <Form.Item<FieldType>
           label={t("confirmPassword")}
-          name={keys.confirm_new_password}
+          name={"confirm_new_password"}
           className="dialog-form-item-full"
           rules={rules().confirm_new_password}
           validateStatus={validSame?.validateStatus}

@@ -57,11 +57,10 @@
     "menuType": "iframe",
     "path": "/link/iframe",
     "meta": {
-      "cached": true,
       "title": "iframe",
-      "isIframe": true,
-      "link": "https://www.baidu.com",
-      "isKeepAlive": true
+      "isKeepAlive": true,
+      "link": "https://leafio.github.io/soon-tools/json/type",
+      "isIframe": true
     },
     "createTime": "2024-09-09T15:31:06.719Z",
     "updateTime": "2024-09-09T15:31:06.719Z",

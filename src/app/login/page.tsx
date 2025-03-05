@@ -1,7 +1,6 @@
 "use client"
 
 import { getCaptcha, login } from "@/api"
-import { useKeys } from "@/hooks/keys"
 import { useLang, useLocales } from "@/i18n"
 import en_login from "@/i18n/en/auth/login"
 import ko_login from "@/i18n/ko/auth/login"
@@ -63,7 +62,7 @@ export default function PageLogin() {
     if (formRef.current?.isFieldsTouched()) formRef.current?.validateFields()
   }, [lang])
 
-  const keys = useKeys(default_value)
+  type FieldType = typeof default_value
   return (
     <Container className="relative min-h-[100vh]">
       <Form
@@ -76,13 +75,13 @@ export default function PageLogin() {
         <div className="flex justify-end">
           <LangSwitch className="w-6 h-6 mb-4" />
         </div>
-        <Form.Item name={keys.username} rules={rules().username}>
+        <Form.Item<FieldType> name={"username"} rules={rules().username}>
           <Input placeholder={t("username") + ":  admin"}></Input>
         </Form.Item>
-        <Form.Item name={keys.password} rules={rules().password}>
+        <Form.Item<FieldType> name={"password"} rules={rules().password}>
           <Input placeholder={t("password") + ":  admin"} type="password"></Input>
         </Form.Item>
-        <Form.Item name={keys.code} rules={rules().code}>
+        <Form.Item<FieldType> name={"code"} rules={rules().code}>
           <Input
             placeholder={t("code")}
             addonAfter={<div ref={refImg} className="cursor-pointer" onClick={refreshCaptcha} />}

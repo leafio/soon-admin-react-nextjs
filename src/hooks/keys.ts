@@ -1,6 +1,11 @@
 import { useMemo } from "react"
-import { obj2keyObj } from "soon-utils"
+import { Paths } from "type-fest"
 
-export function useKeys<T extends object>(data: T) {
-  return useMemo(() => obj2keyObj(data), [data])
+export function useKeys<T>() {
+  return useMemo(
+    () => (key: `${Paths<T>}`) => {
+      return key.split(".")
+    },
+    [],
+  )
 }

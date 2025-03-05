@@ -36,7 +36,7 @@
   }
 
   .table-container {
-    @apply hidden md:flex w-full overflow-auto flex-col;
+    @apply hidden md:flex w-full flex-col;
   }
 
   .pagination-container {
@@ -59,4 +59,7 @@
   //         height: calc(100vh - 86px);
   //     }
   // }
+
+
+  
 }

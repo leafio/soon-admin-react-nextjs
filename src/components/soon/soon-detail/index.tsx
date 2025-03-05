@@ -3,14 +3,35 @@ import clsx from "clsx"
 import { ReactNode, useLayoutEffect, useRef, useState } from "react"
 import { ChevronLeft } from "react-bootstrap-icons"
 
+export function SoonDetailToggle({
+  expanded,
+  setExpanded,
+  className,
+}: {
+  expanded: boolean
+  setExpanded: (value: boolean) => void
+  className?: string
+}) {
+  return (
+    <ChevronLeft
+      className={clsx(
+        "transition-transform bg-primary-100 text-primary-700 rounded-full w-6 h-6 p-1 text-soon stroke-2 cursor-pointer",
+        expanded && "-rotate-90",
+        className,
+      )}
+      onClick={() => setExpanded(!expanded)}
+    />
+  )
+}
+
 export default function SoonDetail({
   children,
   cols,
   item,
-  action,
+  // action,
 }: {
-  children: ReactNode
-  action?: ReactNode
+  children: ReactNode | ((expanded: boolean, setExpanded: (value: boolean) => void) => ReactNode)
+  // action?: ReactNode
   cols: any[]
   item: any
 }) {
@@ -30,8 +51,8 @@ export default function SoonDetail({
   }, [])
   return (
     <div className="flex flex-col bg-white dark:bg-neutral-900">
-      {children}
-      <div className="flex justify-between p-1">
+      {typeof children === "function" ? children(expanded, setExpanded) : children}
+      {/* <div className="flex justify-between p-1">
         {action}
         <ChevronLeft
           className={clsx(
@@ -40,7 +61,7 @@ export default function SoonDetail({
           )}
           onClick={() => setExpanded(!expanded)}
         />
-      </div>
+      </div> */}
       <div className="transition-all overflow-hidden px-1" style={{ maxHeight: (expanded ? maxHeight : 0) + "px" }}>
         <div ref={refDes}>
           <Descriptions items={des} />

@@ -6,18 +6,30 @@
 // export { toast, Toast }
 
 import { message } from "antd"
+import { TypeOpen } from "antd/es/message/interface"
 import mitt from "mitt"
 import { useEffect } from "react"
 export const emitter = mitt()
 
-const info = (msg: string) => {
-  // console.log("toast-emit", info)
-  emitter.emit("toast", { type: "info", msg })
+const info = (...args: Parameters<TypeOpen>) => {
+  emitter.emit("toast", { type: "info", args })
 }
-const success = (msg: string) => emitter.emit("toast", { type: "success", msg })
-const error = (msg: string) => emitter.emit("toast", { type: "error", msg })
-const warning = (msg: string) => emitter.emit("toast", { type: "warning", msg })
-const loading = (msg: string) => emitter.emit("toast", { type: "loading", msg })
+const success = (...args: Parameters<TypeOpen>) => {
+  emitter.emit("toast", { type: "success", args })
+}
+
+const error = (...args: Parameters<TypeOpen>) => {
+  emitter.emit("toast", { type: "error", args })
+}
+
+const warning = (...args: Parameters<TypeOpen>) => {
+  emitter.emit("toast", { type: "warning", args })
+}
+
+const loading = (...args: Parameters<TypeOpen>) => {
+  emitter.emit("toast", { type: "loading", args })
+}
+
 export const toast = {
   info,
   success,
@@ -30,9 +42,8 @@ export function useToast() {
   const [messageApi, contextHolder] = message.useMessage()
   useEffect(() => {
     emitter.on("toast", (data) => {
-      // console.log("on-toast", data)
-      const { msg, type } = data as { type: keyof typeof toast; msg: string }
-      messageApi[type](msg)
+      const { args, type } = data as { type: keyof typeof toast; args: Parameters<TypeOpen> }
+      messageApi[type](...args)
     })
   }, [])
 

@@ -7,6 +7,7 @@ export type SoonRouteMeta = {
   isKeepAlive?: boolean
   isAffix?: boolean
   isIframe?: boolean
+
   icon?: string | ReactNode
   layout?: string
 }

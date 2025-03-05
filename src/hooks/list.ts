@@ -1,10 +1,10 @@
-import { PageParams } from "@/api/types"
+import type { PagedParams, PagedRes } from "@/api/types"
 import { useDebounceEffect } from "ahooks"
 import { useEffect, useRef, useState } from "react"
 
 export function usePageList<
   R,
-  T extends (args: PageParams) => Promise<{ list: R[]; total?: number }>,
+  T extends (args: PagedParams) => Promise<PagedRes<R>>,
   MapFun extends (item: Awaited<ReturnType<T>>["list"][0]) => R,
 >({
   searchApi,
@@ -24,8 +24,8 @@ export function usePageList<
   const [query, setQuery] = useState<NonNullable<Parameters<T>[0]>>({ ...initQuery })
 
   const [otherParams, setOtherParams] = useState<any>({})
-  const initPageInfo: PageParams = { pageIndex: 1, pageSize: 10 }
-  const [pageInfo, setPageInfo] = useState<PageParams>({ ...initPageInfo })
+  const initPageInfo: PagedParams = { pageIndex: 1, pageSize: 10 }
+  const [pageInfo, setPageInfo] = useState<PagedParams>({ ...initPageInfo })
   useEffect(() => {
     const other = { ...otherParams }
     const _pageInfo = { ...pageInfo }
@@ -33,8 +33,8 @@ export function usePageList<
     let isPageInfoChanged = false
     Object.keys(query).forEach((key) => {
       if (Object.keys(initPageInfo).includes(key)) {
-        if (_pageInfo[key as keyof PageParams] !== query[key as keyof Parameters<T>[0]]) {
-          _pageInfo[key as keyof PageParams] = query[key as keyof PageParams]
+        if (_pageInfo[key as keyof PagedParams] !== query[key as keyof Parameters<T>[0]]) {
+          _pageInfo[key as keyof PagedParams] = query[key as keyof PagedParams]
           isPageInfoChanged = true
         }
       } else {

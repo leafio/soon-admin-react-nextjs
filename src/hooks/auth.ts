@@ -1,10 +1,12 @@
 import { userStore } from "@/store/modules/user"
 import { useSnapshot } from "valtio"
-type USER_AUTH = "user.add" | "user.edit" | "user.del" | "user.export"
-type DEPT_AUTH = "dept.add" | "dept.edit" | "dept.del"
-type ROLE_AUTH = "role.add" | "role.edit" | "role.del"
-type MENU = "menu.add" | "menu.edit" | "menu.del"
-type AUTH_CODE = USER_AUTH | DEPT_AUTH | ROLE_AUTH | MENU
+
+type AUTH_USER = "user.add" | "user.edit" | "user.del" | "user.export"
+type AUTH_DEPT = "dept.add" | "dept.edit" | "dept.del"
+type AUTH_ROLE = "role.add" | "role.edit" | "role.del"
+type AUTH_MENU = "menu.add" | "menu.edit" | "menu.del"
+
+type AUTH_CODE = AUTH_USER | AUTH_DEPT | AUTH_ROLE | AUTH_MENU
 
 function createAuthFun<T>(auth_code_arr: readonly T[] = []) {
   const auth = (code: T) => {

@@ -18,7 +18,8 @@ import { useAuth } from "@/hooks/auth"
 import { toast } from "@/components/toast"
 import { modal } from "@/components/modal"
 import { makeVModel } from "react-vmodel"
-import { BtnAdd, BtnCols, BtnExport, BtnRefresh, BtnSearch, SoonDetail } from "@/components/soon"
+import { BtnAdd, BtnCols, BtnExport, BtnRefresh, BtnSearch, SoonDetail, SoonDetailToggle } from "@/components/soon"
+import { useAutoTable } from "@/hooks/table"
 
 export default function PageUser() {
   type Item = UserInfo
@@ -31,6 +32,10 @@ export default function PageUser() {
     en: () => import("@/i18n/en/system/user"),
     ko: () => import("@/i18n/ko/system/user"),
   })
+  const searchApi = ((...args: any) => {
+    setIsRepainting(true)
+    return list_user(...args)
+  }) as typeof list_user
   const {
     list,
     refresh,
@@ -41,13 +46,15 @@ export default function PageUser() {
     query: queryForm,
     setQuery,
   } = usePageList({
-    searchApi: list_user,
+    searchApi,
     autoSearchDelay: 300,
   })
 
   useEffect(() => {
     refresh()
   }, [])
+
+  type TableCol = TableColumnsType<Item>[0] & { dataIndex: string; title: string }
 
   const actionCol = {
     dataIndex: "action",
@@ -72,8 +79,8 @@ export default function PageUser() {
         </div>
       )
     },
-  } satisfies TableColumnsType<Item>[0]
-  const memoCols = useMemo(
+  } satisfies TableCol
+  const memoCols = useMemo<TableCol[]>(
     () => [
       {
         dataIndex: "username",
@@ -103,6 +110,7 @@ export default function PageUser() {
         dataIndex: "role.name",
         title: t("label.roleName"),
         // width: "",
+        minWidth: 75,
         render(_: any, item: Item) {
           return item.role?.name
         },
@@ -115,7 +123,7 @@ export default function PageUser() {
       {
         dataIndex: "dept.name",
         title: t("label.deptName"),
-        // width: "",
+        minWidth: 75,
         render(_: any, item: Item) {
           return item.dept?.name
         },
@@ -139,12 +147,7 @@ export default function PageUser() {
     ],
     [t],
   )
-  const {
-    cols,
-    checkedCols,
-    setCols,
-    reset: restCols,
-  } = useCols<TableColumnsType<Item>[0] & { dataIndex: string; title: string }>(memoCols)
+  const { cols, checkedCols, setCols, reset: restCols } = useCols<TableCol>(memoCols)
 
   const handleDelete = (item: Item) => {
     modal.confirm({
@@ -175,6 +178,9 @@ export default function PageUser() {
   }
 
   const vModel = makeVModel(queryForm, setQuery)
+  const refTableContainer = useRef<HTMLDivElement>(null)
+  const [height, isRepainting, setIsRepainting] = useAutoTable(list, refTableContainer)
+
   return (
     <div className="page-container bg flex-1 flex flex-col overflow-auto">
       {showSearch && (
@@ -201,14 +207,18 @@ export default function PageUser() {
         <BtnRefresh onClick={refresh} />
       </div>
       {!isMobile && (
-        <div className="table-container">
+        <div
+          className="table-container"
+          ref={refTableContainer}
+          style={{ overflowY: isRepainting ? "scroll" : "unset" }}
+        >
           <Table
             pagination={false}
             loading={loading}
             columns={[...checkedCols, actionCol]}
             dataSource={list}
-            className="h-full"
             rowKey={"id"}
+            scroll={{ x: "max-content", y: isRepainting ? undefined : height }}
           ></Table>
         </div>
       )}
@@ -221,31 +231,39 @@ export default function PageUser() {
           dataSource={list}
           renderItem={(item, index) => (
             <List.Item>
-              <SoonDetail cols={cols} item={item} action={actionCol.render(null, item)}>
-                <div className="flex-1 flex p-1 border-b dark:border-b-neutral-800">
-                  <Avatar className="w-12 mr-1 h-12" src={item.avatar ?? "#"}></Avatar>
-                  <div className="flex-1">
-                    <div className="flex justify-between">
-                      <div className="text-lg">
-                        <span className="text-xl">{item.nickname}</span>
-                        <span className="text-gray-500">{item.username}</span>
-                        {item.gender === 1 && <GenderFemale className=" ml-0.5 text-pink-600" />}
-                        {item.gender === 1 && <GenderMale className=" ml-0.5 text-blue-600" />}
-                        {item.status ? (
-                          <Tag className="ml-0.5" color="success">
-                            {t("status.enabled")}
-                          </Tag>
-                        ) : (
-                          <Tag className="ml-0.5">{t("status.disabled")}</Tag>
-                        )}
+              <SoonDetail cols={cols} item={item}>
+                {(expanded, setExpanded) => (
+                  <>
+                    <div className="flex-1 flex p-1 border-b dark:border-b-neutral-800">
+                      <Avatar className="w-12 mr-1 h-12" src={item.avatar ?? "#"}></Avatar>
+                      <div className="flex-1">
+                        <div className="flex justify-between">
+                          <div className="text-lg">
+                            <span className="text-xl">{item.nickname}</span>
+                            <span className="text-gray-500">{item.username}</span>
+                            {item.gender === 1 && <GenderFemale className=" ml-0.5 text-pink-600" />}
+                            {item.gender === 1 && <GenderMale className=" ml-0.5 text-blue-600" />}
+                            {item.status ? (
+                              <Tag className="ml-0.5" color="success">
+                                {t("status.enabled")}
+                              </Tag>
+                            ) : (
+                              <Tag className="ml-0.5">{t("status.disabled")}</Tag>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>{item.phone}</span>
+                          <span>{dateFormat(item.createTime)}</span>
+                        </div>
                       </div>
                     </div>
-                    <div className="flex justify-between">
-                      <span>{item.phone}</span>
-                      <span>{dateFormat(item.createTime)}</span>
+                    <div className="flex justify-between items-center">
+                      {actionCol.render(null, item)}
+                      <SoonDetailToggle expanded={expanded} setExpanded={setExpanded} className="m-1" />
                     </div>
-                  </div>
-                </div>
+                  </>
+                )}
               </SoonDetail>
             </List.Item>
           )}
@@ -254,6 +272,7 @@ export default function PageUser() {
       <Pagination
         className="pagination-container"
         showTotal={() => t("total", total)}
+        showSizeChanger
         current={queryForm.pageIndex}
         pageSize={queryForm.pageSize}
         onChange={(pageIndex, pageSize) => setQuery({ ...queryForm, pageIndex, pageSize })}

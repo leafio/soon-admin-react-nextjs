@@ -15,7 +15,8 @@ import { useAuth } from "@/hooks/auth"
 import { toast } from "@/components/toast"
 import { modal } from "@/components/modal"
 import { makeVModel } from "react-vmodel"
-import { BtnAdd, BtnRefresh, BtnSearch, SoonDetail } from "@/components/soon"
+import { BtnAdd, BtnRefresh, BtnSearch, SoonDetail, SoonDetailToggle } from "@/components/soon"
+import { useAutoTable } from "@/hooks/table"
 
 export default function PageRole() {
   type Item = Role
@@ -28,9 +29,11 @@ export default function PageRole() {
     en: () => import("@/i18n/en/system/role"),
     ko: () => import("@/i18n/ko/system/role"),
   })
-  useEffect(() => {
-    //console.log('role-change', t)
-  })
+  const searchApi = ((...args: any) => {
+    setIsRepainting(true)
+    return list_role(...args)
+  }) as typeof list_role
+
   const {
     list,
     refresh,
@@ -41,13 +44,15 @@ export default function PageRole() {
     query: queryForm,
     setQuery,
   } = usePageList({
-    searchApi: list_role,
+    searchApi,
     autoSearchDelay: 300,
   })
 
   useEffect(() => {
     refresh()
   }, [])
+
+  type TableCol = TableColumnsType<Item>[0] & { dataIndex: string; title: string }
 
   const actionCol = {
     dataIndex: "action",
@@ -71,8 +76,8 @@ export default function PageRole() {
         </div>
       )
     },
-  } satisfies TableColumnsType<Item>[0]
-  const memoCols = useMemo(
+  } satisfies TableCol
+  const memoCols = useMemo<TableCol[]>(
     () => [
       {
         dataIndex: "name",
@@ -90,16 +95,8 @@ export default function PageRole() {
     ],
     [t],
   )
-  useEffect(() => {
-    //console.log('t-change')
-  }, [t])
 
-  const {
-    cols,
-    checkedCols,
-    setCols,
-    reset: restCols,
-  } = useCols<TableColumnsType<Item>[0] & { dataIndex: string; title: string }>(memoCols)
+  const { cols, checkedCols, setCols, reset: restCols } = useCols<TableCol>(memoCols)
 
   const handleDelete = (item: Item) => {
     modal.confirm({
@@ -130,6 +127,8 @@ export default function PageRole() {
   }
 
   const vModel = makeVModel(queryForm, setQuery)
+  const refTableContainer = useRef<HTMLDivElement>(null)
+  const [height, isRepainting, setIsRepainting] = useAutoTable(list, refTableContainer)
   return (
     <div className="page-container bg flex-1 flex flex-col overflow-auto">
       {showSearch && (
@@ -153,14 +152,18 @@ export default function PageRole() {
         <BtnRefresh onClick={refresh} />
       </div>
       {!isMobile && (
-        <div className="table-container">
+        <div
+          className="table-container"
+          ref={refTableContainer}
+          style={{ overflowY: isRepainting ? "scroll" : "unset" }}
+        >
           <Table
             pagination={false}
             loading={loading}
             columns={[...checkedCols, actionCol]}
             dataSource={list}
-            className="h-full"
             rowKey={"id"}
+            scroll={{ x: "max-content", y: isRepainting ? undefined : height }}
           ></Table>
         </div>
       )}
@@ -172,19 +175,27 @@ export default function PageRole() {
           dataSource={list}
           renderItem={(item, index) => (
             <List.Item>
-              <SoonDetail cols={checkedCols} item={item} action={actionCol.render(null, item)}>
-                <div className="flex-1 flex p-1 border-b ">
-                  <div className="text-lg">
-                    <span className="text-xl">{item.name}</span>
-                    {item.status ? (
-                      <Tag className="ml-0.5" color="success">
-                        {t("status.enabled")}
-                      </Tag>
-                    ) : (
-                      <Tag className="ml-0.5">{t("status.disabled")}</Tag>
-                    )}
-                  </div>
-                </div>
+              <SoonDetail cols={checkedCols} item={item}>
+                {(expanded, setExpanded) => (
+                  <>
+                    <div className="flex-1 flex p-1 border-b ">
+                      <div className="text-lg">
+                        <span className="text-xl">{item.name}</span>
+                        {item.status ? (
+                          <Tag className="ml-0.5" color="success">
+                            {t("status.enabled")}
+                          </Tag>
+                        ) : (
+                          <Tag className="ml-0.5">{t("status.disabled")}</Tag>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      {actionCol.render(null, item)}
+                      <SoonDetailToggle expanded={expanded} setExpanded={setExpanded} className="m-1" />
+                    </div>
+                  </>
+                )}
               </SoonDetail>
             </List.Item>
           )}
@@ -193,6 +204,7 @@ export default function PageRole() {
       <Pagination
         className="pagination-container"
         showTotal={() => t("total", total)}
+        showSizeChanger
         current={queryForm.pageIndex}
         pageSize={queryForm.pageSize}
         onChange={(pageIndex, pageSize) => setQuery({ ...queryForm, pageIndex, pageSize })}

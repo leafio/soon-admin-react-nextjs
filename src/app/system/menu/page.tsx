@@ -15,10 +15,11 @@ import { useAuth } from "@/hooks/auth"
 import { toast } from "@/components/toast"
 import { modal } from "@/components/modal"
 import { BtnAdd, BtnRefresh } from "@/components/soon"
+import { useAutoTable } from "@/hooks/table"
 
 export default function PageMenu() {
   type Item = Menu
-  type Col = TableColumnsType<Item>[0] & { dataIndex: string; title: string }
+  type TableCol = TableColumnsType<Item>[0] & { dataIndex: string; title: string }
   const appSnap = useSnapshot(appStore)
   const isMobile = appSnap.responsive === "mobile"
   const [showSearch, setShowSearch] = useState(true)
@@ -28,6 +29,11 @@ export default function PageMenu() {
     en: () => import("@/i18n/en/system/menu"),
     ko: () => import("@/i18n/ko/system/menu"),
   })
+
+  const searchApi = ((...args: any) => {
+    setIsRepainting(true)
+    return tree_menu(...args)
+  }) as typeof tree_menu
   const {
     list,
     refresh,
@@ -38,7 +44,7 @@ export default function PageMenu() {
     query: queryForm,
     setQuery,
   } = usePageList({
-    searchApi: tree_menu,
+    searchApi,
     initQuery: { hasBtn: true },
     autoSearchDelay: 300,
   })
@@ -70,9 +76,9 @@ export default function PageMenu() {
         </div>
       )
     },
-  } satisfies Col
+  } satisfies TableCol
 
-  const checkedCols = useMemo(
+  const checkedCols = useMemo<TableCol[]>(
     () =>
       [
         {
@@ -111,7 +117,7 @@ export default function PageMenu() {
           dataIndex: "auth",
           title: t("label.auth"),
         },
-      ] satisfies Col[],
+      ] satisfies TableCol[],
 
     [t],
   )
@@ -143,6 +149,8 @@ export default function PageMenu() {
   const handleShowDetail = (item: Item) => {
     refFormDialog.current?.open("detail", item)
   }
+  const refTableContainer = useRef<HTMLDivElement>(null)
+  const [height, isRepainting, setIsRepainting] = useAutoTable(list, refTableContainer)
 
   return (
     <div className="page-container bg flex-1 flex flex-col overflow-auto">
@@ -151,14 +159,18 @@ export default function PageMenu() {
         <BtnRefresh onClick={refresh} />
       </div>
       {!isMobile && (
-        <div className="table-container">
+        <div
+          className="table-container"
+          ref={refTableContainer}
+          style={{ overflowY: isRepainting ? "scroll" : "unset" }}
+        >
           <Table
             pagination={false}
             loading={loading}
             columns={[...checkedCols, actionCol]}
             dataSource={list}
-            className="h-full"
             rowKey={"id"}
+            scroll={{ x: "max-content", y: isRepainting ? undefined : height }}
           ></Table>
         </div>
       )}
@@ -193,6 +205,7 @@ export default function PageMenu() {
       <Pagination
         className="pagination-container"
         showTotal={() => t("total", total)}
+        showSizeChanger
         current={queryForm.pageIndex}
         pageSize={queryForm.pageSize}
         onChange={(pageIndex, pageSize) => setQuery({ ...queryForm, pageIndex, pageSize })}

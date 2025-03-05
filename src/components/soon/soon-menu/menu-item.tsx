@@ -73,7 +73,7 @@ export default function MenuItem({
         onClick={handleMenuClick}
       >
         <div className="flex flex-1">
-          {!level && menu.icon && <SoonIcon icon={menu.icon} className="w-6 h-6" />}
+          {menu.icon && <SoonIcon icon={menu.icon} className="w-6 h-6" />}
 
           {!isCollapse && <span className="ml-1">{runStrFun(menu.label)}</span>}
         </div>
