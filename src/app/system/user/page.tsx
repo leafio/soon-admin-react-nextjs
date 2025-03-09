@@ -2,7 +2,7 @@
 import { list_user, download_user_table, del_user, UserInfo } from "@/api"
 import { dateFormat } from "@/utils/tools"
 import { useLocales } from "@/i18n"
-import { Avatar, Button, Form, Input, List, Modal, Pagination, Table, Tag } from "antd"
+import { Avatar, Button, Form, Input, List, Pagination, Table, Tag } from "antd"
 import { appStore } from "@/store/modules/app"
 import { useSnapshot } from "valtio"
 import { useEffect, useMemo, useRef, useState } from "react"
@@ -19,7 +19,6 @@ import { toast } from "@/components/toast"
 import { modal } from "@/components/modal"
 import { makeVModel } from "react-vmodel"
 import { BtnAdd, BtnCols, BtnExport, BtnRefresh, BtnSearch, SoonDetail, SoonDetailToggle } from "@/components/soon"
-import { useAutoTable } from "@/hooks/table"
 
 export default function PageUser() {
   type Item = UserInfo
@@ -32,10 +31,7 @@ export default function PageUser() {
     en: () => import("@/i18n/en/system/user"),
     ko: () => import("@/i18n/ko/system/user"),
   })
-  const searchApi = ((...args: any) => {
-    setIsRepainting(true)
-    return list_user(...args)
-  }) as typeof list_user
+
   const {
     list,
     refresh,
@@ -46,7 +42,7 @@ export default function PageUser() {
     query: queryForm,
     setQuery,
   } = usePageList({
-    searchApi,
+    searchApi: list_user,
     autoSearchDelay: 300,
   })
 
@@ -98,7 +94,7 @@ export default function PageUser() {
         // width: "100",
         render: (_: any, item: Item) => {
           return item?.gender === 1 ? (
-            <Tag color="processing">{t("gender.man")}</Tag>
+            <Tag color="blue">{t("gender.man")}</Tag>
           ) : item?.gender === 2 ? (
             <Tag color="error">{t("gender.woman")}</Tag>
           ) : (
@@ -178,8 +174,6 @@ export default function PageUser() {
   }
 
   const vModel = makeVModel(queryForm, setQuery)
-  const refTableContainer = useRef<HTMLDivElement>(null)
-  const [height, isRepainting, setIsRepainting] = useAutoTable(list, refTableContainer)
 
   return (
     <div className="page-container bg flex-1 flex flex-col overflow-auto">
@@ -207,18 +201,14 @@ export default function PageUser() {
         <BtnRefresh onClick={refresh} />
       </div>
       {!isMobile && (
-        <div
-          className="table-container"
-          ref={refTableContainer}
-          style={{ overflowY: isRepainting ? "scroll" : "unset" }}
-        >
+        <div className="table-container">
           <Table
             pagination={false}
             loading={loading}
             columns={[...checkedCols, actionCol]}
             dataSource={list}
             rowKey={"id"}
-            scroll={{ x: "max-content", y: isRepainting ? undefined : height }}
+            scroll={{ x: "max-content", y: "" }}
           ></Table>
         </div>
       )}

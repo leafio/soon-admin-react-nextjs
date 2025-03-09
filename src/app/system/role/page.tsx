@@ -1,7 +1,7 @@
 "use client"
 import { Role, list_role, del_role } from "@/api"
 import { useLocales } from "@/i18n"
-import { Button, Form, Input, List, Modal, Pagination, Table, Tag } from "antd"
+import { Button, Form, Input, List, Pagination, Table, Tag } from "antd"
 import { appStore } from "@/store/modules/app"
 import { useSnapshot } from "valtio"
 import { useEffect, useMemo, useRef, useState } from "react"
@@ -16,7 +16,6 @@ import { toast } from "@/components/toast"
 import { modal } from "@/components/modal"
 import { makeVModel } from "react-vmodel"
 import { BtnAdd, BtnRefresh, BtnSearch, SoonDetail, SoonDetailToggle } from "@/components/soon"
-import { useAutoTable } from "@/hooks/table"
 
 export default function PageRole() {
   type Item = Role
@@ -29,10 +28,6 @@ export default function PageRole() {
     en: () => import("@/i18n/en/system/role"),
     ko: () => import("@/i18n/ko/system/role"),
   })
-  const searchApi = ((...args: any) => {
-    setIsRepainting(true)
-    return list_role(...args)
-  }) as typeof list_role
 
   const {
     list,
@@ -44,7 +39,7 @@ export default function PageRole() {
     query: queryForm,
     setQuery,
   } = usePageList({
-    searchApi,
+    searchApi: list_role,
     autoSearchDelay: 300,
   })
 
@@ -127,8 +122,7 @@ export default function PageRole() {
   }
 
   const vModel = makeVModel(queryForm, setQuery)
-  const refTableContainer = useRef<HTMLDivElement>(null)
-  const [height, isRepainting, setIsRepainting] = useAutoTable(list, refTableContainer)
+
   return (
     <div className="page-container bg flex-1 flex flex-col overflow-auto">
       {showSearch && (
@@ -152,18 +146,14 @@ export default function PageRole() {
         <BtnRefresh onClick={refresh} />
       </div>
       {!isMobile && (
-        <div
-          className="table-container"
-          ref={refTableContainer}
-          style={{ overflowY: isRepainting ? "scroll" : "unset" }}
-        >
+        <div className="table-container">
           <Table
             pagination={false}
             loading={loading}
             columns={[...checkedCols, actionCol]}
             dataSource={list}
             rowKey={"id"}
-            scroll={{ x: "max-content", y: isRepainting ? undefined : height }}
+            scroll={{ x: "max-content", y: "" }}
           ></Table>
         </div>
       )}

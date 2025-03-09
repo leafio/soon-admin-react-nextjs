@@ -36,7 +36,28 @@
   }
 
   .table-container {
-    @apply hidden md:flex w-full flex-col;
+    @apply hidden md:block w-full overflow-y-auto;
+    .ant-table-wrapper,
+    .ant-spin-nested-loading,
+    .ant-spin-container,
+    .ant-table,
+    .ant-table-container,
+    .ant-table-content {
+      overflow-y: hidden;
+      height: 100%;
+    }
+    .ant-table-container {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .ant-table-body {
+      overflow: auto !important;
+      flex: 1;
+    }
+  }
+  .table-container::-webkit-scrollbar {
+    width: 0;
   }
 
   .pagination-container {
@@ -51,7 +72,7 @@
     box-sizing: border-box;
     flex: 1;
     overflow: auto;
-    @apply dark:bg-neutral-950
+    @apply dark:bg-neutral-950;
   }
 
   // @media screen and (min-width: 1280px) {
@@ -59,7 +80,4 @@
   //         height: calc(100vh - 86px);
   //     }
   // }
-
-
-  
 }

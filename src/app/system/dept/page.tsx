@@ -2,11 +2,10 @@
 import { tree_dept, del_dept, Dept } from "@/api"
 import { dateFormat } from "@/utils/tools"
 import { useLocales } from "@/i18n"
-import { Button, Modal, Pagination, Table, Tree } from "antd"
+import { Button, Pagination, Table, Tree } from "antd"
 import { appStore } from "@/store/modules/app"
 import { useSnapshot } from "valtio"
 import { useEffect, useMemo, useRef, useState } from "react"
-import { useCols } from "@/hooks/cols"
 import { usePageList } from "@/hooks/list"
 
 import FormDialog, { FormDialogRef } from "./dialog"
@@ -15,7 +14,6 @@ import { useAuth } from "@/hooks/auth"
 import { toast } from "@/components/toast"
 import { modal } from "@/components/modal"
 import { BtnAdd, BtnRefresh } from "@/components/soon"
-import { useAutoTable } from "@/hooks/table"
 
 export default function PageDept() {
   type Item = Dept
@@ -28,10 +26,7 @@ export default function PageDept() {
     en: () => import("@/i18n/en/system/dept"),
     ko: () => import("@/i18n/ko/system/dept"),
   })
-  const searchApi = ((...args: any) => {
-    setIsRepainting(true)
-    return tree_dept(...args)
-  }) as typeof tree_dept
+
   const {
     list,
     refresh,
@@ -42,7 +37,7 @@ export default function PageDept() {
     query: queryForm,
     setQuery,
   } = usePageList({
-    searchApi,
+    searchApi: tree_dept,
     autoSearchDelay: 300,
   })
 
@@ -130,9 +125,6 @@ export default function PageDept() {
     refFormDialog.current?.open("detail", item)
   }
 
-  const refTableContainer = useRef<HTMLDivElement>(null)
-  const [height, isRepainting, setIsRepainting] = useAutoTable(list, refTableContainer)
-
   return (
     <div className="page-container bg flex-1 flex flex-col overflow-auto">
       <div className="btn-bar">
@@ -140,18 +132,14 @@ export default function PageDept() {
         <BtnRefresh onClick={refresh} />
       </div>
       {!isMobile && (
-        <div
-          className="table-container"
-          ref={refTableContainer}
-          style={{ overflowY: isRepainting ? "scroll" : "unset" }}
-        >
+        <div className="table-container">
           <Table
             pagination={false}
             loading={loading}
             columns={[...checkedCols, actionCol]}
             dataSource={list}
             rowKey={"id"}
-            scroll={{ x: "max-content", y: isRepainting ? undefined : height }}
+            scroll={{ x: "max-content", y: "" }}
           ></Table>
         </div>
       )}

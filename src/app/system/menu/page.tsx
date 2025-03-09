@@ -15,7 +15,6 @@ import { useAuth } from "@/hooks/auth"
 import { toast } from "@/components/toast"
 import { modal } from "@/components/modal"
 import { BtnAdd, BtnRefresh } from "@/components/soon"
-import { useAutoTable } from "@/hooks/table"
 
 export default function PageMenu() {
   type Item = Menu
@@ -30,10 +29,6 @@ export default function PageMenu() {
     ko: () => import("@/i18n/ko/system/menu"),
   })
 
-  const searchApi = ((...args: any) => {
-    setIsRepainting(true)
-    return tree_menu(...args)
-  }) as typeof tree_menu
   const {
     list,
     refresh,
@@ -44,7 +39,7 @@ export default function PageMenu() {
     query: queryForm,
     setQuery,
   } = usePageList({
-    searchApi,
+    searchApi: tree_menu,
     initQuery: { hasBtn: true },
     autoSearchDelay: 300,
   })
@@ -149,8 +144,6 @@ export default function PageMenu() {
   const handleShowDetail = (item: Item) => {
     refFormDialog.current?.open("detail", item)
   }
-  const refTableContainer = useRef<HTMLDivElement>(null)
-  const [height, isRepainting, setIsRepainting] = useAutoTable(list, refTableContainer)
 
   return (
     <div className="page-container bg flex-1 flex flex-col overflow-auto">
@@ -159,18 +152,14 @@ export default function PageMenu() {
         <BtnRefresh onClick={refresh} />
       </div>
       {!isMobile && (
-        <div
-          className="table-container"
-          ref={refTableContainer}
-          style={{ overflowY: isRepainting ? "scroll" : "unset" }}
-        >
+        <div className="table-container">
           <Table
             pagination={false}
             loading={loading}
             columns={[...checkedCols, actionCol]}
             dataSource={list}
             rowKey={"id"}
-            scroll={{ x: "max-content", y: isRepainting ? undefined : height }}
+            scroll={{ x: "max-content", y: "" }}
           ></Table>
         </div>
       )}
