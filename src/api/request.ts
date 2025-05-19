@@ -1,4 +1,6 @@
 import { createSoon, parseUrlOptions, SoonOptions } from "soon-fetch"
+import isNetworkError from "is-network-error"
+
 import { parseBaseUrl } from "../../env/parse"
 import { getLang, tLocales } from "@/i18n"
 
@@ -54,12 +56,14 @@ function request<T = any>(url: string, options?: RequestOptions) {
     let res,
       err,
       data,
-      errMsg = ""
+      errMsg = "",
+      is_net_err = false
 
     try {
       res = await fetch(_url, _options)
     } catch (error: any) {
       err = error
+      is_net_err = isNetworkError(error)
     }
 
     if (res) {
@@ -87,7 +91,7 @@ function request<T = any>(url: string, options?: RequestOptions) {
     //重试
 
     const { retryLimit, retryCondition, retryDelay } = options || {}
-    const retry = retryLimit && (retryCondition ? retryCondition({ data, res, err }) : true)
+    const retry = retryLimit && (retryCondition ? retryCondition({ data, res, err }) : is_net_err)
     if (retry) {
       setTimeout(() => resolve(request(url, { ...options, retryLimit: retryLimit - 1 })), retryDelay)
       return

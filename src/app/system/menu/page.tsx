@@ -197,7 +197,9 @@ export default function PageMenu() {
         showSizeChanger
         current={queryForm.pageIndex}
         pageSize={queryForm.pageSize}
-        onChange={(pageIndex, pageSize) => setQuery({ ...queryForm, pageIndex, pageSize })}
+        onChange={(pageIndex, pageSize) =>
+          setQuery({ ...queryForm, pageIndex: pageSize !== queryForm.pageSize ? 1 : pageIndex, pageSize })
+        }
         total={total}
       />
       <FormDialog ref={refFormDialog} onSuccess={refresh} />
