@@ -10,7 +10,7 @@ export type Dept = {
   createTime: string
   updateTime: string
 }
-export const tree_dept = soon.API("/dept/tree").GET<PagedParams, { list: Dept[] }>()
-export const add_dept = soon.API("/dept/create").POST<Dept>()
-export const update_dept = soon.API("/dept/update").PUT<Dept>()
-export const del_dept = soon.API("/dept/delete").DELETE<{ id: number }>()
+export const tree_dept = soon.GET("/dept/tree").Query<PagedParams>().Send<{ list: Dept[] }>()
+export const add_dept = soon.POST("/dept/create").Body<Dept>().Send()
+export const update_dept = soon.PUT("/dept/update").Body<Dept>().Send()
+export const del_dept = soon.DELETE("/dept/delete").Body<{ id: number }>().Send()

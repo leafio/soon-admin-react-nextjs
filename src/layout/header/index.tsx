@@ -85,7 +85,12 @@ export default function Header() {
         <div className="mr-4 cursor-pointer hidden md:block select-none" onClick={() => setShowDraw(true)}>
           <Gear />
         </div>
-        <a href="https://github.com/leafio/soon-admin-vue3" target="_blank">
+        <a
+          href="https://github.com/leafio/soon-admin-vue3"
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Visit Soon Admin Vue3 GitHub repository"
+        >
           <Github className="mr-4" />
         </a>
 

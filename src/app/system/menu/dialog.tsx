@@ -1,21 +1,22 @@
 import { Button, Cascader, Form, FormInstance, Input, InputNumber, Modal, Segmented, Select, Switch } from "antd"
 
 import { Menu, add_menu, update_menu, tree_menu } from "@/api"
-import { useFormDialog } from "@/hooks/form-dialog"
 import { useLocales } from "@/i18n"
-import { Ref, useEffect, useImperativeHandle, useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Model } from "react-vmodel"
 
 import { getTreePathArr } from "@/utils"
 import { toast } from "@/components/toast"
 import { useDraggableModal } from "@/hooks/draggable-modal"
 
-export type FormDialogRef = {
-  open: (type?: "add" | "edit" | "detail", data?: Partial<Menu> | undefined, link?: boolean) => void
-  close: () => void
-}
-const FormDialog = ({ onSuccess = () => {}, ref }: { onSuccess?: () => void; ref: Ref<FormDialogRef> }) => {
-  type FieldType = Menu
+type FieldType = Menu
+export type FormDialogShow =
+  | { open: false; type?: never; data?: never }
+  | { open: true; type: "add"; data?: Pick<FieldType, "parentId"> }
+  | { open: true; type: "edit" | "detail"; data: FieldType }
+type FormDialogProps = { onSuccess?: () => void; show: FormDialogShow; onClose: () => void }
+
+export default function FormDialog({ onSuccess = () => {}, show, onClose }: FormDialogProps) {
   const formRef = useRef<FormInstance>(null)
 
   const t = useLocales({
@@ -29,9 +30,6 @@ const FormDialog = ({ onSuccess = () => {}, ref }: { onSuccess?: () => void; ref
     detail: t("detail"),
   })
 
-  const { visible, open, close, type, formData, setFormData } = useFormDialog<FieldType>({
-    onOpen: (data) => formRef.current?.setFieldsValue(data),
-  })
   const menuTypeOptions = () => [
     {
       label: t("menuType.page"),
@@ -51,9 +49,14 @@ const FormDialog = ({ onSuccess = () => {}, ref }: { onSuccess?: () => void; ref
     },
   ]
   const [menuTree, setMenuTree] = useState<Menu[]>([])
+  const [formData, setFormData] = useState<FieldType>({} as FieldType)
   useEffect(() => {
-    if (visible) {
+    if (show.open) {
       formRef.current?.resetFields()
+      if (show.data) {
+        setFormData(show.data as FieldType)
+        formRef.current?.setFieldsValue(show.data)
+      }
       tree_menu().then((res) => {
         const data = res.list
         const parseChildren = (data: { children?: any[]; label?: any; meta: any }[]) => {
@@ -70,54 +73,44 @@ const FormDialog = ({ onSuccess = () => {}, ref }: { onSuccess?: () => void; ref
         setMenuTree(data)
       })
     }
-  }, [visible])
+  }, [show])
 
   const submit = (values: any) => {
     const data = Object.assign({}, formData) as FieldType
     data.meta.isIframe = data.menuType === "iframe"
-    if (type === "add") {
+    if (show.type === "add") {
       add_menu(data).then((res) => {
         toast.success(t("tip.addSuccess"))
         onSuccess()
-        close()
+        onClose()
       })
-    } else if (type === "edit") {
+    } else if (show.type === "edit") {
       update_menu(data).then((res) => {
         toast.success(t("tip.modifySuccess"))
         onSuccess()
-        close()
+        onClose()
       })
     }
   }
 
-  // 取消
-  const onCancel = () => {
-    close()
-  }
   const rules = () => ({
     "meta.title": [{ required: true, message: "请输入标题", trigger: "blur" }],
   })
-
-  useImperativeHandle(ref, () => ({
-    open,
-    close,
-  }))
 
   const { modalRender, ModalTitle } = useDraggableModal()
 
   return (
     <Modal
-      open={visible}
-      title={<ModalTitle>{titles()[type]}</ModalTitle>}
+      open={show.open}
+      title={<ModalTitle>{titles()[show.type ?? "add"]}</ModalTitle>}
       closable
-      onCancel={onCancel}
+      onCancel={onClose}
       footer={null}
       modalRender={modalRender}
     >
       <Form
         ref={formRef}
-        disabled={type === "detail"}
-        label-width="7em"
+        disabled={show.type === "detail"}
         className="dialog-form"
         onValuesChange={(changed, values) => {
           setFormData({ ...formData, ...values })
@@ -220,7 +213,7 @@ const FormDialog = ({ onSuccess = () => {}, ref }: { onSuccess?: () => void; ref
           </>
         )}
         <div className=" w-full flex justify-end px-2">
-          <Button onClick={onCancel}>{t("cancel")}</Button>
+          <Button onClick={onClose}>{t("cancel")}</Button>
           <Button type="primary" htmlType="submit" className="ml-4">
             {t("confirm")}
           </Button>
@@ -229,5 +222,3 @@ const FormDialog = ({ onSuccess = () => {}, ref }: { onSuccess?: () => void; ref
     </Modal>
   )
 }
-FormDialog.displayName = "FormDialog"
-export default FormDialog

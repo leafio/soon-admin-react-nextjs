@@ -16,7 +16,7 @@ export type Menu = {
   updateTime: string
   meta: SoonRouteMeta & { title?: string; icon?: string }
 }
-export const tree_menu = soon.API("/menu/tree").GET<PagedParams & { hasBtn?: boolean }, { list: Menu[] }>()
-export const add_menu = soon.API("/menu/create").POST<Menu>()
-export const update_menu = soon.API("/menu/update").PUT<Menu>()
-export const del_menu = soon.API("/menu/delete").DELETE<{ id: number }>()
+export const tree_menu = soon.GET("/menu/tree").Query<PagedParams & { hasBtn?: boolean }>().Send<{ list: Menu[] }>()
+export const add_menu = soon.POST("/menu/create").Body<Menu>().Send()
+export const update_menu = soon.PUT("/menu/update").Body<Menu>().Send()
+export const del_menu = soon.DELETE("/menu/delete").Body<{ id: number }>().Send()

@@ -23,7 +23,8 @@ Soon-Admin is full stuck admin system written by Typescript。
 - Next js + Typescript + Ant Design
 - style: scss tailwind-css
 - state management: valtio
-- http request: soon-fetch
+- http request: soon-fetch (cache,reusing,race,timeout,retry)
+- localStorage: soon-storage (type-safe)
 - i18n: soon-i18n
 - mock: soon-mock
 - mobile: responsive designed for both PC and mobile
@@ -147,7 +148,8 @@ Soon-Admin 是一套完全以typescript开发的后台管理系统。
 - Next js + Typescript + Ant Design
 - 样式采用 scss 和 Tailwind Css
 - 状态管理 valtio
-- 使用 soon-fetch进行http请求,不到3K
+- 使用 soon-fetch进行http请求，请求共享、竞态管理、响应缓存、重试、双token自动刷新
+- 使用 soon-storage 类型安全的localStorage封装
 - 使用 soon-i18n实现国际化,有良好的type提示约束,不到3K
 - 使用 soon-mock 可视化配置模拟API
 - 移动端适配完善，表格在移动端展示为卡片形式

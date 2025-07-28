@@ -1,123 +1,97 @@
-import type { PagedParams, PagedRes } from "@/api/types"
-import { useDebounceEffect } from "ahooks"
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useRef, useState } from "react"
+import { useSearch } from "./search"
+import { Simplify } from "type-fest"
+import { PagedParams, ReqOpts } from "@/api/types"
 
-export function usePageList<
-  R,
-  T extends (args: PagedParams) => Promise<PagedRes<R>>,
-  MapFun extends (item: Awaited<ReturnType<T>>["list"][0]) => R,
->({
-  searchApi,
-  mapFun,
-  initQuery,
-  autoSearchDelay,
-}: {
-  searchApi: T
-  initQuery?: Parameters<T>[0]
-  mapFun?: MapFun
-  autoSearchDelay?: number
-}) {
-  type Item = Awaited<ReturnType<T>>["list"][0]
-  const [list, setList] = useState<Item[]>([])
+export function useResetState<T>(initState: T) {
+  const getInitState = useCallback(() => {
+    return structuredClone(initState)
+  }, [initState])
+  const [state, setState] = useState<T>(getInitState())
+  const reset = useCallback(() => {
+    setState(getInitState())
+  }, [getInitState])
+  return [state, setState, reset, getInitState] as const
+}
+
+export function usePagedList<
+  T extends (query?: PagedParams, options?: ReqOpts) => Promise<{ list: any[]; total?: number }>,
+  O extends {
+    initQuery?: Simplify<Omit<Exclude<Parameters<T>[0], undefined>, "pageIndex" | "pageSize">>
+    initPager?: Partial<PagedParams>
+  } = { initQuery?: undefined; initPager?: undefined },
+>(api: T, options?: O & Parameters<T>[1] & Parameters<typeof useSearch<T>>[1]) {
+  const { initQuery, initPager } = (options ?? {}) as O
+  type Args = Parameters<T>
+  type DataItem = Awaited<ReturnType<T>>["list"][0]
+  const [list, setList] = useState<DataItem[]>([])
   const [total, setTotal] = useState(0)
-  const [loading, setLoading] = useState(false)
-  const [query, setQuery] = useState<NonNullable<Parameters<T>[0]>>({ ...initQuery })
+  const aborts = useRef<AbortController[]>([])
+  const reqOpts = useRef<ReqOpts>({ aborts: aborts.current })
+  const { loading, search: run, isFetching } = useSearch(api, options)
 
-  const [otherParams, setOtherParams] = useState<any>({})
-  const initPageInfo: PagedParams = { pageIndex: 1, pageSize: 10 }
-  const [pageInfo, setPageInfo] = useState<PagedParams>({ ...initPageInfo })
-  useEffect(() => {
-    const other = { ...otherParams }
-    const _pageInfo = { ...pageInfo }
-    let isOtherChanged = false
-    let isPageInfoChanged = false
-    Object.keys(query).forEach((key) => {
-      if (Object.keys(initPageInfo).includes(key)) {
-        if (_pageInfo[key as keyof PagedParams] !== query[key as keyof Parameters<T>[0]]) {
-          _pageInfo[key as keyof PagedParams] = query[key as keyof PagedParams]
-          isPageInfoChanged = true
-        }
-      } else {
-        if (other[key] !== query[key as keyof Parameters<T>[0]]) {
-          other[key as string] = query[key as keyof Parameters<T>[0]]
-          isOtherChanged = true
-        }
-      }
-    })
-    if (isOtherChanged) setOtherParams((pre: any) => ({ ...pre, ...other }))
-    if (isPageInfoChanged) setPageInfo((pre) => ({ ...pre, ..._pageInfo }))
-  }, [query])
-
-  //网络请求response原数据
-  const resData = useRef<any>(undefined)
-
-  const refresh = () => {
-    setLoading(true)
-
-    const timeout = new Promise<void>((resolve) => {
-      setTimeout(() => {
-        resolve()
-      }, 300)
-    })
-    const search = searchApi(query).then((res) => {
-      let result_list = res?.list || []
-      if (mapFun) result_list = result_list.map(mapFun)
-      setList(result_list)
-      setTotal(res?.total || res.list?.length || 0)
-      resData.current = res
-    })
-    Promise.all([search, timeout]).finally(() => {
-      setLoading(false)
-    })
-  }
-  const search = () => {
-    setQuery({ ...query, pageIndex: 1 })
-    refresh()
-  }
-
-  const reset = () => {
-    const keys = Object.keys(query)
-    const obj: any = {}
-    keys.forEach((item) => {
-      obj[item] = undefined
-    })
-    setQuery(Object.assign(obj, initQuery, initPageInfo))
-  }
-
-  const initAuto = useRef(false)
-  useDebounceEffect(
-    () => {
-      if (initAuto.current && autoSearchDelay !== undefined) {
-        if (pageInfo.pageIndex == 1) {
-          refresh()
-        } else {
-          setQuery({ ...query, pageIndex: 1 })
-        }
-      }
-      initAuto.current = true
-    },
-    [otherParams],
-    {
-      wait: autoSearchDelay,
-      // maxWait: 1000
-    },
+  const [query, setQuery, resetQuery, getInitQuery] = useResetState(
+    (initQuery ?? {}) as unknown as Exclude<typeof initQuery, undefined>,
   )
-  const initPage = useRef(false)
-  useEffect(() => {
-    if (initPage.current) {
-      refresh()
-    }
-    initPage.current = true
-  }, [pageInfo])
+  const [pager, setPager, resetPager, getInitPager] = useResetState({
+    // pageIndex: 1,
+    // pageSize: 10,
+    ...initPager,
+  })
+  const search = useCallback(
+    (...args: Args) => {
+      run(...([args[0], { ...reqOpts.current, ...args[1] }] as unknown as Args)).then((res) => {
+        setList(res.list)
+        setTotal(res.total || res.list?.length || 0)
+      })
+    },
+    [run],
+  )
+  const refresh = useCallback(
+    (resetPageIndex?: boolean) => {
+      if (resetPageIndex === true) {
+        resetPager()
+        search(...([{ ...query, ...getInitPager() }] as unknown as Args))
+      } else {
+        search(...([{ ...query, ...pager }] as unknown as Args))
+      }
+    },
+    [resetPager, search, query, getInitPager, pager],
+  )
+
+  const onPagerChange = useCallback(
+    (pageIndex: number, pageSize: number) => {
+      const target_pager = {
+        pageIndex: pageSize === pager.pageSize ? pageIndex : 1,
+        pageSize,
+      }
+      search(...([{ ...query, ...target_pager }] as unknown as Args))
+      setPager(target_pager)
+    },
+    [pager.pageSize, query, search, setPager],
+  )
+  const reset = useCallback(() => {
+    resetQuery()
+    resetPager()
+    search(...([{ ...getInitQuery(), ...getInitPager() }] as unknown as Args))
+  }, [resetPager, getInitPager, getInitQuery, resetQuery, search])
+
   return {
     list,
-    refresh,
     total,
     loading,
-    resData,
     search,
-    reset,
     query,
     setQuery,
+    resetQuery,
+    getInitQuery,
+    pager,
+    setPager,
+    resetPager,
+    getInitPager,
+    onPagerChange,
+    refresh,
+    reset,
+    isFetching,
   }
 }

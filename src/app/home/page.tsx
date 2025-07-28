@@ -98,11 +98,11 @@ export default function PageHome() {
         <div className="flex flex-wrap justify-between">
           {list.map((item, index) => (
             <Card key={index} className="shadow !my-2 lg:m-4 p-4 w-[90%] lg:w-[45%] xl:w-[30%]">
-              <h3 className="text-3xl">{item.title}</h3>
+              <h3 className="text-3xl text-primary-700 font-bold">{item.title}</h3>
               <div className="mt-2">{item.description}</div>
               <div className="mt-2">
                 {item.tags.map((tag) => (
-                  <Tag key={tag} className="mr-2">
+                  <Tag key={tag} className="mr-2 !mb-2 !bg-primary-100 !text-primary-700 !border-primary-700">
                     {tag}
                   </Tag>
                 ))}

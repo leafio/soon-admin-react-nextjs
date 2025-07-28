@@ -55,6 +55,10 @@
       overflow: auto !important;
       flex: 1;
     }
+
+   .ant-table-cell-fix-right{
+      right: 0 !important;
+    }
   }
   .table-container::-webkit-scrollbar {
     width: 0;

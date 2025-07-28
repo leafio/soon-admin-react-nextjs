@@ -4,11 +4,10 @@ import { useLocales } from "@/i18n"
 import { Button, Form, Input, List, Pagination, Table, Tag } from "antd"
 import { appStore } from "@/store/modules/app"
 import { useSnapshot } from "valtio"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useCols } from "@/hooks/cols"
-import { usePageList } from "@/hooks/list"
 
-import FormDialog, { FormDialogRef } from "./dialog"
+import FormDialog, { FormDialogShow } from "./dialog"
 import type { TableColumnsType } from "antd"
 
 import { useAuth } from "@/hooks/auth"
@@ -16,6 +15,8 @@ import { toast } from "@/components/toast"
 import { modal } from "@/components/modal"
 import { makeVModel } from "react-vmodel"
 import { BtnAdd, BtnRefresh, BtnSearch, SoonDetail, SoonDetailToggle } from "@/components/soon"
+import { usePagedList } from "@/hooks/list"
+import { useDebounceFn, useUpdateEffect } from "ahooks"
 
 export default function PageRole() {
   type Item = Role
@@ -29,23 +30,18 @@ export default function PageRole() {
     ko: () => import("@/i18n/ko/system/role"),
   })
 
-  const {
-    list,
-    refresh,
-    total,
-    loading,
-    search,
-    reset,
-    query: queryForm,
-    setQuery,
-  } = usePageList({
-    searchApi: list_role,
-    autoSearchDelay: 300,
-  })
-
-  useEffect(() => {
-    refresh()
-  }, [])
+  const { list, loading, search, total, refresh, reset, pager, onPagerChange, query, setQuery } = usePagedList(
+    list_role,
+    {
+      initPager: {
+        pageIndex: 1,
+        pageSize: 10,
+      },
+    },
+  )
+  useEffect(refresh, [])
+  const { run: refresh_debounce } = useDebounceFn(refresh, { wait: 300 })
+  useUpdateEffect(() => refresh_debounce(), [query])
 
   type TableCol = TableColumnsType<Item>[0] & { dataIndex: string; title: string }
 
@@ -73,21 +69,21 @@ export default function PageRole() {
     },
   } satisfies TableCol
   const memoCols = useMemo<TableCol[]>(
-    () => [
-      {
-        dataIndex: "name",
-        title: t("label.name"),
-        // width: "",
-      },
+    () =>
+      [
+        {
+          dataIndex: "name",
+          title: t("label.name"),
+        },
 
-      {
-        dataIndex: "status",
-        title: t("label.status"),
-        width: "100",
-        render: (_: any, item: Item) =>
-          item?.status == 1 ? <Tag color="success">{t("status.enabled")}</Tag> : <Tag>{t("status.disabled")}</Tag>,
-      },
-    ],
+        {
+          dataIndex: "status",
+          title: t("label.status"),
+          width: "100",
+          render: (_: any, item: Item) =>
+            item?.status == 1 ? <Tag color="success">{t("status.enabled")}</Tag> : <Tag>{t("status.disabled")}</Tag>,
+        },
+      ] satisfies TableCol[],
     [t],
   )
 
@@ -110,18 +106,17 @@ export default function PageRole() {
     })
   }
 
-  const refFormDialog = useRef<FormDialogRef>(null)
-  const handleShowEdit = (item: Item) => {
-    refFormDialog.current?.open("edit", item)
-  }
-  const handleShowAdd = (item?: Item) => {
-    refFormDialog.current?.open("add")
-  }
-  const handleShowDetail = (item: Item) => {
-    refFormDialog.current?.open("detail", item)
-  }
+  const [show, setShow] = useState<FormDialogShow>({ open: false })
 
-  const vModel = makeVModel(queryForm, setQuery)
+  const handleShowEdit = (item: Item) => setShow({ open: true, type: "edit", data: item })
+
+  const handleShowAdd = (item?: Item) => setShow({ open: true, type: "add" })
+
+  const handleShowDetail = (item: Item) => setShow({ open: true, type: "detail", data: item })
+
+  const closeDialog = () => setShow({ open: false })
+
+  const vModel = makeVModel(query, setQuery)
 
   return (
     <div className="page-container bg flex-1 flex flex-col overflow-auto">
@@ -131,7 +126,7 @@ export default function PageRole() {
             <Input {...vModel("keyword")} allowClear placeholder={t("label.inputKeyword")}></Input>
           </Form.Item>
           <div className="query-btn-container">
-            <Button className="ml-4" type="primary" onClick={search}>
+            <Button className="ml-4" type="primary" onClick={() => refresh(true)}>
               {t("search")}
             </Button>
             <Button className="ml-4" onClick={reset}>
@@ -195,15 +190,13 @@ export default function PageRole() {
         className="pagination-container"
         showTotal={() => t("total", total)}
         showSizeChanger
-        current={queryForm.pageIndex}
-        pageSize={queryForm.pageSize}
-        onChange={(pageIndex, pageSize) =>
-          setQuery({ ...queryForm, pageIndex: pageSize !== queryForm.pageSize ? 1 : pageIndex, pageSize })
-        }
+        current={pager.pageIndex}
+        pageSize={pager.pageSize}
+        onChange={onPagerChange}
         total={total}
       />
 
-      <FormDialog ref={refFormDialog} onSuccess={refresh} />
+      <FormDialog show={show} onSuccess={refresh} onClose={closeDialog} />
     </div>
   )
 }

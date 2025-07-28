@@ -2,8 +2,8 @@ import { downloadBlob, getHeaderFilename } from "soon-utils"
 import { PagedParams } from "../types"
 import { Dept } from "./dept"
 import { Role } from "./role"
-import { soon } from "../request"
 import { Simplify } from "type-fest"
+import { soon } from "../request"
 
 export type User = {
   id: number
@@ -20,22 +20,20 @@ export type User = {
   gender: number
   desc: string | null
 }
-export type UserInfo = Simplify<
-  User & {
-    id: number
-    createTime: Date
-    updateTime: Date | null
-    dept?: Pick<Dept, "id" | "name">
-    role?: Pick<Role, "id" | "name">
-  }
->
+export type UserInfo = User & {
+  id: number
+  createTime: Date
+  updateTime: Date | null
+  dept?: Pick<Dept, "id" | "name">
+  role?: Pick<Role, "id" | "name">
+}
 
-type ListQueryUser = Simplify<PagedParams & { keyword?: string; timeRange?: [string, string] }>
-export const list_user = soon.API("/user").GET<ListQueryUser, { list: UserInfo[] }>()
-export const add_user = soon.API("/user").POST<User>()
-export const update_user = soon.API("/user/:id").PUT<User>()
-export const del_user = soon.API("/user/:id").DELETE()
-export const detail_user = soon.API("/user/:id").GET<undefined, UserInfo>()
+type ListQueryUser = PagedParams & { keyword?: string; timeRange?: [string, string] }
+export const list_user = soon.GET("/user").Query<ListQueryUser>().Send<{ list: UserInfo[] }>()
+export const add_user = soon.POST("/user").Body<User>().Send()
+export const update_user = soon.PUT("/user/:id").Body<User>().Send()
+export const del_user = soon.DELETE("/user/:id").Send()
+export const detail_user = soon.GET("/user/:id").Send<UserInfo>()
 
 export const download_user_table = async (query: ListQueryUser) => {
   return soon.get<Response>("/user/export", { query }).then(async (res) => {
@@ -46,4 +44,4 @@ export const download_user_table = async (query: ListQueryUser) => {
   })
 }
 
-export const getCaptcha = soon.API("/captcha").GET<undefined, { id: number; img: string }>()
+export const getCaptcha = soon.GET("/captcha").Send<{ id: number; img: string }>()

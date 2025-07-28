@@ -5,15 +5,16 @@ import { useLocales } from "@/i18n"
 import { Button, Pagination, Table, Tree } from "antd"
 import { appStore } from "@/store/modules/app"
 import { useSnapshot } from "valtio"
-import { useEffect, useMemo, useRef, useState } from "react"
-import { usePageList } from "@/hooks/list"
+import { useEffect, useMemo, useState } from "react"
 
-import FormDialog, { FormDialogRef } from "./dialog"
+import FormDialog, { FormDialogShow } from "./dialog"
 import type { TableColumnsType } from "antd"
 import { useAuth } from "@/hooks/auth"
 import { toast } from "@/components/toast"
 import { modal } from "@/components/modal"
 import { BtnAdd, BtnRefresh } from "@/components/soon"
+import { useDebounceFn, useUpdateEffect } from "ahooks"
+import { usePagedList } from "@/hooks/list"
 
 export default function PageDept() {
   type Item = Dept
@@ -27,23 +28,18 @@ export default function PageDept() {
     ko: () => import("@/i18n/ko/system/dept"),
   })
 
-  const {
-    list,
-    refresh,
-    total,
-    loading,
-    search,
-    reset,
-    query: queryForm,
-    setQuery,
-  } = usePageList({
-    searchApi: tree_dept,
-    autoSearchDelay: 300,
-  })
-
-  useEffect(() => {
-    refresh()
-  }, [])
+  const { list, loading, search, total, refresh, reset, pager, onPagerChange, query, setQuery } = usePagedList(
+    tree_dept,
+    {
+      initPager: {
+        pageIndex: 1,
+        pageSize: 10,
+      },
+    },
+  )
+  useEffect(refresh, [])
+  const { run: refresh_debounce } = useDebounceFn(refresh, { wait: 300 })
+  useUpdateEffect(() => refresh_debounce(), [query])
 
   type TableCol = TableColumnsType<Item>[0] & { dataIndex: string; title: string }
 
@@ -73,27 +69,25 @@ export default function PageDept() {
   } satisfies TableCol
 
   const checkedCols = useMemo<TableCol[]>(
-    () => [
-      {
-        dataIndex: "name",
-        title: t("label.name"),
-        // width: "",
-      },
-      {
-        dataIndex: "remark",
-        title: t("label.remark"),
-        // width: "",
-      },
-
-      {
-        dataIndex: "createTime",
-        title: t("label.createTime"),
-        // width: "",
-        render(_: any, item: Item) {
-          return dateFormat(item?.createTime)
+    () =>
+      [
+        {
+          dataIndex: "name",
+          title: t("label.name"),
         },
-      },
-    ],
+        {
+          dataIndex: "remark",
+          title: t("label.remark"),
+        },
+
+        {
+          dataIndex: "createTime",
+          title: t("label.createTime"),
+          render(_: any, item: Item) {
+            return dateFormat(item?.createTime)
+          },
+        },
+      ] satisfies TableCol[],
     [t],
   )
 
@@ -114,16 +108,15 @@ export default function PageDept() {
     })
   }
 
-  const refFormDialog = useRef<FormDialogRef>(null)
-  const handleShowEdit = (item: Item) => {
-    refFormDialog.current?.open("edit", item)
-  }
-  const handleShowAdd = (item?: Partial<Item>) => {
-    refFormDialog.current?.open("add")
-  }
-  const handleShowDetail = (item: Item) => {
-    refFormDialog.current?.open("detail", item)
-  }
+  const [show, setShow] = useState<FormDialogShow>({ open: false })
+
+  const handleShowEdit = (item: Item) => setShow({ open: true, type: "edit", data: item })
+
+  const handleShowAdd = (item?: { parentId: any } | undefined) => setShow({ open: true, type: "add", data: item })
+
+  const handleShowDetail = (item: Item) => setShow({ open: true, type: "detail", data: item })
+
+  const closeDialog = () => setShow({ open: false })
 
   return (
     <div className="page-container bg flex-1 flex flex-col overflow-auto">
@@ -140,6 +133,7 @@ export default function PageDept() {
             dataSource={list}
             rowKey={"id"}
             scroll={{ x: "max-content", y: "" }}
+            expandable={{ expandedRowKeys: list.map((item) => item.id) }}
           ></Table>
         </div>
       )}
@@ -175,14 +169,12 @@ export default function PageDept() {
         className="pagination-container"
         showTotal={() => t("total", total)}
         showSizeChanger
-        current={queryForm.pageIndex}
-        pageSize={queryForm.pageSize}
-        onChange={(pageIndex, pageSize) =>
-          setQuery({ ...queryForm, pageIndex: pageSize !== queryForm.pageSize ? 1 : pageIndex, pageSize })
-        }
+        current={pager.pageIndex}
+        pageSize={pager.pageSize}
+        onChange={onPagerChange}
         total={total}
       />
-      <FormDialog ref={refFormDialog} onSuccess={refresh} />
+      <FormDialog show={show} onSuccess={refresh} onClose={closeDialog} />
     </div>
   )
 }

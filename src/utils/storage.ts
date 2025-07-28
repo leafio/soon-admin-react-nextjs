@@ -1,18 +1,12 @@
 import type { Lang } from "@/i18n"
-import { createStorage } from "soon-storage"
+import { createStorage, parsers as p } from "soon-storage"
 
-type LocalVal = {
-  token: string
-  refresh_token: string
-  lang: Lang
-}
-
-export const soon_local = createStorage<LocalVal>({
+export const soon_local = createStorage({
   prefix: "soon-",
   provider: () => localStorage,
   transforms: {
-    token: "string",
-    refresh_token: "string",
-    lang: "string",
+    token: p.string(),
+    refresh_token: p.string(),
+    lang: p.string<Lang>(),
   },
 })

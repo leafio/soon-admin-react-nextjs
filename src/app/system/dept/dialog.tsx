@@ -1,20 +1,21 @@
 import { Button, Cascader, Form, FormInstance, Input, Modal } from "antd"
 
 import { tree_dept, Dept, add_dept, update_dept } from "@/api"
-import { useFormDialog } from "@/hooks/form-dialog"
 import { useLocales } from "@/i18n"
-import { Ref, useEffect, useImperativeHandle, useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Model } from "react-vmodel"
 import { getTreePathArr } from "@/utils"
 import { toast } from "@/components/toast"
 import { useDraggableModal } from "@/hooks/draggable-modal"
 
-export type FormDialogRef = {
-  open: (type?: "add" | "edit" | "detail", data?: Partial<Dept> | undefined, link?: boolean) => void
-  close: () => void
-}
-const FormDialog = ({ onSuccess = () => {}, ref }: { onSuccess?: () => void; ref: Ref<FormDialogRef> }) => {
-  type FieldType = Dept
+type FieldType = Dept
+export type FormDialogShow =
+  | { open: false; type?: never; data?: never }
+  | { open: true; type: "add"; data?: Pick<FieldType, "parentId"> }
+  | { open: true; type: "edit" | "detail"; data: FieldType }
+type FormDialogProps = { onSuccess?: () => void; show: FormDialogShow; onClose: () => void }
+
+export default function FormDialog({ onSuccess = () => {}, show, onClose }: FormDialogProps) {
   const formRef = useRef<FormInstance>(null)
 
   const t = useLocales({
@@ -28,28 +29,30 @@ const FormDialog = ({ onSuccess = () => {}, ref }: { onSuccess?: () => void; ref
     detail: t("detail"),
   })
 
-  const { visible, open, close, type, formData, setFormData } = useFormDialog<FieldType>({
-    onOpen: (data) => formRef.current?.setFieldsValue(data),
-  })
   const [deptOptions, setDeptOptions] = useState<Dept[]>([])
+  const [formData, setFormData] = useState<FieldType>({} as FieldType)
   useEffect(() => {
-    if (visible) {
+    if (show.open) {
       formRef.current?.resetFields()
+      if (show.data) {
+        setFormData(show.data as FieldType)
+        formRef.current?.setFieldsValue(show.data)
+      }
       tree_dept().then((res) => {
         setDeptOptions(res.list)
       })
     }
-  }, [visible])
+  }, [show])
 
   const submit = (values: any) => {
     const data = Object.assign({}, formData) as FieldType
-    if (type === "add") {
+    if (show.type === "add") {
       add_dept(data).then((res) => {
         toast.success(t("tip.addSuccess"))
         onSuccess()
         close()
       })
-    } else if (type === "edit") {
+    } else if (show.type === "edit") {
       update_dept(data).then((res) => {
         toast.success(t("tip.modifySuccess"))
         onSuccess()
@@ -58,39 +61,29 @@ const FormDialog = ({ onSuccess = () => {}, ref }: { onSuccess?: () => void; ref
     }
   }
 
-  // 取消
-  const onCancel = () => {
-    close()
-  }
   const rules = () => ({
     name: [{ required: true, message: t("label.inputName"), trigger: "blur" }],
   })
-
-  useImperativeHandle(ref, () => ({
-    open,
-    close,
-  }))
 
   const { modalRender, ModalTitle } = useDraggableModal()
 
   return (
     <Modal
-      open={visible}
-      title={<ModalTitle>{titles()[type]}</ModalTitle>}
+      open={show.open}
+      title={<ModalTitle>{titles()[show.type ?? "add"]}</ModalTitle>}
       closable
-      onCancel={onCancel}
+      onCancel={onClose}
       footer={null}
       modalRender={modalRender}
     >
       <Form
         ref={formRef}
-        disabled={type === "detail"}
-        label-width="8em"
+        disabled={show.type === "detail"}
         className="dialog-form"
         onValuesChange={(changed, values) => {
           setFormData({ ...formData, ...values })
         }}
-        labelCol={{ span: 6 }}
+        labelCol={{ span: 2 }}
         onFinish={submit}
         onFinishFailed={(err) => {
           //console.log("err", err)
@@ -124,16 +117,11 @@ const FormDialog = ({ onSuccess = () => {}, ref }: { onSuccess?: () => void; ref
           <Input allowClear></Input>
         </Form.Item>
 
-        <Form.Item<FieldType>
-          label={t("label.remark")}
-          name={"desc"}
-          className="dialog-form-item-full"
-          labelCol={{ span: 6 }}
-        >
+        <Form.Item<FieldType> label={t("label.remark")} name={"desc"} className="dialog-form-item-full">
           <Input.TextArea allowClear rows={2} />
         </Form.Item>
         <div className=" w-full flex justify-end px-2">
-          <Button onClick={onCancel}>{t("cancel")}</Button>
+          <Button onClick={onClose}>{t("cancel")}</Button>
           <Button type="primary" htmlType="submit" className="ml-4">
             {t("confirm")}
           </Button>
@@ -142,5 +130,3 @@ const FormDialog = ({ onSuccess = () => {}, ref }: { onSuccess?: () => void; ref
     </Modal>
   )
 }
-FormDialog.displayName = "FormDialog"
-export default FormDialog

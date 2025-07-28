@@ -36,7 +36,7 @@ export function themeColors2cssText(colors: Record<string, RgbColor[]>) {
   let text = ":root{"
   Object.keys(colors).forEach((type) => {
     colors[type].forEach((color, index) => {
-      text = text + `--color-${type}-${COLORS_STEPS[index]}:${color.join(" ")};`
+      text = text + `--color-${type}-${COLORS_STEPS[index]}:${color.map((c) => Math.round(c)).join(" ")};`
     })
   })
   text = text + "}"

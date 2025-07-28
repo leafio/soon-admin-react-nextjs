@@ -9,8 +9,8 @@ export type Role = {
   createTime: string
   updateTime?: string
 }
-export const list_role = soon.API("/role/list").GET<PagedParams & { keyword?: string }, { list: Role[] }>()
+export const list_role = soon.GET("/role/list").Query<PagedParams & { keyword?: string }>().Send<{ list: Role[] }>()
 
-export const add_role = soon.API("/role/create").POST<Role>()
-export const update_role = soon.API("/role/update").PUT<Role>()
-export const del_role = soon.API("/role/delete").DELETE<{ id: string }>()
+export const add_role = soon.POST("/role/create").Body<Role>().Send()
+export const update_role = soon.PUT("/role/update").Body<Role>().Send()
+export const del_role = soon.DELETE("/role/delete").Body<{ id: string }>().Send()

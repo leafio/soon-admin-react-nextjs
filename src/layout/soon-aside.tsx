@@ -43,7 +43,7 @@ export default function SoonAside() {
     if (appStore.responsive === "mobile") {
       appStore.sideBar.isHide = true
     }
-    console.log("menu", menu)
+    // console.log("menu", menu)
     if (!menu.meta?.isIframe && menu.meta?.link) return window.open(menu.meta?.link, "_blank")
 
     router.push(menu.path)

@@ -37,9 +37,8 @@ const nextConfig: NextConfig = {
   sassOptions: {
     includePaths: [path.join(__dirname, "src/css")],
   },
-  experimental: {
-    turbo: {},
-  },
+
+  turbopack: {},
 }
 
 export default withBundleAnalyzer({

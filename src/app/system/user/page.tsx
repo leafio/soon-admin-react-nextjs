@@ -5,11 +5,10 @@ import { useLocales } from "@/i18n"
 import { Avatar, Button, Form, Input, List, Pagination, Table, Tag } from "antd"
 import { appStore } from "@/store/modules/app"
 import { useSnapshot } from "valtio"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useCols } from "@/hooks/cols"
-import { usePageList } from "@/hooks/list"
 
-import FormDialog, { FormDialogRef } from "./dialog"
+import FormDialog, { FormDialogShow } from "./dialog"
 import type { TableColumnsType } from "antd"
 
 import { GenderFemale, GenderMale } from "react-bootstrap-icons"
@@ -19,6 +18,8 @@ import { toast } from "@/components/toast"
 import { modal } from "@/components/modal"
 import { makeVModel } from "react-vmodel"
 import { BtnAdd, BtnCols, BtnExport, BtnRefresh, BtnSearch, SoonDetail, SoonDetailToggle } from "@/components/soon"
+import { usePagedList } from "@/hooks/list"
+import { useDebounceFn, useUpdateEffect } from "ahooks"
 
 export default function PageUser() {
   type Item = UserInfo
@@ -32,23 +33,18 @@ export default function PageUser() {
     ko: () => import("@/i18n/ko/system/user"),
   })
 
-  const {
-    list,
-    refresh,
-    total,
-    loading,
-    search,
-    reset,
-    query: queryForm,
-    setQuery,
-  } = usePageList({
-    searchApi: list_user,
-    autoSearchDelay: 300,
-  })
-
-  useEffect(() => {
-    refresh()
-  }, [])
+  const { list, loading, search, total, refresh, reset, pager, onPagerChange, query, setQuery } = usePagedList(
+    list_user,
+    {
+      initPager: {
+        pageIndex: 1,
+        pageSize: 10,
+      },
+    },
+  )
+  useEffect(refresh, [])
+  const { run: refresh_debounce } = useDebounceFn(refresh, { wait: 300 })
+  useUpdateEffect(() => refresh_debounce(), [query])
 
   type TableCol = TableColumnsType<Item>[0] & { dataIndex: string; title: string }
 
@@ -77,70 +73,65 @@ export default function PageUser() {
     },
   } satisfies TableCol
   const memoCols = useMemo<TableCol[]>(
-    () => [
-      {
-        dataIndex: "username",
-        title: t("label.username"),
-        // width: "",
-      },
-      {
-        dataIndex: "nickname",
-        title: t("label.nickname"),
-        // width: "",
-      },
-      {
-        dataIndex: "gender",
-        title: t("label.gender"),
-        // width: "100",
-        render: (_: any, item: Item) => {
-          return item?.gender === 1 ? (
-            <Tag color="blue">{t("gender.man")}</Tag>
-          ) : item?.gender === 2 ? (
-            <Tag color="error">{t("gender.woman")}</Tag>
-          ) : (
-            <Tag color="default">{t("gender.unknown")}</Tag>
-          )
+    () =>
+      [
+        {
+          dataIndex: "username",
+          title: t("label.username"),
         },
-      },
-      {
-        dataIndex: "role.name",
-        title: t("label.roleName"),
-        // width: "",
-        minWidth: 75,
-        render(_: any, item: Item) {
-          return item.role?.name
+        {
+          dataIndex: "nickname",
+          title: t("label.nickname"),
         },
-      },
-      {
-        dataIndex: "phone",
-        title: t("label.phone"),
-        // width: "",
-      },
-      {
-        dataIndex: "dept.name",
-        title: t("label.deptName"),
-        minWidth: 75,
-        render(_: any, item: Item) {
-          return item.dept?.name
+        {
+          dataIndex: "gender",
+          title: t("label.gender"),
+          render: (_: any, item: Item) => {
+            return item?.gender === 1 ? (
+              <Tag color="blue">{t("gender.man")}</Tag>
+            ) : item?.gender === 2 ? (
+              <Tag color="error">{t("gender.woman")}</Tag>
+            ) : (
+              <Tag color="default">{t("gender.unknown")}</Tag>
+            )
+          },
         },
-      },
-      {
-        dataIndex: "status",
-        title: t("label.status"),
-        width: "100",
-        render: (_: any, item: Item) =>
-          item?.status == 1 ? <Tag color="success">{t("status.enabled")}</Tag> : <Tag>{t("status.disabled")}</Tag>,
-      },
+        {
+          dataIndex: "role.name",
+          title: t("label.roleName"),
+          minWidth: 75,
+          render(_: any, item: Item) {
+            return item.role?.name
+          },
+        },
+        {
+          dataIndex: "phone",
+          title: t("label.phone"),
+        },
+        {
+          dataIndex: "dept.name",
+          title: t("label.deptName"),
+          minWidth: 75,
+          render(_: any, item: Item) {
+            return item.dept?.name
+          },
+        },
+        {
+          dataIndex: "status",
+          title: t("label.status"),
+          width: "100",
+          render: (_: any, item: Item) =>
+            item?.status == 1 ? <Tag color="success">{t("status.enabled")}</Tag> : <Tag>{t("status.disabled")}</Tag>,
+        },
 
-      {
-        dataIndex: "createTime",
-        title: t("label.createTime"),
-        // width: "",
-        render(_: any, item: Item) {
-          return dateFormat(item?.createTime)
+        {
+          dataIndex: "createTime",
+          title: t("label.createTime"),
+          render(_: any, item: Item) {
+            return dateFormat(item?.createTime)
+          },
         },
-      },
-    ],
+      ] satisfies TableCol[],
     [t],
   )
   const { cols, checkedCols, setCols, reset: restCols } = useCols<TableCol>(memoCols)
@@ -162,18 +153,17 @@ export default function PageUser() {
     })
   }
 
-  const refFormDialog = useRef<FormDialogRef>(null)
-  const handleShowEdit = (item: Item) => {
-    refFormDialog.current?.open("edit", item)
-  }
-  const handleShowAdd = (item?: Item) => {
-    refFormDialog.current?.open("add")
-  }
-  const handleShowDetail = (item: Item) => {
-    refFormDialog.current?.open("detail", item)
-  }
+  const [show, setShow] = useState<FormDialogShow>({ open: false })
 
-  const vModel = makeVModel(queryForm, setQuery)
+  const handleShowEdit = (item: Item) => setShow({ open: true, type: "edit", data: item })
+
+  const handleShowAdd = (item?: Item) => setShow({ open: true, type: "add" })
+
+  const handleShowDetail = (item: Item) => setShow({ open: true, type: "detail", data: item })
+
+  const closeDialog = () => setShow({ open: false })
+
+  const vModel = makeVModel(query, setQuery)
 
   return (
     <div className="page-container bg flex-1 flex flex-col overflow-auto">
@@ -183,7 +173,7 @@ export default function PageUser() {
             <Input {...vModel("keyword")} allowClear placeholder={t("label.inputKeyword")}></Input>
           </Form.Item>
           <div className="query-btn-container">
-            <Button className="ml-4" type="primary" onClick={search}>
+            <Button className="ml-4" type="primary" onClick={() => refresh(true)}>
               {t("search")}
             </Button>
             <Button className="ml-4" onClick={reset}>
@@ -195,10 +185,10 @@ export default function PageUser() {
 
       <div className="btn-bar">
         {auth("user.add") && <BtnAdd onClick={() => handleShowAdd()} />}
-        {auth("user.export") && <BtnExport onClick={() => download_user_table(queryForm)} />}
+        {auth("user.export") && <BtnExport onClick={() => download_user_table({ ...query, ...pager })} />}
         <BtnCols cols={cols} setCols={setCols} onReset={restCols} />
         <BtnSearch value={showSearch} onChange={setShowSearch} />
-        <BtnRefresh onClick={refresh} />
+        <BtnRefresh onClick={() => refresh()} />
       </div>
       {!isMobile && (
         <div className="table-container">
@@ -263,14 +253,12 @@ export default function PageUser() {
         className="pagination-container"
         showTotal={() => t("total", total)}
         showSizeChanger
-        current={queryForm.pageIndex}
-        pageSize={queryForm.pageSize}
-        onChange={(pageIndex, pageSize) =>
-          setQuery({ ...queryForm, pageIndex: pageSize !== queryForm.pageSize ? 1 : pageIndex, pageSize })
-        }
+        current={pager.pageIndex}
+        pageSize={pager.pageSize}
+        onChange={onPagerChange}
         total={total}
       />
-      <FormDialog ref={refFormDialog} onSuccess={refresh} />
+      <FormDialog show={show} onSuccess={refresh} onClose={closeDialog} />
     </div>
   )
 }
