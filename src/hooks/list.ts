@@ -16,12 +16,15 @@ export function useResetState<T>(initState: T) {
 
 export function usePagedList<
   T extends (query?: PagedParams, options?: ReqOpts) => Promise<{ list: any[]; total?: number }>,
-  O extends {
+>(
+  api: T,
+  options?: {
     initQuery?: Simplify<Omit<Exclude<Parameters<T>[0], undefined>, "pageIndex" | "pageSize">>
     initPager?: Partial<PagedParams>
-  } = { initQuery?: undefined; initPager?: undefined },
->(api: T, options?: O & Parameters<T>[1] & Parameters<typeof useSearch<T>>[1]) {
-  const { initQuery, initPager } = (options ?? {}) as O
+  } & Parameters<T>[1] &
+    Parameters<typeof useSearch<T>>[1],
+) {
+  const { initQuery, initPager } = options ?? {}
   type Args = Parameters<T>
   type DataItem = Awaited<ReturnType<T>>["list"][0]
   const [list, setList] = useState<DataItem[]>([])
@@ -56,7 +59,7 @@ export function usePagedList<
         search(...([{ ...query, ...pager }] as unknown as Args))
       }
     },
-    [resetPager, search, query, pager],
+    [setPager, pager, search, query],
   )
 
   const onPagerChange = useCallback(

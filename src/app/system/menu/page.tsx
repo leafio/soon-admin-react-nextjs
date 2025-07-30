@@ -32,9 +32,8 @@ export default function PageMenu() {
   const { list, loading, search, total, refresh, reset, pager, onPagerChange, query, setQuery } = usePagedList(
     tree_menu,
     {
-      initPager: {
-        pageIndex: 1,
-        pageSize: 10,
+      initQuery: {
+        hasBtn: true,
       },
     },
   )

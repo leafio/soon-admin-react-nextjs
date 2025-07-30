@@ -33,15 +33,8 @@ export default function PageUser() {
     ko: () => import("@/i18n/ko/system/user"),
   })
 
-  const { list, loading, search, total, refresh, reset, pager, onPagerChange, query, setQuery } = usePagedList(
-    list_user,
-    {
-      initPager: {
-        pageIndex: 1,
-        pageSize: 10,
-      },
-    },
-  )
+  const { list, loading, search, total, refresh, reset, pager, onPagerChange, query, setQuery } =
+    usePagedList(list_user)
   useEffect(refresh, [])
   const { run: refresh_debounce } = useDebounceFn(() => refresh(true), { wait: 300 })
   useUpdateEffect(() => refresh_debounce(), [query])

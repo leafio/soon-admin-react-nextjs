@@ -28,15 +28,8 @@ export default function PageDept() {
     ko: () => import("@/i18n/ko/system/dept"),
   })
 
-  const { list, loading, search, total, refresh, reset, pager, onPagerChange, query, setQuery } = usePagedList(
-    tree_dept,
-    {
-      initPager: {
-        pageIndex: 1,
-        pageSize: 10,
-      },
-    },
-  )
+  const { list, loading, search, total, refresh, reset, pager, onPagerChange, query, setQuery } =
+    usePagedList(tree_dept)
   useEffect(refresh, [])
   const { run: refresh_debounce } = useDebounceFn(() => refresh(true), { wait: 300 })
   useUpdateEffect(() => refresh_debounce(), [query])

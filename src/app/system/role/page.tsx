@@ -30,15 +30,8 @@ export default function PageRole() {
     ko: () => import("@/i18n/ko/system/role"),
   })
 
-  const { list, loading, search, total, refresh, reset, pager, onPagerChange, query, setQuery } = usePagedList(
-    list_role,
-    {
-      initPager: {
-        pageIndex: 1,
-        pageSize: 10,
-      },
-    },
-  )
+  const { list, loading, search, total, refresh, reset, pager, onPagerChange, query, setQuery } =
+    usePagedList(list_role)
   useEffect(refresh, [])
   const { run: refresh_debounce } = useDebounceFn(() => refresh(true), { wait: 300 })
   useUpdateEffect(() => refresh_debounce(), [query])
