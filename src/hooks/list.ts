@@ -50,13 +50,13 @@ export function usePagedList<
   const refresh = useCallback(
     (resetPageIndex?: boolean) => {
       if (resetPageIndex === true) {
-        resetPager()
-        search(...([{ ...query, ...getInitPager() }] as unknown as Args))
+        setPager({ ...pager, pageIndex: 1 })
+        search(...([{ ...query, ...pager, pageIndex: 1 }] as unknown as Args))
       } else {
         search(...([{ ...query, ...pager }] as unknown as Args))
       }
     },
-    [resetPager, search, query, getInitPager, pager],
+    [resetPager, search, query, pager],
   )
 
   const onPagerChange = useCallback(

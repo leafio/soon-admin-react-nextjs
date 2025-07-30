@@ -39,7 +39,7 @@ export default function PageMenu() {
     },
   )
   useEffect(refresh, [])
-  const { run: refresh_debounce } = useDebounceFn(refresh, { wait: 300 })
+  const { run: refresh_debounce } = useDebounceFn(() => refresh(true), { wait: 300 })
   useUpdateEffect(() => refresh_debounce(), [query])
 
   const actionCol = {

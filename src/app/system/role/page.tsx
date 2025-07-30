@@ -40,7 +40,7 @@ export default function PageRole() {
     },
   )
   useEffect(refresh, [])
-  const { run: refresh_debounce } = useDebounceFn(refresh, { wait: 300 })
+  const { run: refresh_debounce } = useDebounceFn(() => refresh(true), { wait: 300 })
   useUpdateEffect(() => refresh_debounce(), [query])
 
   type TableCol = TableColumnsType<Item>[0] & { dataIndex: string; title: string }
