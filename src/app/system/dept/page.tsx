@@ -15,6 +15,7 @@ import { modal } from "@/components/modal"
 import { BtnAdd, BtnRefresh } from "@/components/soon"
 import { useDebounceFn, useUpdateEffect } from "ahooks"
 import { usePagedList } from "@/hooks/list"
+import { useDefaultExpandable } from "@/hooks/antd"
 
 export default function PageDept() {
   type Item = Dept
@@ -111,6 +112,8 @@ export default function PageDept() {
 
   const closeDialog = () => setShow({ open: false })
 
+  const expandable = useDefaultExpandable(list, "id")
+
   return (
     <div className="page-container bg flex-1 flex flex-col overflow-auto">
       <div className="btn-bar">
@@ -126,7 +129,7 @@ export default function PageDept() {
             dataSource={list}
             rowKey={"id"}
             scroll={{ x: "max-content", y: "" }}
-            expandable={{ expandedRowKeys: list.map((item) => item.id) }}
+            expandable={expandable}
           ></Table>
         </div>
       )}

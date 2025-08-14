@@ -4,7 +4,7 @@ import { useLocales } from "@/i18n"
 import { Button, Pagination, Table, Tag, Tree } from "antd"
 import { appStore } from "@/store/modules/app"
 import { useSnapshot } from "valtio"
-import { useEffect, useMemo, useState } from "react"
+import { use, useEffect, useMemo, useRef, useState } from "react"
 
 import FormDialog, { FormDialogShow } from "./dialog"
 import type { TableColumnsType } from "antd"
@@ -15,6 +15,7 @@ import { modal } from "@/components/modal"
 import { BtnAdd, BtnRefresh } from "@/components/soon"
 import { useDebounceFn, useUpdateEffect } from "ahooks"
 import { usePagedList } from "@/hooks/list"
+import { useDefaultExpandable } from "@/hooks/antd"
 
 export default function PageMenu() {
   type Item = Menu
@@ -134,6 +135,8 @@ export default function PageMenu() {
 
   const closeDialog = () => setShow({ open: false })
 
+  const expandable = useDefaultExpandable(list, "id")
+
   return (
     <div className="page-container bg flex-1 flex flex-col overflow-auto">
       <div className="btn-bar">
@@ -149,7 +152,7 @@ export default function PageMenu() {
             dataSource={list}
             rowKey={"id"}
             scroll={{ x: "max-content", y: "" }}
-            expandable={{ expandedRowKeys: list.map((item) => item.id) }}
+            expandable={expandable}
           ></Table>
         </div>
       )}
